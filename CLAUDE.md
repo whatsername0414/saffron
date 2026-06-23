@@ -88,7 +88,7 @@ Standard MVI / unidirectional data flow:
 **Pending fixes (do before new features):**
 - `RecipeDetailScreen.kt` — add `state.isError` branch (show error + retry button); add `elevation = ButtonDefaults.buttonElevation(0.dp)` to "Start cooking" button; change `.replaceFirstChar { it.uppercase() }.uppercase()` → `.replaceFirstChar { it.uppercase() }` on categoryId.
 - `HomeViewModel.kt` — (a) add `private var categoryJob: Job? = null`; cancel in `onSelectCategory` before launching; (b) replace `viewModelScope.async` in `loadData()` with `coroutineScope { async { } }` wrapped in `runCatching { }.onFailure { _uiState.update { it.copy(isLoading = false) } }`.
-- `MainActivity.kt` — replace hardcoded `tabRoutes` setOf(...) with `BottomNavDestination.entries.map { it.screen.route }.toSet()`; add `backStackEntry.arguments?.getString("recipeId") ?: return@composable` guard to the CookingMode composable block.
+- `MainActivity.kt` — replace hardcoded `tabRoutes` setOf(...) with `BottomNavDestination.entries.map { it.screen.route }.toSet()`.
 - `MealMapper.kt` — fix `parseSteps`: split on paragraph breaks (`\r?\n\s*\r?\n`) first; fall back to single line breaks only if no paragraph breaks found.
 - `MealDbRecipeRepository.kt` — replace hardcoded `gridCategories` list with `preferredCategoryIds` (lowercase); fetch live category names from `getCategories()` at the start of `getRecipes()` and resolve to exact API names (case-insensitive match, fall back to `replaceFirstChar { uppercase }` if API fetch fails).
 
@@ -106,22 +106,27 @@ Standard MVI / unidirectional data flow:
 
 ## Linting
 
-ktlint **1.4.1** + `io.nlopez.compose.rules:ktlint:0.4.22` applied to all modules via `subprojects {}` in root `build.gradle.kts`. Config in `.editorconfig` at project root.
+ktlint **1.4.1** + `io.nlopez.compose.rules:ktlint:0.4.22`. Config in `.editorconfig` at project root.
 
-Active suppressions:
+**Coverage limitation:** ktlint-gradle cannot detect Android source sets under AGP 9.x + Kotlin 2.x (adding `kotlin-android` explicitly conflicts with `kotlin-compose`). As a result:
+- `:core:data` (Kotlin JVM) — fully covered; `ktlintFormat` auto-fixes on every run.
+- `:app`, `:core:ui` (Android) — only `.kts` build scripts are checked. Kotlin source files must be formatted manually via Android Studio (`Code → Reformat Code`) or by hand.
+
+The plugin is applied per-module via `plugins { alias(libs.plugins.ktlint) }` and configured in root `build.gradle.kts` using `subprojects { plugins.withId("org.jlleitschuh.gradle.ktlint") { ... } }`.
+
+Active `.editorconfig` suppressions:
 - `max_line_length = off` — long string literals in fake data and modifier chains make a hard limit impractical.
 - `ktlint_function_naming_ignore_when_annotated_with = Composable` — allows PascalCase `@Composable` function names.
 
-Run `ktlintFormat` before committing to auto-fix whitespace/import/wrapping violations. The compose rules (`compose:modifier-missing-check`, `compose:remember-missing-check`, `compose:unstable-collections`) require manual fixes.
-
-Known open compose-rule violations (tracked as pending work):
+Known open compose-rule violations (require manual fixes):
 - `ModifierMissing` — `HomeHeader`, `InitialsAvatar`, `SearchBar`, `CategoryChip`, `FeaturedSection`, `IngredientRow`, `StepContent`, `Footer`
 - `RememberMissing` — `chunked(2)` and `.map { }` in `HomeContent`
 - `UnstableCollections` — `CategoryRow(categories: List<Pair<...>>)`
 
 ## Key Conventions
 
-- All versions in `libs.versions.toml` — never hardcode in build files. Exception: ktlint engine version is hardcoded as `version.set("1.4.1")` in `build.gradle.kts` because it overrides the plugin's bundled engine and the catalog accessor doesn't resolve in `subprojects {}` scope.
+- All versions in `libs.versions.toml` — never hardcode in build files. Exception: ktlint engine version is hardcoded as `version.set("1.4.1")` in `build.gradle.kts` because it overrides the plugin's bundled engine (1.0.1) and the version catalog accessor doesn't resolve inside `subprojects {}`.
+- Named arguments use single-space `=` — no alignment padding. This is the enforced ktlint style. Use Android Studio `Code → Reformat Code` to keep new code consistent.
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
