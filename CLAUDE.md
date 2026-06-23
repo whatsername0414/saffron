@@ -4,61 +4,82 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Saffron** is an Android cooking app (package `com.saffron.cook`). It is in early scaffolding — currently only a `MainActivity` with a placeholder `Greeting` composable.
+**Saffron** is an Android cooking/recipe app (package `com.saffron.cook`). The brand is editorial and warm — Saffron `#C8860A` hero color, Playfair Display headlines, Inter UI text, flat card design (hairline borders, no shadows on resting surfaces). The full design system lives at Claude Design project `e9c32af8-cb1e-4957-b736-17366c4eb9db`.
 
 ## Build & Run Commands
 
-All commands run from the repo root via Gradle wrapper.
-
 ```bash
-# Build debug APK
-./gradlew assembleDebug
-
-# Run unit tests
-./gradlew test
-
-# Run instrumented tests (requires connected device/emulator)
-./gradlew connectedAndroidTest
-
-# Run a single unit test class
-./gradlew test --tests "com.saffron.cook.ExampleUnitTest"
-
-# Lint
+./gradlew assembleDebug        # build debug APK
+./gradlew installDebug         # install on connected device
+./gradlew test                 # unit tests
+./gradlew connectedAndroidTest # instrumented tests (device/emulator required)
 ./gradlew lint
-
-# Install on connected device
-./gradlew installDebug
 ```
 
 On Windows use `gradlew.bat` instead of `./gradlew`.
 
 ## Tech Stack
 
-| Layer | Library |
+| | |
 |---|---|
 | Language | Kotlin 2.2.10 |
 | UI | Jetpack Compose + Material3 |
 | Compose BOM | 2026.02.01 |
-| Min SDK | 24 (Android 7.0) |
-| Target/Compile SDK | 36 |
+| Navigation | Navigation Compose 2.8.0 |
+| Min SDK | 24 / Target+Compile SDK 37 |
 | AGP | 9.3.0-rc01 |
-| Build system | Gradle 9.5 (Kotlin DSL) |
+| Build system | Gradle 9.5 (Kotlin DSL), version catalog `gradle/libs.versions.toml` |
 
-Dependencies are version-catalogued in `gradle/libs.versions.toml`.
+## Module Structure
+
+```
+:core:ui    — brand theme layer (android.library)
+              Color.kt, Type.kt, Theme.kt + GMS font certs
+              Exposes Compose/Material3 as api — feature modules need only depend on :core:ui
+
+:core:data  — domain models + repository (kotlin.jvm, no Android framework)
+              model/  → Recipe, Ingredient, Step, Difficulty, Category
+              repository/ → RecipeRepository interface
+              repository/fake/ → FakeRecipeRepository (6 full recipes, in-memory)
+
+:app        — shell: MainActivity, NavHost, BottomNav, placeholder screens
+              navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
+              ui/screen/  → HomeScreen, SearchScreen, FavoritesScreen, ProfileScreen (stubs)
+```
+
+When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
 
 ## Architecture
 
-The app targets a standard Android unidirectional-data-flow architecture with Jetpack Compose:
+Standard MVI / unidirectional data flow:
 
-- **UI layer** — Composables in `app/src/main/java/com/saffron/cook/`. Screens and components live here. The theme is `SaffronTheme` (defined in `ui/theme/`).
-- **Presentation layer** — ViewModels (not yet added) should be placed alongside their screens or in a `viewmodel/` sub-package.
-- **Data layer** — Repositories and data sources (not yet added) belong in a `data/` package.
+```
+:core:data  ←  repositories (interface + fake impl)
+    ↓
+:app (ViewModels — not yet added; inject via Koin)
+    ↓
+:app (Composable screens ← StateFlow/UiState)
+```
 
-`SaffronTheme` supports dynamic color (Android 12+) and falls back to static `DarkColorScheme`/`LightColorScheme`. Custom brand colors go in `ui/theme/Color.kt`.
+**Next steps (in order):**
+1. **Koin DI** — add `koin-android` + `koin-androidx-compose`, create a `di/` module in `:app`, bind `FakeRecipeRepository` as `RecipeRepository`. This unblocks ViewModels.
+2. **Home screen** — category chips, featured editorial card (Playfair title + photo scrim), 2-column recipe grid. Needs a `HomeViewModel` backed by `RecipeRepository`.
+3. **Recipe Detail screen** — hero image, title, rating, 3-up meta strip, ingredient list, "Start cooking" CTA.
+4. **Cooking Mode** — full-screen step flow, `StepIndicator`, done checkbox.
+
+## Brand Rules (non-negotiable)
+
+- **Color** — Saffron `#C8860A` is the only hero color. Apply sparingly (CTAs, active states, bookmark). Full palette in `:core:ui/Color.kt`.
+- **Type** — Playfair Display for recipe titles, screen headers, category names (never below 18sp, never in paragraphs). Inter Light (300) for body copy. Inter Medium (500) max for labels/buttons — never Bold.
+- **Flat UI** — zero elevation shadow on resting cards/buttons. Use `0.dp` `tonalElevation` on `NavigationBar`. Hairline borders (`0.5dp`) instead of shadows.
+- **Voice** — sentence case everywhere. No emoji. No "Amazing!" — say "Saved." Metadata abbreviates ("35 min"); instructions spell out ("thirty-five minutes").
+- **Dynamic color disabled** — `SaffronTheme` enforces the brand palette on all API levels.
+- **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark is the only filled icon in resting state (saved recipes).
 
 ## Key Conventions
 
-- Single module (`:app`) for now — extract feature modules only if the codebase grows large enough to warrant it.
-- All UI must use Compose; no XML layouts.
-- Version catalog (`libs.versions.toml`) is the single source of truth for dependency versions — never hardcode versions in build files.
-- `keepRules/rules.keep` holds ProGuard keep rules for the release build.
+- All versions in `libs.versions.toml` — never hardcode in build files.
+- All UI in Compose — no XML layouts.
+- BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
+- `keepRules/rules.keep` holds ProGuard keep rules.
+- Screen-level composables live in `app/ui/screen/`; shared UI components will live in `:core:ui` once extracted.
