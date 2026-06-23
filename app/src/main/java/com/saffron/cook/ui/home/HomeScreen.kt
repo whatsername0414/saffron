@@ -42,11 +42,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import coil.compose.AsyncImage
 import com.saffron.cook.R
 import com.saffron.cook.core.data.model.Category
@@ -74,11 +74,11 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     HomeContent(
-        state              = state,
-        onToggleSave       = viewModel::onToggleSave,
-        onSelectCategory   = viewModel::onSelectCategory,
+        state = state,
+        onToggleSave = viewModel::onToggleSave,
+        onSelectCategory = viewModel::onSelectCategory,
         onNavigateToSearch = onNavigateToSearch,
-        onOpenRecipe       = onOpenRecipe,
+        onOpenRecipe = onOpenRecipe,
     )
 }
 
@@ -105,8 +105,8 @@ private fun HomeContent(
         if (state.categories.isNotEmpty()) {
             item {
                 CategoryRow(
-                    categories       = state.categories.map { it.id to it.name },
-                    selectedId       = state.selectedCategoryId,
+                    categories = state.categories.map { it.id to it.name },
+                    selectedId = state.selectedCategoryId,
                     onSelectCategory = onSelectCategory,
                 )
             }
@@ -115,10 +115,10 @@ private fun HomeContent(
         state.featuredRecipe?.let { recipe ->
             item {
                 FeaturedSection(
-                    recipe       = recipe,
-                    isSaved      = recipe.id in state.savedIds,
+                    recipe = recipe,
+                    isSaved = recipe.id in state.savedIds,
                     onToggleSave = onToggleSave,
-                    onClick      = { onOpenRecipe(recipe.id) },
+                    onClick = { onOpenRecipe(recipe.id) },
                 )
             }
         }
@@ -126,7 +126,7 @@ private fun HomeContent(
         if (state.isLoading) {
             item {
                 Box(
-                    modifier         = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
@@ -135,24 +135,24 @@ private fun HomeContent(
         } else if (gridRows.isNotEmpty()) {
             item {
                 Text(
-                    text     = stringResource(R.string.saved_for_the_week),
-                    style    = MaterialTheme.typography.labelMedium,
-                    color    = Color(0xFF8A7A5C),
+                    text = stringResource(R.string.saved_for_the_week),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color(0xFF8A7A5C),
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
                 )
             }
             items(gridRows) { row ->
                 Row(
-                    modifier              = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     row.forEach { recipe ->
                         RecipeCard(
-                            recipe       = recipe,
-                            isSaved      = recipe.id in state.savedIds,
+                            recipe = recipe,
+                            isSaved = recipe.id in state.savedIds,
                             onToggleSave = onToggleSave,
-                            onClick      = { onOpenRecipe(recipe.id) },
-                            modifier     = Modifier.weight(1f),
+                            onClick = { onOpenRecipe(recipe.id) },
+                            modifier = Modifier.weight(1f),
                         )
                     }
                     if (row.size == 1) Spacer(Modifier.weight(1f))
@@ -172,20 +172,20 @@ private fun HomeHeader(greeting: String, dateLabel: String) {
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment     = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Column {
             Text(
-                text  = dateLabel.uppercase(),
+                text = dateLabel.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color(0xFF8A7A5C),
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text  = greeting,
+                text = greeting,
                 style = MaterialTheme.typography.displaySmall.copy(
-                    fontFamily    = PlayfairDisplayFamily,
-                    fontSize      = 28.sp,
+                    fontFamily = PlayfairDisplayFamily,
+                    fontSize = 28.sp,
                     letterSpacing = (-0.3).sp,
                 ),
                 color = Truffle,
@@ -198,14 +198,14 @@ private fun HomeHeader(greeting: String, dateLabel: String) {
 @Composable
 private fun InitialsAvatar(initial: String, size: Int) {
     Box(
-        modifier         = Modifier
+        modifier = Modifier
             .size(size.dp)
             .clip(CircleShape)
             .background(Saffron20),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text  = initial,
+            text = initial,
             style = MaterialTheme.typography.labelLarge,
             color = Saffron160,
         )
@@ -225,17 +225,17 @@ private fun SearchBar(onClick: () -> Unit) {
             .border(0.5.dp, Color(0xFFD3CFC8), RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
-        verticalAlignment     = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Icon(
-            imageVector        = Icons.Outlined.Search,
+            imageVector = Icons.Outlined.Search,
             contentDescription = null,
-            tint               = Color(0xFF8A7A5C),
-            modifier           = Modifier.size(20.dp),
+            tint = Color(0xFF8A7A5C),
+            modifier = Modifier.size(20.dp),
         )
         Text(
-            text  = stringResource(R.string.search_hint),
+            text = stringResource(R.string.search_hint),
             style = MaterialTheme.typography.bodyLarge,
             color = Color(0xFF8A7A5C),
         )
@@ -251,16 +251,16 @@ private fun CategoryRow(
     onSelectCategory: (String) -> Unit,
 ) {
     Row(
-        modifier              = Modifier
+        modifier = Modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         categories.forEach { (id, name) ->
             CategoryChip(
-                label    = name,
+                label = name,
                 selected = id == selectedId,
-                onClick  = { onSelectCategory(id) },
+                onClick = { onSelectCategory(id) },
             )
         }
     }
@@ -269,12 +269,12 @@ private fun CategoryRow(
 
 @Composable
 private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val bg     = if (selected) Saffron20 else Color.Transparent
+    val bg = if (selected) Saffron20 else Color.Transparent
     val border = if (selected) Color(0xFFE0A020) else Color(0xFFC9C2B6)
-    val text   = if (selected) Saffron160 else Cinnamon
+    val text = if (selected) Saffron160 else Cinnamon
 
     Box(
-        modifier         = Modifier
+        modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(bg)
             .border(0.5.dp, border, RoundedCornerShape(8.dp))
@@ -283,7 +283,7 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) 
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text  = label,
+            text = label,
             style = MaterialTheme.typography.labelLarge,
             color = text,
         )
@@ -301,9 +301,9 @@ private fun FeaturedSection(
 ) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp)) {
         Text(
-            text     = stringResource(R.string.featured_tonight),
-            style    = MaterialTheme.typography.labelMedium,
-            color    = Saffron,
+            text = stringResource(R.string.featured_tonight),
+            style = MaterialTheme.typography.labelMedium,
+            color = Saffron,
             modifier = Modifier.padding(bottom = 8.dp),
         )
         Box(
@@ -314,10 +314,10 @@ private fun FeaturedSection(
                 .clickable(onClick = onClick),
         ) {
             AsyncImage(
-                model              = recipe.imageUrl,
+                model = recipe.imageUrl,
                 contentDescription = recipe.title,
-                contentScale       = ContentScale.Crop,
-                modifier           = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
             )
             Box(
                 modifier = Modifier
@@ -325,12 +325,12 @@ private fun FeaturedSection(
                     .background(
                         Brush.verticalGradient(
                             0.45f to Color.Transparent,
-                            1.0f  to Color(0xB81A1208),
+                            1.0f to Color(0xB81A1208),
                         )
                     )
             )
             IconButton(
-                onClick  = { onToggleSave(recipe.id) },
+                onClick = { onToggleSave(recipe.id) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(10.dp)
@@ -339,10 +339,10 @@ private fun FeaturedSection(
                     .background(Color(0xEBFFFFFF)),
             ) {
                 Icon(
-                    imageVector        = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint               = if (isSaved) Saffron else Cinnamon,
-                    modifier           = Modifier.size(19.dp),
+                    tint = if (isSaved) Saffron else Cinnamon,
+                    modifier = Modifier.size(19.dp),
                 )
             }
             Column(
@@ -351,20 +351,20 @@ private fun FeaturedSection(
                     .padding(start = 16.dp, end = 56.dp, bottom = 14.dp),
             ) {
                 Text(
-                    text  = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
+                    text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
                     style = MaterialTheme.typography.labelMedium,
                     color = Saffron40,
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text     = recipe.title,
-                    style    = MaterialTheme.typography.displaySmall.copy(
-                        fontFamily    = PlayfairDisplayFamily,
-                        fontSize      = 26.sp,
-                        lineHeight    = 30.sp,
+                    text = recipe.title,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontFamily = PlayfairDisplayFamily,
+                        fontSize = 26.sp,
+                        lineHeight = 30.sp,
                         letterSpacing = (-0.3).sp,
                     ),
-                    color    = Color.White,
+                    color = Color.White,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -377,7 +377,7 @@ private fun FeaturedSection(
                     Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         metaItems.forEach { (icon, label) ->
                             Row(
-                                verticalAlignment     = Alignment.CenterVertically,
+                                verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
                                 Icon(icon, null, Modifier.size(15.dp), Color.White.copy(alpha = 0.85f))
@@ -394,16 +394,16 @@ private fun FeaturedSection(
 // ---- Previews --------------------------------------------------------------
 
 private val previewRecipe = Recipe(
-    id             = "52772",
-    title          = "Teriyaki Chicken Casserole",
-    description    = "A hearty weeknight dinner the whole family will love.",
-    imageUrl       = "",
-    categoryId     = "chicken",
-    ingredients    = listOf(Ingredient("3/4 cup", "soy sauce"), Ingredient("1/2 cup", "water")),
-    steps          = listOf(Step("Marinate", "Mix soy sauce and water, pour over chicken.")),
+    id = "52772",
+    title = "Teriyaki Chicken Casserole",
+    description = "A hearty weeknight dinner the whole family will love.",
+    imageUrl = "",
+    categoryId = "chicken",
+    ingredients = listOf(Ingredient("3/4 cup", "soy sauce"), Ingredient("1/2 cup", "water")),
+    steps = listOf(Step("Marinate", "Mix soy sauce and water, pour over chicken.")),
     cookTimeMinutes = 35,
-    servings       = 4,
-    difficulty     = Difficulty.Medium,
+    servings = 4,
+    difficulty = Difficulty.Medium,
 )
 
 @Preview(showBackground = true, backgroundColor = 0xFFF5F0E8)
@@ -412,26 +412,26 @@ private fun HomeContentPreview() {
     SaffronTheme {
         HomeContent(
             state = HomeUiState(
-                isLoading          = false,
-                greeting           = "Good evening.",
-                dateLabel          = "Monday, 23 June",
-                categories         = listOf(
+                isLoading = false,
+                greeting = "Good evening.",
+                dateLabel = "Monday, 23 June",
+                categories = listOf(
                     Category(id = "chicken", name = "Chicken"),
-                    Category(id = "pasta",   name = "Pasta"),
+                    Category(id = "pasta", name = "Pasta"),
                     Category(id = "seafood", name = "Seafood"),
                 ),
                 selectedCategoryId = "chicken",
-                featuredRecipe     = previewRecipe,
-                gridRecipes        = listOf(
+                featuredRecipe = previewRecipe,
+                gridRecipes = listOf(
                     previewRecipe,
                     previewRecipe.copy(id = "2", title = "Pasta Carbonara", categoryId = "pasta"),
-                    previewRecipe.copy(id = "3", title = "Grilled Salmon",  categoryId = "seafood"),
+                    previewRecipe.copy(id = "3", title = "Grilled Salmon", categoryId = "seafood"),
                 ),
             ),
-            onToggleSave       = {},
-            onSelectCategory   = {},
+            onToggleSave = {},
+            onSelectCategory = {},
             onNavigateToSearch = {},
-            onOpenRecipe       = {},
+            onOpenRecipe = {},
         )
     }
 }
@@ -441,11 +441,11 @@ private fun HomeContentPreview() {
 private fun HomeLoadingPreview() {
     SaffronTheme {
         HomeContent(
-            state              = HomeUiState(isLoading = true, greeting = "Good morning.", dateLabel = "Tuesday, 24 June"),
-            onToggleSave       = {},
-            onSelectCategory   = {},
+            state = HomeUiState(isLoading = true, greeting = "Good morning.", dateLabel = "Tuesday, 24 June"),
+            onToggleSave = {},
+            onSelectCategory = {},
             onNavigateToSearch = {},
-            onOpenRecipe       = {},
+            onOpenRecipe = {},
         )
     }
 }
@@ -474,13 +474,13 @@ private fun RecipeCard(
                 .background(Cream),
         ) {
             AsyncImage(
-                model              = recipe.imageUrl,
+                model = recipe.imageUrl,
                 contentDescription = recipe.title,
-                contentScale       = ContentScale.Crop,
-                modifier           = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
             )
             IconButton(
-                onClick  = { onToggleSave(recipe.id) },
+                onClick = { onToggleSave(recipe.id) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(8.dp)
@@ -489,30 +489,30 @@ private fun RecipeCard(
                     .background(Color(0xEBFFFFFF)),
             ) {
                 Icon(
-                    imageVector        = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint               = if (isSaved) Saffron else Cinnamon,
-                    modifier           = Modifier.size(18.dp),
+                    tint = if (isSaved) Saffron else Cinnamon,
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }
         Column(
-            modifier            = Modifier.padding(12.dp),
+            modifier = Modifier.padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text  = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
+                text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
                 color = Saffron,
             )
             Text(
-                text     = recipe.title,
-                style    = MaterialTheme.typography.labelLarge.copy(
+                text = recipe.title,
+                style = MaterialTheme.typography.labelLarge.copy(
                     fontFamily = PlayfairDisplayFamily,
-                    fontSize   = 18.sp,
+                    fontSize = 18.sp,
                     lineHeight = 22.sp,
                 ),
-                color    = Truffle,
+                color = Truffle,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )

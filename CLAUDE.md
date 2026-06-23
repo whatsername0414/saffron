@@ -14,6 +14,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew test                 # unit tests
 ./gradlew connectedAndroidTest # instrumented tests (device/emulator required)
 ./gradlew lint
+./gradlew ktlintCheck          # style + Compose rule check
+./gradlew ktlintFormat         # auto-fix formatting violations
 ```
 
 On Windows use `gradlew.bat` instead of `./gradlew`.
@@ -102,11 +104,26 @@ Standard MVI / unidirectional data flow:
 - **Dynamic color disabled** — `SaffronTheme` enforces the brand palette on all API levels.
 - **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark is the only filled icon in resting state (saved recipes).
 
+## Linting
+
+ktlint **1.4.1** + `io.nlopez.compose.rules:ktlint:0.4.22` applied to all modules via `subprojects {}` in root `build.gradle.kts`. Config in `.editorconfig` at project root.
+
+Active suppressions:
+- `max_line_length = off` — long string literals in fake data and modifier chains make a hard limit impractical.
+- `ktlint_function_naming_ignore_when_annotated_with = Composable` — allows PascalCase `@Composable` function names.
+
+Run `ktlintFormat` before committing to auto-fix whitespace/import/wrapping violations. The compose rules (`compose:modifier-missing-check`, `compose:remember-missing-check`, `compose:unstable-collections`) require manual fixes.
+
+Known open compose-rule violations (tracked as pending work):
+- `ModifierMissing` — `HomeHeader`, `InitialsAvatar`, `SearchBar`, `CategoryChip`, `FeaturedSection`, `IngredientRow`, `StepContent`, `Footer`
+- `RememberMissing` — `chunked(2)` and `.map { }` in `HomeContent`
+- `UnstableCollections` — `CategoryRow(categories: List<Pair<...>>)`
+
 ## Key Conventions
 
-- All versions in `libs.versions.toml` — never hardcode in build files.
+- All versions in `libs.versions.toml` — never hardcode in build files. Exception: ktlint engine version is hardcoded as `version.set("1.4.1")` in `build.gradle.kts` because it overrides the plugin's bundled engine and the catalog accessor doesn't resolve in `subprojects {}` scope.
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
 - Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components will move to `:core:ui` once there are two or more consumers.
-- Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests.
+- Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests — not yet wired into any test module.

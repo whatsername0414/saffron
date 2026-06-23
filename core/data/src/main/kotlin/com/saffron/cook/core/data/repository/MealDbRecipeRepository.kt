@@ -9,29 +9,35 @@ import com.saffron.cook.core.data.network.toRecipe
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
-class MealDbRecipeRepository(private val service: TheMealDbService) : RecipeRepository {
-
+class MealDbRecipeRepository(
+    private val service: TheMealDbService,
+) : RecipeRepository {
     // Categories fetched for the home grid — capitalized to match API filter param
     private val gridCategories = listOf("Chicken", "Pasta", "Seafood", "Dessert")
 
-    override suspend fun getRecipes(): List<Recipe> = coroutineScope {
-        gridCategories
-            .map { cat ->
-                async {
-                    runCatching {
-                        service.filterByCategory(cat)
-                            .meals
-                            ?.take(3)
-                            ?.map { it.toPartialRecipe(cat.lowercase()) }
-                            ?: emptyList()
-                    }.getOrDefault(emptyList())
-                }
-            }
-            .flatMap { it.await() }
-    }
+    override suspend fun getRecipes(): List<Recipe> =
+        coroutineScope {
+            gridCategories
+                .map { cat ->
+                    async {
+                        runCatching {
+                            service
+                                .filterByCategory(cat)
+                                .meals
+                                ?.take(3)
+                                ?.map { it.toPartialRecipe(cat.lowercase()) }
+                                ?: emptyList()
+                        }.getOrDefault(emptyList())
+                    }
+                }.flatMap { it.await() }
+        }
 
     override suspend fun getRecipeById(id: String): Recipe? =
-        service.lookupMeal(id).meals?.firstOrNull()?.toRecipe()
+        service
+            .lookupMeal(id)
+            .meals
+            ?.firstOrNull()
+            ?.toRecipe()
 
     override suspend fun getCategories(): List<Category> =
         runCatching {
@@ -40,13 +46,18 @@ class MealDbRecipeRepository(private val service: TheMealDbService) : RecipeRepo
 
     override suspend fun getFeaturedRecipe(): Recipe? =
         runCatching {
-            service.getRandomMeal().meals?.firstOrNull()?.toRecipe(isFeatured = true)
+            service
+                .getRandomMeal()
+                .meals
+                ?.firstOrNull()
+                ?.toRecipe(isFeatured = true)
         }.getOrNull()
 
     override suspend fun getRecipesByCategory(categoryId: String): List<Recipe> =
         runCatching {
             val apiCategory = categoryId.replaceFirstChar { it.uppercase() }
-            service.filterByCategory(apiCategory)
+            service
+                .filterByCategory(apiCategory)
                 .meals
                 ?.map { it.toPartialRecipe(categoryId) }
                 ?: emptyList()

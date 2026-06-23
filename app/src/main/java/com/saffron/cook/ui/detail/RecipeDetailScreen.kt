@@ -45,8 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -81,10 +81,10 @@ fun RecipeDetailScreen(
             Text(stringResource(R.string.recipe_not_found), style = MaterialTheme.typography.bodyLarge, color = Cinnamon)
         }
         else -> DetailContent(
-            recipe         = state.recipe!!,
-            isSaved        = state.isSaved,
-            onBack         = onBack,
-            onToggleSave   = viewModel::onToggleSave,
+            recipe = state.recipe!!,
+            isSaved = state.isSaved,
+            onBack = onBack,
+            onToggleSave = viewModel::onToggleSave,
             onStartCooking = { onStartCooking(recipeId) },
         )
     }
@@ -98,8 +98,8 @@ private fun DetailContent(
     onToggleSave: () -> Unit,
     onStartCooking: () -> Unit,
 ) {
-    val cookTimeCaption  = stringResource(R.string.meta_cook_time)
-    val servingsCaption  = stringResource(R.string.meta_servings)
+    val cookTimeCaption = stringResource(R.string.meta_cook_time)
+    val servingsCaption = stringResource(R.string.meta_servings)
     val difficultyCaption = stringResource(R.string.meta_difficulty)
 
     Box(Modifier.fillMaxSize().background(Color.White)) {
@@ -113,14 +113,14 @@ private fun DetailContent(
                         .background(Cream),
                 ) {
                     AsyncImage(
-                        model              = recipe.imageUrl,
+                        model = recipe.imageUrl,
                         contentDescription = recipe.title,
-                        contentScale       = ContentScale.Crop,
-                        modifier           = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
                     )
                     // Back
                     IconButton(
-                        onClick  = onBack,
+                        onClick = onBack,
                         modifier = Modifier
                             .align(Alignment.TopStart)
                             .padding(12.dp)
@@ -129,15 +129,15 @@ private fun DetailContent(
                             .background(Color(0xEBFFFFFF)),
                     ) {
                         Icon(
-                            imageVector        = Icons.AutoMirrored.Outlined.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back),
-                            tint               = Truffle,
-                            modifier           = Modifier.size(20.dp),
+                            tint = Truffle,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                     // Bookmark
                     IconButton(
-                        onClick  = onToggleSave,
+                        onClick = onToggleSave,
                         modifier = Modifier
                             .align(Alignment.TopEnd)
                             .padding(12.dp)
@@ -146,10 +146,10 @@ private fun DetailContent(
                             .background(Color(0xEBFFFFFF)),
                     ) {
                         Icon(
-                            imageVector        = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
                             contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                            tint               = if (isSaved) Saffron else Cinnamon,
-                            modifier           = Modifier.size(20.dp),
+                            tint = if (isSaved) Saffron else Cinnamon,
+                            modifier = Modifier.size(20.dp),
                         )
                     }
                 }
@@ -159,19 +159,19 @@ private fun DetailContent(
             item {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp)) {
                     Text(
-                        text  = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
+                        text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
                         style = MaterialTheme.typography.labelMedium,
                         color = Saffron,
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        text  = recipe.title,
+                        text = recipe.title,
                         style = MaterialTheme.typography.displayMedium.copy(
-                            fontFamily    = PlayfairDisplayFamily,
-                            fontSize      = 32.sp,
-                            lineHeight    = (32 * 1.15).sp,
+                            fontFamily = PlayfairDisplayFamily,
+                            fontSize = 32.sp,
+                            lineHeight = (32 * 1.15).sp,
                             letterSpacing = (-0.3).sp,
-                            fontWeight    = FontWeight.Normal,
+                            fontWeight = FontWeight.Normal,
                         ),
                         color = Truffle,
                     )
@@ -180,14 +180,14 @@ private fun DetailContent(
 
             // 3-up meta strip (only if at least one value available)
             val metaCards = buildList {
-                recipe.cookTimeMinutes?.let { add(Triple(Icons.Outlined.Schedule,              "$it min", cookTimeCaption))   }
-                recipe.servings?.let        { add(Triple(Icons.Outlined.People,                "$it",     servingsCaption))   }
-                recipe.difficulty?.let      { add(Triple(Icons.Outlined.LocalFireDepartment,   it.name,   difficultyCaption)) }
+                recipe.cookTimeMinutes?.let { add(Triple(Icons.Outlined.Schedule, "$it min", cookTimeCaption)) }
+                recipe.servings?.let { add(Triple(Icons.Outlined.People, "$it", servingsCaption)) }
+                recipe.difficulty?.let { add(Triple(Icons.Outlined.LocalFireDepartment, it.name, difficultyCaption)) }
             }
             if (metaCards.isNotEmpty()) {
                 item {
                     Row(
-                        modifier              = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         metaCards.forEach { (icon, label, caption) ->
@@ -203,9 +203,9 @@ private fun DetailContent(
             if (recipe.description.isNotBlank()) {
                 item {
                     Text(
-                        text     = recipe.description,
-                        style    = MaterialTheme.typography.bodyLarge,
-                        color    = Truffle,
+                        text = recipe.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = Truffle,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
@@ -215,22 +215,22 @@ private fun DetailContent(
             if (recipe.ingredients.isNotEmpty()) {
                 item {
                     Text(
-                        text     = stringResource(R.string.ingredients),
-                        style    = MaterialTheme.typography.headlineMedium.copy(
+                        text = stringResource(R.string.ingredients),
+                        style = MaterialTheme.typography.headlineMedium.copy(
                             fontFamily = PlayfairDisplayFamily,
-                            fontSize   = 22.sp,
+                            fontSize = 22.sp,
                             fontWeight = FontWeight.Medium,
                         ),
-                        color    = Truffle,
+                        color = Truffle,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp),
                     )
                 }
                 itemsIndexed(
                     items = recipe.ingredients,
-                    key   = { i, _ -> i },
+                    key = { i, _ -> i },
                 ) { index, ingredient ->
                     IngredientRow(
-                        ingredient  = ingredient,
+                        ingredient = ingredient,
                         showDivider = index < recipe.ingredients.lastIndex,
                     )
                 }
@@ -244,20 +244,20 @@ private fun DetailContent(
                 .fillMaxWidth()
                 .background(
                     Brush.verticalGradient(
-                        0f   to Color.Transparent,
+                        0f to Color.Transparent,
                         0.35f to Color.White,
                     )
                 )
                 .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
         ) {
             Button(
-                onClick  = onStartCooking,
+                onClick = onStartCooking,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
-                shape    = RoundedCornerShape(10.dp),
-                colors   = ButtonDefaults.buttonColors(containerColor = Saffron),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
             ) {
                 Text(
-                    text  = stringResource(R.string.start_cooking),
+                    text = stringResource(R.string.start_cooking),
                     style = MaterialTheme.typography.labelLarge.copy(fontSize = 15.sp),
                     color = Color.White,
                 )
@@ -274,7 +274,7 @@ private fun MetaCard(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier          = modifier
+        modifier = modifier
             .clip(RoundedCornerShape(14.dp))
             .background(Cream)
             .border(0.5.dp, Color(0xFFE4DFD5), RoundedCornerShape(14.dp))
@@ -283,33 +283,33 @@ private fun MetaCard(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Icon(icon, contentDescription = null, tint = Saffron160, modifier = Modifier.size(20.dp))
-        Text(label,   style = MaterialTheme.typography.labelLarge, color = Truffle)
-        Text(caption, style = MaterialTheme.typography.bodySmall,  color = Color(0xFF8A7A5C))
+        Text(label, style = MaterialTheme.typography.labelLarge, color = Truffle)
+        Text(caption, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8A7A5C))
     }
 }
 
 // ---- Preview ---------------------------------------------------------------
 
 private val previewDetailRecipe = Recipe(
-    id              = "52772",
-    title           = "Teriyaki Chicken Casserole",
-    description     = "Soy sauce, brown sugar, and sesame oil come together in a sticky glaze that coats tender chicken and vibrant vegetables.",
-    imageUrl        = "",
-    categoryId      = "chicken",
-    ingredients     = listOf(
+    id = "52772",
+    title = "Teriyaki Chicken Casserole",
+    description = "Soy sauce, brown sugar, and sesame oil come together in a sticky glaze that coats tender chicken and vibrant vegetables.",
+    imageUrl = "",
+    categoryId = "chicken",
+    ingredients = listOf(
         Ingredient("3/4 cup", "soy sauce"),
         Ingredient("1/2 cup", "water"),
         Ingredient("1/4 cup", "brown sugar"),
-        Ingredient("1 tbsp",  "sesame oil"),
+        Ingredient("1 tbsp", "sesame oil"),
     ),
-    steps           = listOf(
+    steps = listOf(
         Step("Marinate", "Whisk together soy sauce, water, brown sugar, and sesame oil."),
-        Step("Cook",     "Pour over chicken in a baking dish. Bake at 190 °C for 35 minutes."),
+        Step("Cook", "Pour over chicken in a baking dish. Bake at 190 °C for 35 minutes."),
     ),
     cookTimeMinutes = 35,
-    servings        = 4,
-    difficulty      = Difficulty.Medium,
-    isFeatured      = false,
+    servings = 4,
+    difficulty = Difficulty.Medium,
+    isFeatured = false,
 )
 
 @Preview(showBackground = true)
@@ -317,10 +317,10 @@ private val previewDetailRecipe = Recipe(
 private fun RecipeDetailScreenPreview() {
     SaffronTheme {
         DetailContent(
-            recipe         = previewDetailRecipe,
-            isSaved        = false,
-            onBack         = {},
-            onToggleSave   = {},
+            recipe = previewDetailRecipe,
+            isSaved = false,
+            onBack = {},
+            onToggleSave = {},
             onStartCooking = {},
         )
     }
@@ -331,10 +331,10 @@ private fun RecipeDetailScreenPreview() {
 private fun RecipeDetailSavedPreview() {
     SaffronTheme {
         DetailContent(
-            recipe         = previewDetailRecipe,
-            isSaved        = true,
-            onBack         = {},
-            onToggleSave   = {},
+            recipe = previewDetailRecipe,
+            isSaved = true,
+            onBack = {},
+            onToggleSave = {},
             onStartCooking = {},
         )
     }
@@ -344,7 +344,7 @@ private fun RecipeDetailSavedPreview() {
 private fun IngredientRow(ingredient: Ingredient, showDivider: Boolean) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Row(
-            modifier          = Modifier.padding(vertical = 11.dp),
+            modifier = Modifier.padding(vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(

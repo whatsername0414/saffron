@@ -6,4 +6,6 @@ data class CategoryDto(
     @SerializedName("strCategory") val name: String,
 )
 
-data class CategoryResponse(@SerializedName("categories") val categories: List<CategoryDto>?)
+data class CategoryResponse(
+    @SerializedName("categories") val categories: List<CategoryDto>?,
+)

@@ -55,8 +55,7 @@ fun SaffronApp() {
     val currentDestination = currentBackStack?.destination
 
     val tabRoutes = setOf(
-        Screen.Home.route, Screen.Search.route,
-        Screen.Favorites.route, Screen.Profile.route,
+        Screen.Home.route, Screen.Search.route, Screen.Favorites.route, Screen.Profile.route,
     )
     val showBottomBar = currentDestination?.route in tabRoutes
 

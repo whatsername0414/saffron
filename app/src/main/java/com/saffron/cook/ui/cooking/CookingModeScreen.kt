@@ -74,14 +74,14 @@ fun CookingModeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     CookingModeContent(
-        state            = state,
-        onBack           = onBack,
-        onFinish         = onFinish,
-        onRetry          = viewModel::retry,
-        onSelectStep     = viewModel::onSelectStep,
+        state = state,
+        onBack = onBack,
+        onFinish = onFinish,
+        onRetry = viewModel::retry,
+        onSelectStep = viewModel::onSelectStep,
         onToggleStepDone = viewModel::onToggleStepDone,
-        onNext           = viewModel::onNext,
-        onPrevious       = viewModel::onPrevious,
+        onNext = viewModel::onNext,
+        onPrevious = viewModel::onPrevious,
     )
 }
 
@@ -103,14 +103,14 @@ private fun CookingModeContent(
         state.isError -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text  = stringResource(R.string.error_load_failed),
+                    text = stringResource(R.string.error_load_failed),
                     style = MaterialTheme.typography.bodyLarge,
                     color = Cinnamon,
                 )
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = onRetry,
-                    colors  = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
                 ) {
                     Text(stringResource(R.string.error_retry), color = Color.White)
@@ -119,20 +119,20 @@ private fun CookingModeContent(
         }
         state.recipe == null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Text(
-                text  = stringResource(R.string.recipe_not_found),
+                text = stringResource(R.string.recipe_not_found),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Cinnamon,
             )
         }
         else -> CookingLayout(
-            state            = state,
-            recipe           = state.recipe,
-            onBack           = onBack,
-            onFinish         = onFinish,
-            onSelectStep     = onSelectStep,
+            state = state,
+            recipe = state.recipe,
+            onBack = onBack,
+            onFinish = onFinish,
+            onSelectStep = onSelectStep,
             onToggleStepDone = onToggleStepDone,
-            onNext           = onNext,
-            onPrevious       = onPrevious,
+            onNext = onNext,
+            onPrevious = onPrevious,
         )
     }
 }
@@ -159,17 +159,17 @@ private fun CookingLayout(
                 .fillMaxWidth()
                 .padding(start = 12.dp, end = 12.dp, top = 14.dp, bottom = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment     = Alignment.CenterVertically,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector        = Icons.Outlined.Close,
+                    imageVector = Icons.Outlined.Close,
                     contentDescription = stringResource(R.string.cd_exit),
-                    tint               = Truffle,
+                    tint = Truffle,
                 )
             }
             Text(
-                text  = stringResource(R.string.cooking_step_progress, state.currentStepIndex + 1, state.totalSteps),
+                text = stringResource(R.string.cooking_step_progress, state.currentStepIndex + 1, state.totalSteps),
                 style = MaterialTheme.typography.labelLarge,
                 color = Cinnamon,
             )
@@ -178,10 +178,10 @@ private fun CookingLayout(
 
         if (state.steps.isNotEmpty()) {
             StepIndicatorRow(
-                totalSteps     = state.totalSteps,
-                currentIndex   = state.currentStepIndex,
+                totalSteps = state.totalSteps,
+                currentIndex = state.currentStepIndex,
                 completedSteps = state.completedSteps,
-                onSelectStep   = onSelectStep,
+                onSelectStep = onSelectStep,
             )
         }
 
@@ -189,7 +189,7 @@ private fun CookingLayout(
             if (state.steps.isEmpty()) {
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Text(
-                        text  = stringResource(R.string.cooking_no_steps),
+                        text = stringResource(R.string.cooking_no_steps),
                         style = MaterialTheme.typography.bodyLarge,
                         color = Cinnamon,
                     )
@@ -208,9 +208,9 @@ private fun CookingLayout(
                 ) { stepIndex ->
                     state.steps.getOrNull(stepIndex)?.let { step ->
                         StepContent(
-                            step         = step,
-                            recipeName   = recipe.title,
-                            isDone       = stepIndex in state.completedSteps,
+                            step = step,
+                            recipeName = recipe.title,
+                            isDone = stepIndex in state.completedSteps,
                             onToggleDone = onToggleStepDone,
                         )
                     }
@@ -221,10 +221,10 @@ private fun CookingLayout(
         HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
         Footer(
             isFirstStep = state.isFirstStep,
-            isLastStep  = state.isLastStep,
-            onPrevious  = onPrevious,
-            onNext      = onNext,
-            onFinish    = onFinish,
+            isLastStep = state.isLastStep,
+            onPrevious = onPrevious,
+            onNext = onNext,
+            onFinish = onFinish,
         )
     }
 }
@@ -243,16 +243,16 @@ private fun StepIndicatorRow(
         listState.animateScrollToItem(currentIndex)
     }
     LazyRow(
-        state                 = listState,
+        state = listState,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding        = PaddingValues(start = 16.dp, end = 16.dp, bottom = 14.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 14.dp),
     ) {
         items(count = totalSteps) { index ->
             StepPill(
-                number      = index + 1,
-                isActive    = index == currentIndex,
+                number = index + 1,
+                isActive = index == currentIndex,
                 isCompleted = index in completedSteps,
-                onClick     = { onSelectStep(index) },
+                onClick = { onSelectStep(index) },
             )
         }
     }
@@ -265,11 +265,11 @@ private fun StepPill(
     isCompleted: Boolean,
     onClick: () -> Unit,
 ) {
-    val bg        = if (isActive) Saffron else Cream
+    val bg = if (isActive) Saffron else Cream
     val textColor = when {
-        isActive    -> Color.White
+        isActive -> Color.White
         isCompleted -> Saffron160
-        else        -> Cinnamon
+        else -> Cinnamon
     }
 
     Box(
@@ -281,7 +281,7 @@ private fun StepPill(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text  = number.toString(),
+            text = number.toString(),
             style = MaterialTheme.typography.labelLarge,
             color = textColor,
         )
@@ -304,48 +304,48 @@ private fun StepContent(
             .padding(horizontal = 20.dp, vertical = 8.dp),
     ) {
         Text(
-            text  = recipeName.uppercase(),
+            text = recipeName.uppercase(),
             style = MaterialTheme.typography.labelMedium,
             color = Saffron,
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            text  = step.title,
+            text = step.title,
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontFamily    = PlayfairDisplayFamily,
-                fontWeight    = FontWeight.Normal,
-                fontSize      = 30.sp,
-                lineHeight    = 35.4.sp,
+                fontFamily = PlayfairDisplayFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 30.sp,
+                lineHeight = 35.4.sp,
                 letterSpacing = (-0.3).sp,
             ),
             color = Truffle,
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text  = step.instruction,
+            text = step.instruction,
             style = MaterialTheme.typography.bodyLarge.copy(
-                fontSize   = 17.sp,
+                fontSize = 17.sp,
                 lineHeight = 29.75.sp,
             ),
             color = Truffle,
         )
         Spacer(Modifier.height(20.dp))
         Row(
-            modifier          = Modifier.clickable(onClick = onToggleDone),
+            modifier = Modifier.clickable(onClick = onToggleDone),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Checkbox(
-                checked         = isDone,
+                checked = isDone,
                 onCheckedChange = null,
-                colors          = CheckboxDefaults.colors(
-                    checkedColor   = Saffron,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = Saffron,
                     uncheckedColor = Cinnamon,
                     checkmarkColor = Color.White,
                 ),
             )
             Spacer(Modifier.width(8.dp))
             Text(
-                text  = stringResource(R.string.cooking_mark_done),
+                text = stringResource(R.string.cooking_mark_done),
                 style = MaterialTheme.typography.labelLarge,
                 color = if (isDone) Saffron else Truffle,
             )
@@ -364,30 +364,30 @@ private fun Footer(
     onFinish: () -> Unit,
 ) {
     Row(
-        modifier              = Modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment     = Alignment.CenterVertically,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // Back — natural width
         Button(
-            onClick   = onPrevious,
-            enabled   = !isFirstStep,
-            shape     = RoundedCornerShape(10.dp),
-            colors    = ButtonDefaults.buttonColors(
-                containerColor         = Color.Transparent,
-                contentColor           = Truffle,
+            onClick = onPrevious,
+            enabled = !isFirstStep,
+            shape = RoundedCornerShape(10.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Truffle,
                 disabledContainerColor = Color.Transparent,
-                disabledContentColor   = Color(0xFFD3CFC8),
+                disabledContentColor = Color(0xFFD3CFC8),
             ),
-            border    = BorderStroke(0.5.dp, if (isFirstStep) Color(0xFFE4DFD5) else Color(0xFFD3CFC8)),
+            border = BorderStroke(0.5.dp, if (isFirstStep) Color(0xFFE4DFD5) else Color(0xFFD3CFC8)),
             elevation = ButtonDefaults.buttonElevation(0.dp),
         ) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(
-                text  = stringResource(R.string.cooking_previous),
+                text = stringResource(R.string.cooking_previous),
                 style = MaterialTheme.typography.labelLarge,
             )
         }
@@ -395,44 +395,44 @@ private fun Footer(
         // Next step or Finish — fills remaining space
         if (isLastStep) {
             Button(
-                onClick   = onFinish,
-                modifier  = Modifier.weight(1f),
-                shape     = RoundedCornerShape(10.dp),
-                colors    = ButtonDefaults.buttonColors(containerColor = Saffron),
+                onClick = onFinish,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Icon(
-                    imageVector        = Icons.Outlined.CheckCircle,
+                    imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = null,
-                    tint               = Color.White,
-                    modifier           = Modifier.size(18.dp),
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text  = stringResource(R.string.cooking_finish),
+                    text = stringResource(R.string.cooking_finish),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
                 )
             }
         } else {
             Button(
-                onClick   = onNext,
-                modifier  = Modifier.weight(1f),
-                shape     = RoundedCornerShape(10.dp),
-                colors    = ButtonDefaults.buttonColors(containerColor = Saffron),
+                onClick = onNext,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Text(
-                    text  = stringResource(R.string.cooking_next),
+                    text = stringResource(R.string.cooking_next),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.White,
                 )
                 Spacer(Modifier.width(6.dp))
                 Icon(
-                    imageVector        = Icons.AutoMirrored.Outlined.ArrowForward,
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                     contentDescription = null,
-                    tint               = Color.White,
-                    modifier           = Modifier.size(18.dp),
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
                 )
             }
         }
@@ -442,16 +442,16 @@ private fun Footer(
 // ---- Preview ---------------------------------------------------------------
 
 private val previewCookingRecipe = Recipe(
-    id              = "52772",
-    title           = "Teriyaki Chicken Casserole",
-    description     = "",
-    imageUrl        = "",
-    categoryId      = "chicken",
-    ingredients     = listOf(Ingredient("3/4 cup", "soy sauce")),
+    id = "52772",
+    title = "Teriyaki Chicken Casserole",
+    description = "",
+    imageUrl = "",
+    categoryId = "chicken",
+    ingredients = listOf(Ingredient("3/4 cup", "soy sauce")),
     cookTimeMinutes = 35,
-    servings        = 4,
-    difficulty      = Difficulty.Medium,
-    steps           = listOf(
+    servings = 4,
+    difficulty = Difficulty.Medium,
+    steps = listOf(
         Step("Preheat the oven", "Preheat oven to 190 °C. Mix soy sauce, water, brown sugar, sesame oil, and garlic powder in a bowl until the sugar dissolves."),
         Step("Marinate the chicken", "Place chicken pieces in a single layer in a large baking dish. Pour the marinade over the chicken, turning each piece to coat well."),
         Step("Bake", "Cover the dish with foil and bake for 25 minutes. Remove the foil and bake for a further 10 minutes until the glaze is sticky and caramelised."),
@@ -465,18 +465,18 @@ private fun CookingModePreview() {
     SaffronTheme {
         CookingLayout(
             state = CookingModeUiState(
-                isLoading        = false,
-                recipe           = previewCookingRecipe,
+                isLoading = false,
+                recipe = previewCookingRecipe,
                 currentStepIndex = 1,
-                completedSteps   = setOf(0),
+                completedSteps = setOf(0),
             ),
-            recipe           = previewCookingRecipe,
-            onBack           = {},
-            onFinish         = {},
-            onSelectStep     = {},
+            recipe = previewCookingRecipe,
+            onBack = {},
+            onFinish = {},
+            onSelectStep = {},
             onToggleStepDone = {},
-            onNext           = {},
-            onPrevious       = {},
+            onNext = {},
+            onPrevious = {},
         )
     }
 }
@@ -487,18 +487,18 @@ private fun CookingModeLastStepPreview() {
     SaffronTheme {
         CookingLayout(
             state = CookingModeUiState(
-                isLoading        = false,
-                recipe           = previewCookingRecipe,
+                isLoading = false,
+                recipe = previewCookingRecipe,
                 currentStepIndex = 3,
-                completedSteps   = setOf(0, 1, 2, 3),
+                completedSteps = setOf(0, 1, 2, 3),
             ),
-            recipe           = previewCookingRecipe,
-            onBack           = {},
-            onFinish         = {},
-            onSelectStep     = {},
+            recipe = previewCookingRecipe,
+            onBack = {},
+            onFinish = {},
+            onSelectStep = {},
             onToggleStepDone = {},
-            onNext           = {},
-            onPrevious       = {},
+            onNext = {},
+            onPrevious = {},
         )
     }
 }
