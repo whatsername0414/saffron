@@ -30,6 +30,12 @@
     <string name="cooking_no_steps">No steps available for this recipe.</string>
     <string name="cd_exit">Exit</string>
 
+    <!-- Search screen -->
+    <string name="search_no_results">No results for \"%1$s\". Try a different ingredient or dish.</string>
+    <string name="search_error">Couldn\'t load results.</string>
+    <string name="search_idle_hint">Find your next recipe.</string>
+    <string name="cd_clear_search">Clear search</string>
+
     <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_search">Search</string>

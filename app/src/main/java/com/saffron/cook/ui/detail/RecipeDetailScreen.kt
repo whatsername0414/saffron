@@ -77,6 +77,19 @@ fun RecipeDetailScreen(
         state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
         }
+        state.isError -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.error_load_failed),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Cinnamon,
+                )
+                Spacer(Modifier.height(12.dp))
+                Button(onClick = viewModel::retry) {
+                    Text(stringResource(R.string.error_retry))
+                }
+            }
+        }
         state.recipe == null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Text(stringResource(R.string.recipe_not_found), style = MaterialTheme.typography.bodyLarge, color = Cinnamon)
         }
@@ -159,7 +172,7 @@ private fun DetailContent(
             item {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp)) {
                     Text(
-                        text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
+                        text = recipe.categoryId.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelMedium,
                         color = Saffron,
                     )
@@ -255,6 +268,7 @@ private fun DetailContent(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Text(
                     text = stringResource(R.string.start_cooking),

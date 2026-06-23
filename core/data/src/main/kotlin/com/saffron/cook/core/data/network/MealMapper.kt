@@ -101,13 +101,20 @@ fun CategoryDto.toCategory(): Category =
         name = name,
     )
 
+private val paragraphSplit = Regex("""\r?\n\s*\r?\n""")
+
 private fun String.parseSteps(): List<Step> {
-    // Split on paragraph breaks first, then line breaks
-    val lines =
-        split("\r\n\r\n", "\n\n")
-            .flatMap { block -> block.split("\r\n", "\n", "\r") }
+    val paragraphs = paragraphSplit.split(this)
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+
+    val lines = if (paragraphs.size > 1) {
+        paragraphs
+    } else {
+        split("\r\n", "\n", "\r")
             .map { it.trim() }
             .filter { it.isNotBlank() }
+    }
 
     return lines.mapIndexed { index, text ->
         Step(title = "Step ${index + 1}", instruction = text)

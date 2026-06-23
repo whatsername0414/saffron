@@ -12,20 +12,26 @@ import kotlinx.coroutines.coroutineScope
 class MealDbRecipeRepository(
     private val service: TheMealDbService,
 ) : RecipeRepository {
-    // Categories fetched for the home grid — capitalized to match API filter param
-    private val gridCategories = listOf("Chicken", "Pasta", "Seafood", "Dessert")
+    private val preferredCategoryIds = listOf("chicken", "pasta", "seafood", "dessert")
 
     override suspend fun getRecipes(): List<Recipe> =
         coroutineScope {
-            gridCategories
-                .map { cat ->
+            val liveCategories = runCatching {
+                service.getCategories().categories?.associate {
+                    it.name.lowercase() to it.name
+                } ?: emptyMap()
+            }.getOrDefault(emptyMap())
+
+            preferredCategoryIds
+                .map { id ->
                     async {
+                        val apiName = liveCategories[id] ?: id.replaceFirstChar { it.uppercase() }
                         runCatching {
                             service
-                                .filterByCategory(cat)
+                                .filterByCategory(apiName)
                                 .meals
                                 ?.take(3)
-                                ?.map { it.toPartialRecipe(cat.lowercase()) }
+                                ?.map { it.toPartialRecipe(id) }
                                 ?: emptyList()
                         }.getOrDefault(emptyList())
                     }

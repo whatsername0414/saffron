@@ -7,6 +7,7 @@ import com.saffron.cook.core.data.repository.RecipeRepository
 import com.saffron.cook.ui.cooking.CookingModeViewModel
 import com.saffron.cook.ui.detail.RecipeDetailViewModel
 import com.saffron.cook.ui.home.HomeViewModel
+import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.module.dsl.viewModelOf
@@ -48,4 +49,8 @@ val detailModule = module {
 
 val cookingModule = module {
     viewModelOf(::CookingModeViewModel)
+}
+
+val searchModule = module {
+    viewModelOf(::SearchViewModel)
 }

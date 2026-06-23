@@ -6,6 +6,7 @@ import com.saffron.cook.di.coreDataModule
 import com.saffron.cook.di.detailModule
 import com.saffron.cook.di.homeModule
 import com.saffron.cook.di.networkModule
+import com.saffron.cook.di.searchModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -14,7 +15,7 @@ class SaffronApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@SaffronApplication)
-            modules(networkModule, coreDataModule, homeModule, detailModule, cookingModule)
+            modules(networkModule, coreDataModule, homeModule, detailModule, cookingModule, searchModule)
         }
     }
 }

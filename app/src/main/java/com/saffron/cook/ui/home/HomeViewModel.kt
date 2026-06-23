@@ -3,7 +3,9 @@ package com.saffron.cook.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.core.data.repository.RecipeRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,26 +19,34 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(buildShellState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
+    private var categoryJob: Job? = null
+
     init {
         viewModelScope.launch { loadData() }
     }
 
     private suspend fun loadData() {
-        val featuredDeferred  = viewModelScope.async { repository.getFeaturedRecipe() }
-        val categoriesDeferred = viewModelScope.async { repository.getCategories() }
-        val recipesDeferred   = viewModelScope.async { repository.getRecipes() }
+        runCatching {
+            coroutineScope {
+                val featuredDeferred   = async { repository.getFeaturedRecipe() }
+                val categoriesDeferred = async { repository.getCategories() }
+                val recipesDeferred    = async { repository.getRecipes() }
 
-        val featured   = featuredDeferred.await()
-        val categories = categoriesDeferred.await()
-        val grid       = recipesDeferred.await().filter { it.id != featured?.id }
+                val featured   = featuredDeferred.await()
+                val categories = categoriesDeferred.await()
+                val grid       = recipesDeferred.await().filter { it.id != featured?.id }
 
-        _uiState.update { state ->
-            state.copy(
-                isLoading      = false,
-                categories     = categories,
-                featuredRecipe = featured,
-                gridRecipes    = grid,
-            )
+                _uiState.update { state ->
+                    state.copy(
+                        isLoading      = false,
+                        categories     = categories,
+                        featuredRecipe = featured,
+                        gridRecipes    = grid,
+                    )
+                }
+            }
+        }.onFailure {
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
@@ -51,7 +61,8 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
     fun onSelectCategory(categoryId: String) {
         val newId = if (_uiState.value.selectedCategoryId == categoryId) null else categoryId
         _uiState.update { it.copy(selectedCategoryId = newId, isLoading = true) }
-        viewModelScope.launch {
+        categoryJob?.cancel()
+        categoryJob = viewModelScope.launch {
             val grid = if (newId == null) repository.getRecipes()
                        else repository.getRecipesByCategory(newId)
             _uiState.update { it.copy(isLoading = false, gridRecipes = grid) }

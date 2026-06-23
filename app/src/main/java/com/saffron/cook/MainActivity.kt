@@ -54,9 +54,7 @@ fun SaffronApp() {
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
 
-    val tabRoutes = setOf(
-        Screen.Home.route, Screen.Search.route, Screen.Favorites.route, Screen.Profile.route,
-    )
+    val tabRoutes = BottomNavDestination.entries.map { it.screen.route }.toSet()
     val showBottomBar = currentDestination?.route in tabRoutes
 
     Scaffold(
@@ -105,7 +103,9 @@ fun SaffronApp() {
                     onOpenRecipe       = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
                 )
             }
-            composable(Screen.Search.route)    { SearchScreen() }
+            composable(Screen.Search.route) {
+                SearchScreen(onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) })
+            }
             composable(Screen.Favorites.route) { FavoritesScreen() }
             composable(Screen.Profile.route)   { ProfileScreen() }
             composable(
