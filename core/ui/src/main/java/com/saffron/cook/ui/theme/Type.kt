@@ -2,28 +2,23 @@ package com.saffron.cook.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.googlefonts.Font
-import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
 import com.saffron.cook.core.ui.R
 
-val FontProvider = GoogleFont.Provider(
-    providerAuthority = "com.google.android.gms.fonts",
-    providerPackage = "com.google.android.gms",
-    certificates = R.array.com_google_android_gms_fonts_certs
-)
-
+// Bundled TTF — works offline, on emulators, and in Compose Previews.
+// Design spec: Playfair Display 400/500 + Inter 300/400/500. Inter never Bold.
 val PlayfairDisplayFamily = FontFamily(
-    Font(googleFont = GoogleFont("Playfair Display"), fontProvider = FontProvider, weight = FontWeight.Normal),
-    Font(googleFont = GoogleFont("Playfair Display"), fontProvider = FontProvider, weight = FontWeight.Medium),
+    Font(R.font.playfair_display_regular, FontWeight.Normal),
+    Font(R.font.playfair_display_medium, FontWeight.Medium),
 )
 
 val InterFamily = FontFamily(
-    Font(googleFont = GoogleFont("Inter"), fontProvider = FontProvider, weight = FontWeight.Light),
-    Font(googleFont = GoogleFont("Inter"), fontProvider = FontProvider, weight = FontWeight.Normal),
-    Font(googleFont = GoogleFont("Inter"), fontProvider = FontProvider, weight = FontWeight.Medium),
+    Font(R.font.inter_light, FontWeight.Light),
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
 )
 
 val Typography = Typography(
@@ -99,7 +94,7 @@ val Typography = Typography(
         lineHeight = 18.sp,
         letterSpacing = 0.sp,
     ),
-    // overline — uppercase with tracking (apply TextDecoration.uppercase at call site)
+    // overline — uppercase with tracking (apply .uppercase() at call site)
     labelMedium = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Medium,

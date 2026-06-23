@@ -31,9 +31,7 @@ class MealDbRecipeRepository(private val service: TheMealDbService) : RecipeRepo
     }
 
     override suspend fun getRecipeById(id: String): Recipe? =
-        runCatching {
-            service.lookupMeal(id).meals?.firstOrNull()?.toRecipe()
-        }.getOrNull()
+        service.lookupMeal(id).meals?.firstOrNull()?.toRecipe()
 
     override suspend fun getCategories(): List<Category> =
         runCatching {

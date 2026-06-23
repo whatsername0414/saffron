@@ -52,7 +52,7 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
                 ui/search/    → SearchScreen (stub)
                 ui/favorites/ → FavoritesScreen (stub)
                 ui/profile/   → ProfileScreen (stub)
-                ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState (next)
+                ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
 ```
 
 When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
@@ -70,12 +70,29 @@ Standard MVI / unidirectional data flow:
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule` wired in `SaffronApplication`.
+1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule`, `cookingModule` wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB).
-3. Recipe Detail screen — `RecipeDetailViewModel` (reads `recipeId` from `SavedStateHandle`) + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA).
+3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA).
+4. Cooking Mode — `CookingModeScreen` + `CookingModeViewModel` (step indicator pills, done-checkbox, back/next/finish footer).
 
-**Next:**
-4. **Cooking Mode** — full-screen step flow in `ui/cooking/`, `StepIndicator` (numbered pill buttons), done-checkbox per step, back/next/finish footer.
+**In progress — review fixes (half-applied, finish before new features):**
+
+Already applied:
+- `strings.xml` — section headers lowercased to sentence case; `error_load_failed` / `error_retry` strings added.
+- `RecipeDetailUiState` + `CookingModeUiState` — `isError: Boolean = false` field added.
+- `RecipeDetailViewModel` + `CookingModeViewModel` — `load()` wrapped in try/catch; `retry()` added.
+- `MealDbRecipeRepository.getRecipeById` — `runCatching` removed; network errors now propagate so ViewModels can catch and set `isError`.
+
+Still to apply (do these first in the next session):
+- `RecipeDetailScreen.kt` — add `state.isError` branch (show error + retry button); add `elevation = ButtonDefaults.buttonElevation(0.dp)` to "Start cooking" button; change `.replaceFirstChar { it.uppercase() }.uppercase()` → `.replaceFirstChar { it.uppercase() }` on categoryId (line 162).
+- `CookingModeScreen.kt` — add `onRetry: () -> Unit` param to `CookingModeContent`; add `state.isError` branch; remove `.uppercase()` from step-progress label (line 312); pass `viewModel::retry` from `CookingModeScreen`.
+- `HomeViewModel.kt` — (a) add `private var categoryJob: Job? = null`; cancel in `onSelectCategory` before launching; (b) replace `viewModelScope.async` in `loadData()` with `coroutineScope { async { } }` wrapped in `runCatching { }.onFailure { _uiState.update { it.copy(isLoading = false) } }`.
+- `MainActivity.kt` — replace hardcoded `tabRoutes` setOf(...) with `BottomNavDestination.entries.map { it.screen.route }.toSet()`; add `backStackEntry.arguments?.getString("recipeId") ?: return@composable` guard to the CookingMode composable block.
+- `MealMapper.kt` — fix `parseSteps`: split on paragraph breaks (`\r?\n\s*\r?\n`) first; fall back to single line breaks only if no paragraph breaks found. Removes the second-pass single-line split that over-fragments recipes.
+- `MealDbRecipeRepository.kt` — replace hardcoded `gridCategories` list with `preferredCategoryIds` (lowercase); fetch live category names from `getCategories()` at the start of `getRecipes()` and resolve to exact API names (case-insensitive match, fall back to `replaceFirstChar { uppercase }` if API fetch fails).
+
+**Next feature after fixes:**
+5. **Search screen** — implement `SearchScreen` using `TheMealDbService.searchMeals(query)`. Full-text search by name/ingredient. `SearchViewModel` + `SearchUiState` in `ui/search/`. Debounce input, empty state, loading state.
 
 ## Brand Rules (non-negotiable)
 

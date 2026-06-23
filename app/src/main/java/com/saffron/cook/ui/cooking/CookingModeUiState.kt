@@ -8,6 +8,7 @@ data class CookingModeUiState(
     val recipe: Recipe? = null,
     val currentStepIndex: Int = 0,
     val completedSteps: Set<Int> = emptySet(),
+    val isError: Boolean = false,
 ) {
     val steps: List<Step> get() = recipe?.steps.orEmpty()
     val totalSteps: Int get() = steps.size

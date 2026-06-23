@@ -6,4 +6,5 @@ data class RecipeDetailUiState(
     val isLoading: Boolean = true,
     val recipe: Recipe? = null,
     val isSaved: Boolean = false,
+    val isError: Boolean = false,
 )

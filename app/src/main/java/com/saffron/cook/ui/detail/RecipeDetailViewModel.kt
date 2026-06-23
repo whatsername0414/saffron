@@ -25,8 +25,17 @@ class RecipeDetailViewModel(
     }
 
     private suspend fun load() {
-        val recipe = repository.getRecipeById(recipeId)
-        _uiState.update { it.copy(isLoading = false, recipe = recipe) }
+        _uiState.update { it.copy(isLoading = true, isError = false) }
+        try {
+            val recipe = repository.getRecipeById(recipeId)
+            _uiState.update { it.copy(isLoading = false, recipe = recipe) }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(isLoading = false, isError = true) }
+        }
+    }
+
+    fun retry() {
+        viewModelScope.launch { load() }
     }
 
     fun onToggleSave() {
