@@ -263,18 +263,18 @@ object FakeRecipeRepository : RecipeRepository {
         ),
     )
 
-    override fun getRecipes(): List<Recipe> = recipes
+    override suspend fun getRecipes(): List<Recipe> = recipes
 
-    override fun getRecipeById(id: String): Recipe? = recipes.find { it.id == id }
+    override suspend fun getRecipeById(id: String): Recipe? = recipes.find { it.id == id }
 
-    override fun getCategories(): List<Category> = categories
+    override suspend fun getCategories(): List<Category> = categories
 
-    override fun getFeaturedRecipe(): Recipe? = recipes.find { it.isFeatured }
+    override suspend fun getFeaturedRecipe(): Recipe? = recipes.find { it.isFeatured }
 
-    override fun getRecipesByCategory(categoryId: String): List<Recipe> =
+    override suspend fun getRecipesByCategory(categoryId: String): List<Recipe> =
         recipes.filter { it.categoryId == categoryId }
 
-    override fun searchRecipes(query: String): List<Recipe> {
+    override suspend fun searchRecipes(query: String): List<Recipe> {
         val q = query.trim().lowercase()
         if (q.isEmpty()) return recipes
         return recipes.filter { recipe ->

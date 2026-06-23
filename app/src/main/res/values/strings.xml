@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">Saffron</string>
+
+    <!-- Home screen -->
+    <string name="search_hint">Search recipes, ingredients</string>
+    <string name="featured_tonight">FEATURED TONIGHT</string>
+    <string name="saved_for_the_week">SAVED FOR THE WEEK</string>
+
+    <!-- Common actions / accessibility -->
+    <string name="action_save">Save</string>
+    <string name="action_saved">Saved</string>
+    <string name="cd_back">Back</string>
+
+    <!-- Recipe detail screen -->
+    <string name="recipe_not_found">Recipe not found.</string>
+    <string name="start_cooking">Start cooking</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="meta_cook_time">cook time</string>
+    <string name="meta_servings">servings</string>
+    <string name="meta_difficulty">difficulty</string>
+
+    <!-- Cooking mode -->
+    <string name="cooking_step_progress">Step %1$d of %2$d</string>
+    <string name="cooking_mark_done">Mark as done</string>
+    <string name="cooking_previous">Previous</string>
+    <string name="cooking_next">Next</string>
+    <string name="cooking_finish">Finish</string>
+    <string name="cooking_no_steps">No steps available for this recipe.</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_search">Search</string>
+    <string name="nav_saved">Saved</string>
+    <string name="nav_profile">Profile</string>
 </resources>

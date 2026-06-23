@@ -6,14 +6,15 @@ data class Recipe(
     val description: String,
     val imageUrl: String,
     val categoryId: String,
-    val cookTimeMinutes: Int,
-    val servings: Int,
-    val difficulty: Difficulty,
-    val rating: Float,
-    val ratingCount: Int,
     val ingredients: List<Ingredient>,
     val steps: List<Step>,
     val isFeatured: Boolean = false,
+    // TheMealDB doesn't provide these; null = not available
+    val cookTimeMinutes: Int? = null,
+    val servings: Int? = null,
+    val difficulty: Difficulty? = null,
+    val rating: Float? = null,
+    val ratingCount: Int? = null,
 )
 
 data class Ingredient(

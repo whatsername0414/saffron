@@ -1,0 +1,61 @@
+package com.saffron.cook.core.data.repository
+
+import com.saffron.cook.core.data.model.Category
+import com.saffron.cook.core.data.model.Recipe
+import com.saffron.cook.core.data.network.TheMealDbService
+import com.saffron.cook.core.data.network.toCategory
+import com.saffron.cook.core.data.network.toPartialRecipe
+import com.saffron.cook.core.data.network.toRecipe
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+
+class MealDbRecipeRepository(private val service: TheMealDbService) : RecipeRepository {
+
+    // Categories fetched for the home grid — capitalized to match API filter param
+    private val gridCategories = listOf("Chicken", "Pasta", "Seafood", "Dessert")
+
+    override suspend fun getRecipes(): List<Recipe> = coroutineScope {
+        gridCategories
+            .map { cat ->
+                async {
+                    runCatching {
+                        service.filterByCategory(cat)
+                            .meals
+                            ?.take(3)
+                            ?.map { it.toPartialRecipe(cat.lowercase()) }
+                            ?: emptyList()
+                    }.getOrDefault(emptyList())
+                }
+            }
+            .flatMap { it.await() }
+    }
+
+    override suspend fun getRecipeById(id: String): Recipe? =
+        runCatching {
+            service.lookupMeal(id).meals?.firstOrNull()?.toRecipe()
+        }.getOrNull()
+
+    override suspend fun getCategories(): List<Category> =
+        runCatching {
+            service.getCategories().categories?.map { it.toCategory() } ?: emptyList()
+        }.getOrDefault(emptyList())
+
+    override suspend fun getFeaturedRecipe(): Recipe? =
+        runCatching {
+            service.getRandomMeal().meals?.firstOrNull()?.toRecipe(isFeatured = true)
+        }.getOrNull()
+
+    override suspend fun getRecipesByCategory(categoryId: String): List<Recipe> =
+        runCatching {
+            val apiCategory = categoryId.replaceFirstChar { it.uppercase() }
+            service.filterByCategory(apiCategory)
+                .meals
+                ?.map { it.toPartialRecipe(categoryId) }
+                ?: emptyList()
+        }.getOrDefault(emptyList())
+
+    override suspend fun searchRecipes(query: String): List<Recipe> =
+        runCatching {
+            service.searchMeals(query).meals?.map { it.toRecipe() } ?: emptyList()
+        }.getOrDefault(emptyList())
+}

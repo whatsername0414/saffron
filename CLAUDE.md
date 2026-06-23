@@ -39,12 +39,20 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 
 :core:data  — domain models + repository (kotlin.jvm, no Android framework)
               model/  → Recipe, Ingredient, Step, Difficulty, Category
-              repository/ → RecipeRepository interface
-              repository/fake/ → FakeRecipeRepository (6 full recipes, in-memory)
+              repository/ → RecipeRepository interface + MealDbRecipeRepository (TheMealDB)
+              repository/fake/ → FakeRecipeRepository (in-memory, for tests)
+              network/ → TheMealDbService (Retrofit), DTOs, MealMapper
 
-:app        — shell: MainActivity, NavHost, BottomNav, placeholder screens
+:app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              ui/screen/  → HomeScreen, SearchScreen, FavoritesScreen, ProfileScreen (stubs)
+              di/         → AppModule (networkModule, coreDataModule, homeModule, detailModule)
+              ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
+                ui/home/      → HomeScreen, HomeViewModel, HomeUiState
+                ui/detail/    → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
+                ui/search/    → SearchScreen (stub)
+                ui/favorites/ → FavoritesScreen (stub)
+                ui/profile/   → ProfileScreen (stub)
+                ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState (next)
 ```
 
 When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
@@ -61,11 +69,13 @@ Standard MVI / unidirectional data flow:
 :app (Composable screens ← StateFlow/UiState)
 ```
 
-**Next steps (in order):**
-1. **Koin DI** — add `koin-android` + `koin-androidx-compose`, create a `di/` module in `:app`, bind `FakeRecipeRepository` as `RecipeRepository`. This unblocks ViewModels.
-2. **Home screen** — category chips, featured editorial card (Playfair title + photo scrim), 2-column recipe grid. Needs a `HomeViewModel` backed by `RecipeRepository`.
-3. **Recipe Detail screen** — hero image, title, rating, 3-up meta strip, ingredient list, "Start cooking" CTA.
-4. **Cooking Mode** — full-screen step flow, `StepIndicator`, done checkbox.
+**Completed:**
+1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule` wired in `SaffronApplication`.
+2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB).
+3. Recipe Detail screen — `RecipeDetailViewModel` (reads `recipeId` from `SavedStateHandle`) + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA).
+
+**Next:**
+4. **Cooking Mode** — full-screen step flow in `ui/cooking/`, `StepIndicator` (numbered pill buttons), done-checkbox per step, back/next/finish footer.
 
 ## Brand Rules (non-negotiable)
 
@@ -82,4 +92,5 @@ Standard MVI / unidirectional data flow:
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
-- Screen-level composables live in `app/ui/screen/`; shared UI components will live in `:core:ui` once extracted.
+- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components will move to `:core:ui` once there are two or more consumers.
+- Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests.
