@@ -49,11 +49,11 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 
 :app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              di/         → AppModule (networkModule, coreDataModule, homeModule, detailModule)
+              di/         → AppModule (networkModule, coreDataModule, homeModule, detailModule, cookingModule, searchModule)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
                 ui/home/      → HomeScreen, HomeViewModel, HomeUiState
                 ui/detail/    → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
-                ui/search/    → SearchScreen (stub)
+                ui/search/    → SearchScreen, SearchViewModel, SearchUiState
                 ui/favorites/ → FavoritesScreen (stub)
                 ui/profile/   → ProfileScreen (stub)
                 ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
@@ -68,32 +68,37 @@ Standard MVI / unidirectional data flow:
 ```
 :core:data  ←  repositories (interface + fake impl)
     ↓
-:app (ViewModels — not yet added; inject via Koin)
+:app (ViewModels — inject via Koin)
     ↓
 :app (Composable screens ← StateFlow/UiState)
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule`, `cookingModule` wired in `SaffronApplication`.
-2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB).
-3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` + `retry()` wired; ViewModel wraps load in try/catch.
+1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule` wired in `SaffronApplication`.
+2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
+3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` branch + `retry()` wired; 0dp button elevation; category label in sentence case.
 4. Cooking Mode — `CookingModeScreen` + `CookingModeViewModel` fully aligned with Claude Design spec:
    - Header: × exit icon (left), "Step N of M" centered, 48dp spacer (right). No divider.
    - Step pills: active = Saffron/white; done = Cream/Saffron160; pending = Cream/Cinnamon. Numbers only — no check icon.
    - Content: recipe name overline (Saffron) → `step.title` in Playfair 30sp → `step.instruction` Inter Light 17sp → plain checkbox "Mark this step done".
    - Footer: "Back" (natural width, secondary) | "Next step" / "Finish" (fills remaining space; Finish has leading CheckCircle icon). Gap 10dp, bottom padding 18dp.
-   - `isError` branch + `onRetry` wired. `strings.xml` updated (Back, Next step, Mark this step done, cd_exit).
-5. Brand fonts bundled — Playfair Display (400/500) + Inter (300/400/500) as TTF files in `core/ui/src/main/res/font/`. `Type.kt` uses `Font(R.font.*)` — renders in Compose Previews, works offline, no GMS dependency. `ui-text-google-fonts` dep removed.
+5. Brand fonts bundled — Playfair Display (400/500) + Inter (300/400/500) as TTF files in `core/ui/src/main/res/font/`. `Type.kt` uses `Font(R.font.*)` — renders in Compose Previews, works offline, no GMS dependency.
+6. Search screen — `SearchViewModel` + `SearchScreen` aligned with Claude Design spec:
+   - Header: "Search" in Playfair 26sp.
+   - Input: 48dp tall, 10dp radius, white bg, Saffron focus ring (1dp border on focus).
+   - Filter chips: horizontal scroll row — All / Breakfast / Lunch / Dinner / Baking. Pill shape, Saffron selected.
+   - Results: 92×70dp thumbnail, category overline, Playfair Medium 16sp title, clock + people meta row, bookmark toggle. 12dp gap between rows (no dividers).
+   - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
+   - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
+   - `savedIds` managed in-memory in `SearchViewModel`; category filter applied client-side.
 
-**Pending fixes (do before new features):**
-- `RecipeDetailScreen.kt` — add `state.isError` branch (show error + retry button); add `elevation = ButtonDefaults.buttonElevation(0.dp)` to "Start cooking" button; change `.replaceFirstChar { it.uppercase() }.uppercase()` → `.replaceFirstChar { it.uppercase() }` on categoryId.
-- `HomeViewModel.kt` — (a) add `private var categoryJob: Job? = null`; cancel in `onSelectCategory` before launching; (b) replace `viewModelScope.async` in `loadData()` with `coroutineScope { async { } }` wrapped in `runCatching { }.onFailure { _uiState.update { it.copy(isLoading = false) } }`.
-- `MainActivity.kt` — replace hardcoded `tabRoutes` setOf(...) with `BottomNavDestination.entries.map { it.screen.route }.toSet()`.
-- `MealMapper.kt` — fix `parseSteps`: split on paragraph breaks (`\r?\n\s*\r?\n`) first; fall back to single line breaks only if no paragraph breaks found.
-- `MealDbRecipeRepository.kt` — replace hardcoded `gridCategories` list with `preferredCategoryIds` (lowercase); fetch live category names from `getCategories()` at the start of `getRecipes()` and resolve to exact API names (case-insensitive match, fall back to `replaceFirstChar { uppercase }` if API fetch fails).
+**Data layer notes:**
+- `MealMapper.parseSteps` — paragraph-break detection first (`\r?\n\s*\r?\n`); falls back to single line splits if no paragraph breaks found.
+- `MealDbRecipeRepository.getRecipes()` — `preferredCategoryIds` list (lowercase); fetches live category names from `getCategories()` at call time and resolves to exact API names (case-insensitive, falls back to `replaceFirstChar { uppercase }` if API fails).
 
-**Next feature after fixes:**
-6. **Search screen** — implement `SearchScreen` using `TheMealDbService.searchMeals(query)`. Full-text search by name/ingredient. `SearchViewModel` + `SearchUiState` in `ui/search/`. Debounce input, empty state, loading state.
+**Next features:**
+7. **Favorites screen** — implement `FavoritesScreen` with a 2-column grid of saved recipes. Requires shared saved-state persistence (DataStore or in-memory singleton) so saves in Detail/Search survive navigation.
+8. **Profile screen** — implement `ProfileScreen` with stats (saved count, cooked count) and settings rows.
 
 ## Brand Rules (non-negotiable)
 
