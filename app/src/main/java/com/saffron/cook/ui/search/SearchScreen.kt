@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Search
@@ -326,9 +327,9 @@ private fun ResultRow(
         }
         IconButton(onClick = onToggleSave) {
             Icon(
-                imageVector = if (saved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                imageVector = if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (saved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                tint = if (saved) Saffron else Cinnamon,
+                tint = Saffron,
             )
         }
     }

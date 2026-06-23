@@ -19,7 +19,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -58,7 +57,7 @@ fun SaffronApp() {
     val showBottomBar = currentDestination?.route in tabRoutes
 
     Scaffold(
-        modifier  = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         bottomBar = {
             if (showBottomBar) {
                 NavigationBar(
@@ -70,18 +69,26 @@ fun SaffronApp() {
                             ?.any { it.route == destination.screen.route } == true
                         NavigationBarItem(
                             selected = selected,
-                            onClick  = {
-                                navController.navigate(destination.screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                            onClick = {
+                                if (destination.screen.route == Screen.Home.route) {
+                                    navController.popBackStack(
+                                        route = Screen.Home.route,
+                                        inclusive = false,
+                                        saveState = true,
+                                    )
+                                } else {
+                                    navController.navigate(destination.screen.route) {
+                                        popUpTo(Screen.Home.route) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
                                     }
-                                    launchSingleTop = true
-                                    restoreState    = true
                                 }
                             },
-                            icon  = {
+                            icon = {
                                 Icon(
-                                    imageVector        = if (selected) destination.selectedIcon else destination.unselectedIcon,
+                                    imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
                                     contentDescription = stringResource(destination.labelRes),
                                 )
                             },
@@ -93,14 +100,14 @@ fun SaffronApp() {
         },
     ) { innerPadding ->
         NavHost(
-            navController    = navController,
+            navController = navController,
             startDestination = Screen.Home.route,
-            modifier         = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(innerPadding),
         ) {
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSearch = { navController.navigate(Screen.Search.route) },
-                    onOpenRecipe       = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
                 )
             }
             composable(Screen.Search.route) {
@@ -109,22 +116,22 @@ fun SaffronApp() {
             composable(Screen.Favorites.route) { FavoritesScreen() }
             composable(Screen.Profile.route)   { ProfileScreen() }
             composable(
-                route     = Screen.RecipeDetail.route,
+                route = Screen.RecipeDetail.route,
                 arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
             ) { backStackEntry ->
                 val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
                 RecipeDetailScreen(
-                    recipeId       = recipeId,
-                    onBack         = { navController.popBackStack() },
+                    recipeId = recipeId,
+                    onBack = { navController.popBackStack() },
                     onStartCooking = { id -> navController.navigate(Screen.CookingMode.createRoute(id)) },
                 )
             }
             composable(
-                route     = Screen.CookingMode.route,
+                route = Screen.CookingMode.route,
                 arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
             ) {
                 CookingModeScreen(
-                    onBack   = { navController.popBackStack() },
+                    onBack = { navController.popBackStack() },
                     onFinish = { navController.popBackStack() },
                 )
             }

@@ -24,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Schedule
@@ -95,7 +96,7 @@ private fun HomeContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Linen),
+            .background(Color.White),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
         item { HomeHeader(greeting = state.greeting, dateLabel = state.dateLabel) }
@@ -135,7 +136,7 @@ private fun HomeContent(
         } else if (gridRows.isNotEmpty()) {
             item {
                 Text(
-                    text = stringResource(R.string.saved_for_the_week),
+                    text = stringResource(R.string.saved_for_the_week).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
                     color = Color(0xFF8A7A5C),
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
@@ -219,7 +220,7 @@ private fun SearchBar(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 6.dp)
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White)
             .border(0.5.dp, Color(0xFFD3CFC8), RoundedCornerShape(8.dp))
@@ -269,21 +270,19 @@ private fun CategoryRow(
 
 @Composable
 private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val bg = if (selected) Saffron20 else Color.Transparent
-    val border = if (selected) Color(0xFFE0A020) else Color(0xFFC9C2B6)
-    val text = if (selected) Saffron160 else Cinnamon
+    val bg = if (selected) Saffron else Cream
+    val text = if (selected) Color.White else Saffron160
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(percent = 50))
             .background(bg)
-            .border(0.5.dp, border, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = label,
+            text = label.uppercase(),
             style = MaterialTheme.typography.labelLarge,
             color = text,
         )
@@ -301,7 +300,7 @@ private fun FeaturedSection(
 ) {
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp)) {
         Text(
-            text = stringResource(R.string.featured_tonight),
+            text = stringResource(R.string.featured_tonight).uppercase(),
             style = MaterialTheme.typography.labelMedium,
             color = Saffron,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -310,7 +309,7 @@ private fun FeaturedSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 10f)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(14.dp))
                 .clickable(onClick = onClick),
         ) {
             AsyncImage(
@@ -333,22 +332,20 @@ private fun FeaturedSection(
                 onClick = { onToggleSave(recipe.id) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(10.dp)
-                    .size(38.dp)
+                    .padding(16.dp)
                     .clip(CircleShape)
                     .background(Color(0xEBFFFFFF)),
             ) {
                 Icon(
-                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint = if (isSaved) Saffron else Cinnamon,
-                    modifier = Modifier.size(19.dp),
+                    tint = Saffron
                 )
             }
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 16.dp, end = 56.dp, bottom = 14.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 14.dp),
             ) {
                 Text(
                     text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
@@ -483,22 +480,20 @@ private fun RecipeCard(
                 onClick = { onToggleSave(recipe.id) },
                 modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(36.dp)
+                    .padding(12.dp)
                     .clip(CircleShape)
                     .background(Color(0xEBFFFFFF)),
             ) {
                 Icon(
-                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint = if (isSaved) Saffron else Cinnamon,
-                    modifier = Modifier.size(18.dp),
+                    tint = Saffron,
                 )
             }
         }
         Column(
             modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
                 text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
@@ -509,8 +504,8 @@ private fun RecipeCard(
                 text = recipe.title,
                 style = MaterialTheme.typography.labelLarge.copy(
                     fontFamily = PlayfairDisplayFamily,
-                    fontSize = 18.sp,
-                    lineHeight = 22.sp,
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
                 ),
                 color = Truffle,
                 maxLines = 2,
@@ -521,7 +516,6 @@ private fun RecipeCard(
                 recipe.servings?.let { add(Icons.Outlined.People to "$it") }
             }
             if (metaItems.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     metaItems.forEach { (icon, label) ->
                         Row(
