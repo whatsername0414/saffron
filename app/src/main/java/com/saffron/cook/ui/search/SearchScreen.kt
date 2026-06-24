@@ -147,14 +147,14 @@ fun SearchScreen(
                         Icon(
                             imageVector = Icons.Outlined.Search,
                             contentDescription = null,
-                            tint = Color(0xFF8A7A5C),
+                            tint = Cinnamon,
                             modifier = Modifier.size(32.dp),
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.search_no_results, state.query),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color(0xFF8A7A5C),
+                            color = Cinnamon,
                         )
                     }
                 }
@@ -167,7 +167,7 @@ fun SearchScreen(
                         itemsIndexed(displayedRecipes, key = { _, r -> r.id }) { _, recipe ->
                             ResultRow(
                                 recipe = recipe,
-                                saved = recipe.id in state.savedIds,
+                                isSaved = recipe.id in state.savedIds,
                                 onToggleSave = { viewModel.onToggleSave(recipe.id) },
                                 onClick = { onOpenRecipe(recipe.id) },
                             )
@@ -272,7 +272,7 @@ private fun FilterChip(
 @Composable
 private fun ResultRow(
     recipe: Recipe,
-    saved: Boolean,
+    isSaved: Boolean,
     onToggleSave: () -> Unit,
     onClick: () -> Unit,
 ) {
@@ -320,16 +320,16 @@ private fun ResultRow(
                         MetaItem(icon = Icons.Outlined.Schedule, text = "$it min")
                     }
                     recipe.servings?.let {
-                        MetaItem(icon = Icons.Outlined.People, text = "$it")
+                        MetaItem(icon = Icons.Outlined.People, text = "serves $it")
                     }
                 }
             }
         }
         IconButton(onClick = onToggleSave) {
             Icon(
-                imageVector = if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                contentDescription = if (saved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                tint = Saffron,
+                imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
+                tint = if (isSaved) Saffron else Cinnamon,
             )
         }
     }
@@ -363,8 +363,8 @@ private fun MetaItem(icon: ImageVector, text: String) {
 @Composable
 private fun SearchScreenIdlePreview() {
     val fakeRecipes = listOf(
-        Recipe(id = "1", title = "Teriyaki Chicken Casserole", description = "", imageUrl = "", categoryId = "chicken", ingredients = emptyList(), steps = emptyList()),
-        Recipe(id = "2", title = "Chicken Alfredo", description = "", imageUrl = "", categoryId = "pasta", ingredients = emptyList(), steps = emptyList()),
+        Recipe(id = "1", title = "Teriyaki Chicken Casserole", description = "", imageUrl = "", categoryId = "chicken", ingredients = emptyList(), steps = emptyList(), servings = 5),
+        Recipe(id = "2", title = "Chicken Alfredo", description = "", imageUrl = "", categoryId = "pasta", ingredients = emptyList(), steps = emptyList(), servings = 2),
     )
     SaffronTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
@@ -388,7 +388,7 @@ private fun SearchScreenIdlePreview() {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 itemsIndexed(fakeRecipes) { _, r ->
-                    ResultRow(recipe = r, saved = false, onToggleSave = {}, onClick = {})
+                    ResultRow(recipe = r, isSaved = false, onToggleSave = {}, onClick = {})
                 }
             }
         }

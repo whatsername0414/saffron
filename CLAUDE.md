@@ -105,7 +105,7 @@ Standard MVI / unidirectional data flow:
    - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
    - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
    - `savedIds` sourced from shared `SavedRecipesRepository` (Room-backed); category filter applied client-side.
-   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint on Search result rows.
+   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved, Cinnamon when unsaved (consistent with Home/Favorites RecipeCard).
 7. Favorites screen — `FavoritesViewModel` + `FavoritesScreen` aligned with Claude Design spec:
    - Header: "Favorites" in Playfair 26sp (same pattern as Search header).
    - Empty state: 32dp `Icons.Outlined.BookmarkBorder` + "Your saved recipes will live here." — both `Color(0xFF8A7A5C)`, centered with `fillMaxSize`.
@@ -132,7 +132,7 @@ Standard MVI / unidirectional data flow:
 - **Flat UI** — zero elevation shadow on resting cards/buttons. Use `0.dp` `tonalElevation` on `NavigationBar`. Hairline borders (`0.5dp`) instead of shadows.
 - **Voice** — sentence case everywhere. No emoji. No "Amazing!" — say "Saved." Metadata abbreviates ("35 min"); instructions spell out ("thirty-five minutes").
 - **Dynamic color disabled** — `SaffronTheme` enforces the brand palette on all API levels.
-- **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark icon: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved everywhere; when unsaved, Saffron on Home/Search cards, Cinnamon on the Detail screen (matches design spec per screen).
+- **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark icon: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved, Cinnamon when unsaved — applies on all screens (Home, Search, Favorites, Detail).
 
 ## Linting
 
