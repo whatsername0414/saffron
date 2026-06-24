@@ -22,11 +22,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.Button
@@ -34,11 +36,14 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,32 +74,35 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun CookingModeScreen(
     onBack: () -> Unit,
-    onFinish: () -> Unit,
+    onAddNote: (recipeId: String) -> Unit,
     viewModel: CookingModeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     CookingModeContent(
         state = state,
         onBack = onBack,
-        onFinish = onFinish,
+        onAddNote = onAddNote,
         onRetry = viewModel::retry,
         onSelectStep = viewModel::onSelectStep,
         onToggleStepDone = viewModel::onToggleStepDone,
         onNext = viewModel::onNext,
         onPrevious = viewModel::onPrevious,
+        onFinish = viewModel::onFinish,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CookingModeContent(
     state: CookingModeUiState,
     onBack: () -> Unit,
-    onFinish: () -> Unit,
+    onAddNote: (recipeId: String) -> Unit,
     onRetry: () -> Unit,
     onSelectStep: (Int) -> Unit,
     onToggleStepDone: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onFinish: () -> Unit,
 ) {
     when {
         state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
@@ -124,16 +132,163 @@ private fun CookingModeContent(
                 color = Cinnamon,
             )
         }
-        else -> CookingLayout(
-            state = state,
-            recipe = state.recipe,
-            onBack = onBack,
-            onFinish = onFinish,
-            onSelectStep = onSelectStep,
-            onToggleStepDone = onToggleStepDone,
-            onNext = onNext,
-            onPrevious = onPrevious,
-        )
+        else -> {
+            CookingLayout(
+                state = state,
+                recipe = state.recipe,
+                onBack = onBack,
+                onFinish = onFinish,
+                onSelectStep = onSelectStep,
+                onToggleStepDone = onToggleStepDone,
+                onNext = onNext,
+                onPrevious = onPrevious,
+            )
+            if (state.isFinished) {
+                val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                ModalBottomSheet(
+                    onDismissRequest = onBack,
+                    sheetState = sheetState,
+                    containerColor = Color.White,
+                ) {
+                    CompletionSheetContent(
+                        recipeName = state.recipe.title,
+                        onClose = onBack,
+                        onAddNote = { onAddNote(state.recipe.id) },
+                        onMaybeLater = onBack,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompletionSheetContent(
+    recipeName: String,
+    onClose: () -> Unit,
+    onAddNote: () -> Unit,
+    onMaybeLater: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 18.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 4.dp),
+            horizontalArrangement = Arrangement.End,
+        ) {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(R.string.cd_exit),
+                    tint = Truffle,
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Cream),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircle,
+                    contentDescription = null,
+                    tint = Saffron,
+                    modifier = Modifier.size(30.dp),
+                )
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            Text(
+                text = recipeName.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = Saffron,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(R.string.cooking_done_headline),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = PlayfairDisplayFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 30.sp,
+                    lineHeight = 35.4.sp,
+                    letterSpacing = (-0.3).sp,
+                ),
+                color = Truffle,
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(R.string.cooking_done_tagline),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Cinnamon,
+            )
+        }
+
+        Spacer(Modifier.height(28.dp))
+
+        HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Button(
+                onClick = onAddNote,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                elevation = ButtonDefaults.buttonElevation(0.dp),
+                contentPadding = PaddingValues(vertical = 16.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.cooking_add_note),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.White,
+                )
+            }
+
+            Button(
+                onClick = onMaybeLater,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Transparent,
+                    contentColor = Truffle,
+                ),
+                elevation = ButtonDefaults.buttonElevation(0.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.cooking_maybe_later),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+            }
+        }
     }
 }
 
@@ -370,7 +525,6 @@ private fun Footer(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        // Back — natural width
         Button(
             onClick = onPrevious,
             enabled = !isFirstStep,
@@ -392,7 +546,6 @@ private fun Footer(
             )
         }
 
-        // Next step or Finish — fills remaining space
         if (isLastStep) {
             Button(
                 onClick = onFinish,
@@ -483,22 +636,13 @@ private fun CookingModePreview() {
 
 @Preview(showBackground = true)
 @Composable
-private fun CookingModeLastStepPreview() {
+private fun CompletionSheetPreview() {
     SaffronTheme {
-        CookingLayout(
-            state = CookingModeUiState(
-                isLoading = false,
-                recipe = previewCookingRecipe,
-                currentStepIndex = 3,
-                completedSteps = setOf(0, 1, 2, 3),
-            ),
-            recipe = previewCookingRecipe,
-            onBack = {},
-            onFinish = {},
-            onSelectStep = {},
-            onToggleStepDone = {},
-            onNext = {},
-            onPrevious = {},
+        CompletionSheetContent(
+            recipeName = "Teriyaki Chicken Casserole",
+            onClose = {},
+            onAddNote = {},
+            onMaybeLater = {},
         )
     }
 }

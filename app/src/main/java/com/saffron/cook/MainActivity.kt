@@ -29,6 +29,7 @@ import com.saffron.cook.navigation.BottomNavDestination
 import com.saffron.cook.navigation.Screen
 import com.saffron.cook.ui.cooking.CookingModeScreen
 import com.saffron.cook.ui.detail.RecipeDetailScreen
+import com.saffron.cook.ui.notes.NoteEditorScreen
 import com.saffron.cook.ui.favorites.FavoritesScreen
 import com.saffron.cook.ui.home.HomeScreen
 import com.saffron.cook.ui.login.LoginScreen
@@ -151,7 +152,22 @@ fun SaffronApp() {
             ) {
                 CookingModeScreen(
                     onBack = { navController.popBackStack() },
-                    onFinish = { navController.popBackStack() },
+                    onAddNote = { recipeId ->
+                        navController.navigate(Screen.NoteEditor.createRoute(recipeId))
+                    },
+                )
+            }
+            composable(
+                route = Screen.NoteEditor.route,
+                arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
+            ) {
+                NoteEditorScreen(
+                    onCancel = { navController.popBackStack() },
+                    onSaved = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Home.route) { inclusive = false }
+                        }
+                    },
                 )
             }
         }

@@ -40,6 +40,25 @@
     <string name="favorites_title">Favorites</string>
     <string name="favorites_empty">Your saved recipes will live here.</string>
 
+    <!-- Cooking mode — completion sheet -->
+    <string name="cooking_done_headline">That\'s it — you\'re done.</string>
+    <string name="cooking_done_tagline">Jot down what you\'d change while it\'s fresh. A good note now is a better dish next time.</string>
+    <string name="cooking_add_note">Add a note</string>
+    <string name="cooking_maybe_later">Maybe later</string>
+
+    <!-- Note editor -->
+    <string name="note_editor_title">New note</string>
+    <string name="note_title_hint">Give it a title</string>
+    <string name="note_body_hint">What did you change? What would you do differently? Write it down while it\'s fresh.</string>
+    <string name="note_on_label">Note on</string>
+    <string name="note_section_rating">How it turned out</string>
+    <string name="note_section_labels">Add a label</string>
+    <string name="note_section_notes">Notes</string>
+    <string name="note_section_photos">Photos</string>
+    <string name="note_add_photo">Add photo</string>
+    <string name="note_add_more_photos">Add more</string>
+    <string name="note_remove_photo">Remove photo</string>
+
     <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_search">Search</string>

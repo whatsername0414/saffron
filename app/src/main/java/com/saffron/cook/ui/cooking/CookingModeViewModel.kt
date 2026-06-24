@@ -64,4 +64,8 @@ class CookingModeViewModel(
             else state
         }
     }
+
+    fun onFinish() {
+        _uiState.update { it.copy(isFinished = true) }
+    }
 }

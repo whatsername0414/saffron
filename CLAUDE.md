@@ -51,9 +51,10 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 :app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
               auth/       → AuthRepository interface + FirebaseAuthRepository (Firebase Auth + Google Sign-In via Credential Manager)
-              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, authModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
+              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, notesModule, authModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
               data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
-              data/local/ → SaffronDatabase, SavedRecipeDao, SavedRecipeEntity (Room)
+                            RecipeNotesRepository (Room-backed, Koin single in notesModule)
+              data/local/ → SaffronDatabase v2, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity (Room)
               ui/components/ → RecipeCard (shared 2-column grid card, used by Home + Favorites)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
                 ui/home/      → HomeScreen, HomeViewModel, HomeUiState
@@ -63,6 +64,7 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
                 ui/profile/   → ProfileScreen, ProfileViewModel, ProfileUiState
                 ui/login/     → LoginScreen, LoginViewModel, LoginUiState, LoginEvent
                 ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
+                ui/notes/     → NoteEditorScreen, NoteEditorViewModel, NoteEditorUiState
 ```
 
 When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
@@ -80,7 +82,7 @@ Standard MVI / unidirectional data flow:
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `authModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule`, `loginModule`, `profileModule` wired in `SaffronApplication`.
+1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `notesModule`, `authModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule`, `loginModule`, `profileModule` wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
@@ -98,6 +100,7 @@ Standard MVI / unidirectional data flow:
    - Step pills: active = Saffron/white; done = Cream/Saffron160; pending = Cream/Cinnamon. Numbers only — no check icon.
    - Content: recipe name overline (Saffron) → `step.title` in Playfair 30sp → `step.instruction` Inter Light 17sp → plain checkbox "Mark this step done".
    - Footer: "Back" (natural width, secondary) | "Next step" / "Finish" (fills remaining space; Finish has leading CheckCircle icon). Gap 10dp, bottom padding 18dp.
+   - Finish triggers `viewModel.onFinish()` which sets `isFinished = true` in `CookingModeUiState`. A `ModalBottomSheet` appears over the cooking layout showing the completion screen (check-circle, recipe name, "That's it — you're done.", "Add a note" primary + "Maybe later" ghost). Swipe dismiss and "Maybe later" both call `onBack`. "Add a note" navigates to `Screen.NoteEditor`.
 5. Brand fonts bundled — Playfair Display (400/500) + Inter (300/400/500) as TTF files in `core/ui/src/main/res/font/`. `Type.kt` uses `Font(R.font.*)` — renders in Compose Previews, works offline, no GMS dependency.
 6. Search screen — `SearchViewModel` + `SearchScreen` aligned with Claude Design spec:
    - Header: "Search" in Playfair 26sp.
@@ -126,9 +129,17 @@ Standard MVI / unidirectional data flow:
    - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
 
+9. Recipe Notes — post-cook journaling, create-from-cooking-mode flow:
+   - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`.
+   - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
+   - `NoteEditorScreen` — full-screen, own route `Screen.NoteEditor`. Params: `onCancel` (pop back), `onSaved` (navigate to Home, clearing back stack). Layout: header (× / "New note" label / "Save" ghost button enabled only when `canSave`), recipe context card (Cream, 44×44 image), borderless Playfair 26sp title input, hairline divider, star rating (5 stars, Saffron40 filled / `#C9C2B6` empty, 32dp tap target), label chips (`FlowRow`, pill, Saffron selected), notes `OutlinedTextField` (Inter Light 15sp, Saffron 1dp focus border), photo `LazyRow` (100×100 tiles, remove × overlay, dashed "Add photo" tile hidden at 4).
+   - Photo picker: two launchers registered unconditionally — `PickVisualMedia` (single, used when 1 slot remains) and `PickMultipleVisualMedia(4)` (used when 2+ slots remain). ViewModel caps with `.take(4)`. No `takePersistableUriPermission` needed (modern Photo Picker).
+   - `canSave` — true when any of title / body / rating / labels / photos is non-empty.
+
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
 - `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab — a sign-in entry point needs to be wired up.
+- `Screen.NoteEditor` — route `note_editor/{recipeId}`. Launched from CookingMode completion sheet. After save, navigates to Home with `popUpTo(Home, inclusive = false)` to clear the cooking + editor back stack.
 
 **Data layer notes:**
 - `MealMapper.parseSteps` — paragraph-break detection first (`\r?\n\s*\r?\n`); falls back to single line splits if no paragraph breaks found.

@@ -8,6 +8,7 @@ import com.saffron.cook.auth.FirebaseAuthRepository
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.repository.MealDbRecipeRepository
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.RecipeNotesRepository
 import com.saffron.cook.data.SavedRecipesRepository
 import com.saffron.cook.data.local.SaffronDatabase
 import com.saffron.cook.ui.cooking.CookingModeViewModel
@@ -15,6 +16,7 @@ import com.saffron.cook.ui.detail.RecipeDetailViewModel
 import com.saffron.cook.ui.favorites.FavoritesViewModel
 import com.saffron.cook.ui.home.HomeViewModel
 import com.saffron.cook.ui.login.LoginViewModel
+import com.saffron.cook.ui.notes.NoteEditorViewModel
 import com.saffron.cook.ui.profile.ProfileViewModel
 import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
@@ -57,11 +59,17 @@ val coreDataModule = module {
 val savedRecipesModule = module {
     single {
         Room.databaseBuilder(androidContext(), SaffronDatabase::class.java, "saffron_db")
+            .addMigrations(SaffronDatabase.MIGRATION_1_2)
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
     single { get<SaffronDatabase>().savedRecipeDao() }
     single { SavedRecipesRepository(get()) }
+}
+
+val notesModule = module {
+    single { RecipeNotesRepository(get<SaffronDatabase>().recipeNoteDao()) }
+    viewModelOf(::NoteEditorViewModel)
 }
 
 val homeModule = module {

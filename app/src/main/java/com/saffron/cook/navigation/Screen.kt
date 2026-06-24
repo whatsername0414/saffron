@@ -12,4 +12,7 @@ sealed class Screen(val route: String) {
     data object CookingMode : Screen("cooking/{recipeId}") {
         fun createRoute(recipeId: String) = "cooking/$recipeId"
     }
+    data object NoteEditor : Screen("note_editor/{recipeId}") {
+        fun createRoute(recipeId: String) = "note_editor/$recipeId"
+    }
 }
