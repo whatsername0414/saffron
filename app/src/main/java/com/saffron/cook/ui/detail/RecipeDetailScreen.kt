@@ -22,7 +22,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.outlined.Bookmark
+import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocalFireDepartment
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Schedule
@@ -60,8 +64,10 @@ import com.saffron.cook.ui.theme.Cream
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.Saffron160
+import com.saffron.cook.ui.theme.Saffron40
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
+import kotlin.math.roundToInt
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -139,7 +145,7 @@ private fun DetailContent(
                             .padding(12.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color(0xEBFFFFFF)),
+                            .background(Color.White),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -159,7 +165,7 @@ private fun DetailContent(
                             .background(Color(0xEBFFFFFF)),
                     ) {
                         Icon(
-                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.Bookmark,
+                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
                             tint = if (isSaved) Saffron else Cinnamon,
                             modifier = Modifier.size(20.dp),
@@ -191,10 +197,43 @@ private fun DetailContent(
                 }
             }
 
+            // Rating row (only if data is available)
+            val rating = recipe.rating
+            if (rating != null) {
+                item {
+                    Row(
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                            for (n in 1..5) {
+                                val filled = n <= rating.roundToInt()
+                                Icon(
+                                    imageVector = if (filled) Icons.Filled.Star else Icons.Filled.StarBorder,
+                                    contentDescription = null,
+                                    tint = Saffron40,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        }
+                        val ratingText = buildString {
+                            append("%.1f".format(rating))
+                            if (recipe.ratingCount != null) append(" (${recipe.ratingCount})")
+                        }
+                        Text(
+                            text = ratingText,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Cinnamon,
+                        )
+                    }
+                }
+            }
+
             // 3-up meta strip (only if at least one value available)
             val metaCards = buildList {
                 recipe.cookTimeMinutes?.let { add(Triple(Icons.Outlined.Schedule, "$it min", cookTimeCaption)) }
-                recipe.servings?.let { add(Triple(Icons.Outlined.People, "$it", servingsCaption)) }
+                recipe.servings?.let { add(Triple(Icons.Outlined.People, "serves $it", servingsCaption)) }
                 recipe.difficulty?.let { add(Triple(Icons.Outlined.LocalFireDepartment, it.name, difficultyCaption)) }
             }
             if (metaCards.isNotEmpty()) {
@@ -261,7 +300,7 @@ private fun DetailContent(
                         0.35f to Color.White,
                     )
                 )
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
         ) {
             Button(
                 onClick = onStartCooking,
@@ -274,6 +313,13 @@ private fun DetailContent(
                     text = stringResource(R.string.start_cooking),
                     style = MaterialTheme.typography.labelLarge.copy(fontSize = 15.sp),
                     color = Color.White,
+                )
+                Spacer(Modifier.width(6.dp))
+                Icon(
+                    imageVector = Icons.Filled.ChevronRight,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = Color.White,
                 )
             }
         }
@@ -298,7 +344,7 @@ private fun MetaCard(
     ) {
         Icon(icon, contentDescription = null, tint = Saffron160, modifier = Modifier.size(20.dp))
         Text(label, style = MaterialTheme.typography.labelLarge, color = Truffle)
-        Text(caption, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8A7A5C))
+        Text(caption, style = MaterialTheme.typography.bodySmall, color = Cinnamon)
     }
 }
 

@@ -79,9 +79,14 @@ Standard MVI / unidirectional data flow:
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
    - Section labels ("FEATURED TONIGHT", "SAVED FOR THE WEEK") are `.uppercase()`.
-   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint.
+   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint on Home cards.
    - RecipeCard title: 16sp / 20sp line height.
 3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` branch + `retry()` wired; 0dp button elevation; category label in sentence case.
+   - Hero: 4:3 aspect ratio, Cream placeholder. Back (top-left) and bookmark (top-right) float on a 38dp circular pill (`rgba(255,255,255,0.92)`).
+   - Bookmark tint: Saffron when saved, **Cinnamon when unsaved** (Detail screen differs from Home/Search).
+   - Rating row (below title, above meta strip): 5 stars — filled = Saffron40 `#F5C76A`, empty = `#C9C2B6`; value + count in 12sp Inter Regular Cinnamon. Only rendered when `recipe.rating != null`.
+   - Meta strip: 3-up cards (clock / users / flame), Cream bg, Saffron160 icon tint, `labelLarge` value, Cinnamon caption.
+   - "Start cooking" CTA: full-width, 52dp, 10dp radius, Saffron fill, 0dp elevation, trailing `Icons.Filled.ChevronRight` (18dp, white).
 4. Cooking Mode — `CookingModeScreen` + `CookingModeViewModel` fully aligned with Claude Design spec:
    - Header: × exit icon (left), "Step N of M" centered, 48dp spacer (right). No divider.
    - Step pills: active = Saffron/white; done = Cream/Saffron160; pending = Cream/Cinnamon. Numbers only — no check icon.
@@ -96,7 +101,7 @@ Standard MVI / unidirectional data flow:
    - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
    - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
    - `savedIds` managed in-memory in `SearchViewModel`; category filter applied client-side.
-   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint.
+   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint on Search result rows.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
@@ -116,7 +121,7 @@ Standard MVI / unidirectional data flow:
 - **Flat UI** — zero elevation shadow on resting cards/buttons. Use `0.dp` `tonalElevation` on `NavigationBar`. Hairline borders (`0.5dp`) instead of shadows.
 - **Voice** — sentence case everywhere. No emoji. No "Amazing!" — say "Saved." Metadata abbreviates ("35 min"); instructions spell out ("thirty-five minutes").
 - **Dynamic color disabled** — `SaffronTheme` enforces the brand palette on all API levels.
-- **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark uses `Icons.Outlined.BookmarkBorder` (unsaved) and `Icons.Filled.Bookmark` (saved) — always Saffron tint regardless of state. It is the only filled icon in resting state (saved recipes).
+- **Icons** — Material Icons Extended for now (outlined unselected, filled selected). Bookmark icon: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved everywhere; when unsaved, Saffron on Home/Search cards, Cinnamon on the Detail screen (matches design spec per screen).
 
 ## Linting
 
