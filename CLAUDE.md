@@ -168,11 +168,6 @@ Active `.editorconfig` suppressions:
 - `max_line_length = off` — long string literals in fake data and modifier chains make a hard limit impractical.
 - `ktlint_function_naming_ignore_when_annotated_with = Composable` — allows PascalCase `@Composable` function names.
 
-Known open compose-rule violations (require manual fixes):
-- `ModifierMissing` — `HomeHeader`, `InitialsAvatar`, `SearchBar`, `CategoryChip`, `FeaturedSection`, `IngredientRow`, `StepContent`, `Footer`
-- `RememberMissing` — `chunked(2)` and `.map { }` in `HomeContent`
-- `UnstableCollections` — `CategoryRow(categories: List<Pair<...>>)`
-
 ## Key Conventions
 
 - All versions in `libs.versions.toml` — never hardcode in build files. Exception: ktlint engine version is hardcoded as `version.set("1.4.1")` in `build.gradle.kts` because it overrides the plugin's bundled engine (1.0.1) and the version catalog accessor doesn't resolve inside `subprojects {}`.

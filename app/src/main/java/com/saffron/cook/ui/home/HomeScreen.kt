@@ -99,7 +99,8 @@ private fun HomeContent(
     onNavigateToSearch: () -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
-    val gridRows = state.gridRecipes.chunked(2)
+    val gridRows = remember(state.gridRecipes) { state.gridRecipes.chunked(2) }
+    val categoryPairs = remember(state.categories) { state.categories.map { it.id to it.name } }
 
     LazyColumn(
         modifier = Modifier
@@ -114,7 +115,7 @@ private fun HomeContent(
         if (state.categories.isNotEmpty()) {
             item {
                 CategoryRow(
-                    categories = state.categories.map { it.id to it.name },
+                    categories = categoryPairs,
                     selectedId = state.selectedCategoryId,
                     onSelectCategory = onSelectCategory,
                 )
@@ -175,9 +176,9 @@ private fun HomeContent(
 // ---- Header ----------------------------------------------------------------
 
 @Composable
-private fun HomeHeader(greeting: String, dateLabel: String) {
+private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -205,9 +206,9 @@ private fun HomeHeader(greeting: String, dateLabel: String) {
 }
 
 @Composable
-private fun InitialsAvatar(initial: String, size: Int) {
+private fun InitialsAvatar(initial: String, size: Int, modifier: Modifier = Modifier) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(size.dp)
             .clip(CircleShape)
             .background(Saffron20),
@@ -224,9 +225,9 @@ private fun InitialsAvatar(initial: String, size: Int) {
 // ---- Search bar ------------------------------------------------------------
 
 @Composable
-private fun SearchBar(onClick: () -> Unit) {
+private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 6.dp)
             .clip(RoundedCornerShape(8.dp))
@@ -253,14 +254,16 @@ private fun SearchBar(onClick: () -> Unit) {
 
 // ---- Category chips --------------------------------------------------------
 
+@Suppress("UnstableCollections")
 @Composable
 private fun CategoryRow(
     categories: List<Pair<String, String>>,
     selectedId: String?,
     onSelectCategory: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -277,12 +280,12 @@ private fun CategoryRow(
 }
 
 @Composable
-private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val bg = if (selected) Saffron else Cream
     val text = if (selected) Color.White else Saffron160
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(percent = 50))
             .background(bg)
             .clickable(onClick = onClick)
@@ -305,8 +308,9 @@ private fun FeaturedSection(
     isSaved: Boolean,
     onToggleSave: (String) -> Unit,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp)) {
+    Column(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp)) {
         Text(
             text = stringResource(R.string.featured_tonight).uppercase(),
             style = MaterialTheme.typography.labelMedium,

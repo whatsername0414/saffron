@@ -451,9 +451,10 @@ private fun StepContent(
     recipeName: String,
     isDone: Boolean,
     onToggleDone: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 8.dp),
@@ -517,9 +518,10 @@ private fun Footer(
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     onFinish: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 18.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),

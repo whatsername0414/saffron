@@ -401,8 +401,8 @@ private fun RecipeDetailSavedPreview() {
 }
 
 @Composable
-private fun IngredientRow(ingredient: Ingredient, showDivider: Boolean) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+private fun IngredientRow(ingredient: Ingredient, showDivider: Boolean, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Row(
             modifier = Modifier.padding(vertical = 11.dp),
             verticalAlignment = Alignment.CenterVertically,

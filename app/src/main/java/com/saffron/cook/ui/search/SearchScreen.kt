@@ -250,10 +250,11 @@ private fun FilterChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(999.dp))
             .background(if (selected) Saffron else Cream)
             .clickable(onClick = onClick)
@@ -278,9 +279,10 @@ private fun ResultRow(
     isSaved: Boolean,
     onToggleSave: () -> Unit,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
@@ -339,8 +341,9 @@ private fun ResultRow(
 }
 
 @Composable
-private fun MetaItem(icon: ImageVector, text: String) {
+private fun MetaItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
