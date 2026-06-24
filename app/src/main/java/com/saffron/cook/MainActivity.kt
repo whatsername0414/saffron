@@ -31,8 +31,11 @@ import com.saffron.cook.ui.cooking.CookingModeScreen
 import com.saffron.cook.ui.detail.RecipeDetailScreen
 import com.saffron.cook.ui.favorites.FavoritesScreen
 import com.saffron.cook.ui.home.HomeScreen
+import com.saffron.cook.ui.login.LoginScreen
 import com.saffron.cook.ui.profile.ProfileScreen
 import com.saffron.cook.ui.search.SearchScreen
+import com.saffron.cook.ui.theme.Cinnamon
+import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.SaffronTheme
 
 class MainActivity : ComponentActivity() {
@@ -55,6 +58,8 @@ fun SaffronApp() {
 
     val tabRoutes = BottomNavDestination.entries.map { it.screen.route }.toSet()
     val showBottomBar = currentDestination?.route in tabRoutes
+
+    val navigateToLogin = { navController.navigate(Screen.Login.route) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -90,6 +95,7 @@ fun SaffronApp() {
                                 Icon(
                                     imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
                                     contentDescription = stringResource(destination.labelRes),
+                                    tint = if (selected) Saffron else Cinnamon
                                 )
                             },
                             label = { Text(stringResource(destination.labelRes)) },
@@ -104,6 +110,11 @@ fun SaffronApp() {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
+            composable(Screen.Login.route) {
+                LoginScreen(
+                    onSignedIn = { navController.popBackStack() },
+                )
+            }
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSearch = { navController.navigate(Screen.Search.route) },
@@ -111,12 +122,18 @@ fun SaffronApp() {
                 )
             }
             composable(Screen.Search.route) {
-                SearchScreen(onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) })
+                SearchScreen(
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                )
             }
             composable(Screen.Favorites.route) {
-                FavoritesScreen(onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) })
+                FavoritesScreen(
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                )
             }
-            composable(Screen.Profile.route)   { ProfileScreen() }
+            composable(Screen.Profile.route) {
+                ProfileScreen()
+            }
             composable(
                 route = Screen.RecipeDetail.route,
                 arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),

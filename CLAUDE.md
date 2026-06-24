@@ -50,7 +50,8 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 
 :app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule)
+              auth/       → AuthRepository interface + FirebaseAuthRepository (Firebase Auth + Google Sign-In via Credential Manager)
+              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, authModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
               data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
               data/local/ → SaffronDatabase, SavedRecipeDao, SavedRecipeEntity (Room)
               ui/components/ → RecipeCard (shared 2-column grid card, used by Home + Favorites)
@@ -59,7 +60,8 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
                 ui/detail/    → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
                 ui/search/    → SearchScreen, SearchViewModel, SearchUiState
                 ui/favorites/ → FavoritesScreen, FavoritesViewModel, FavoritesUiState
-                ui/profile/   → ProfileScreen (stub)
+                ui/profile/   → ProfileScreen, ProfileViewModel, ProfileUiState
+                ui/login/     → LoginScreen, LoginViewModel, LoginUiState, LoginEvent
                 ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
 ```
 
@@ -78,7 +80,7 @@ Standard MVI / unidirectional data flow:
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule` wired in `SaffronApplication`.
+1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `authModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule`, `loginModule`, `profileModule` wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
@@ -114,16 +116,23 @@ Standard MVI / unidirectional data flow:
    - `RecipeCard` extracted from `HomeScreen.kt` to `ui/components/RecipeCard.kt` (`internal`) — shared by Home and Favorites.
    - Shared saved state — `SavedRecipesRepository` (Room `saved_recipes` table) is a Koin `single`. All four ViewModels (Home, Search, Detail, Favorites) inject it. `savedIdsFlow: Flow<Set<String>>` keeps bookmark icons in sync across screens. Saves survive app restarts.
    - `RecipeDetailUiState` gained a `savedIds: Set<String>` field so `load()` can correctly set `isSaved` after the network call completes.
+   - No auth gate — saves and favorites work without sign-in. `FavoritesUiState` has no `isSignedIn` field; `FavoritesViewModel` does not inject `AuthRepository`.
+8. Firebase Auth — Google Sign-In, no forced gates:
+   - `auth/AuthRepository.kt` — interface: `currentUser: Flow<FirebaseUser?>`, `currentUserSnapshot: FirebaseUser?`, `signInWithGoogle(idToken)`, `signOut()`.
+   - `auth/FirebaseAuthRepository.kt` — implements via `callbackFlow` on `FirebaseAuth.AuthStateListener`; sign-in uses `GoogleAuthProvider` + `suspendCancellableCoroutine`.
+   - `ui/login/` — `LoginScreen` (Saffron-branded, Credential Manager Google Sign-In), `LoginViewModel`, `LoginUiState`/`LoginEvent`. Standalone screen at `Screen.Login` route.
+   - `ui/profile/` — `ProfileScreen` always renders full layout: "S" avatar initial when signed out, real photo/name/email when signed in. Sign-out row only shown when signed in. No `onNavigateToLogin` parameter — login entry point TBD.
+   - Bookmarking is ungated: `HomeViewModel` and `SearchViewModel` do not check auth; `onToggleSave` always calls `SavedRecipesRepository.toggle()`.
+   - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
+   - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
+- `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab — a sign-in entry point needs to be wired up.
 
 **Data layer notes:**
 - `MealMapper.parseSteps` — paragraph-break detection first (`\r?\n\s*\r?\n`); falls back to single line splits if no paragraph breaks found.
 - `MealDbRecipeRepository.getRecipes()` — `preferredCategoryIds` list (lowercase); fetches live category names from `getCategories()` at call time and resolves to exact API names (case-insensitive, falls back to `replaceFirstChar { uppercase }` if API fails).
-
-**Next features:**
-8. **Profile screen** — implement `ProfileScreen` with stats (saved count, cooked count) and settings rows.
 
 ## Brand Rules (non-negotiable)
 

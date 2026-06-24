@@ -10,7 +10,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class FavoritesViewModel(private val savedRecipesRepository: SavedRecipesRepository) : ViewModel() {
+class FavoritesViewModel(
+    private val savedRecipesRepository: SavedRecipesRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(FavoritesUiState())
     val uiState: StateFlow<FavoritesUiState> = _uiState.asStateFlow()

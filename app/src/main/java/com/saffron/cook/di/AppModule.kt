@@ -1,7 +1,10 @@
 package com.saffron.cook.di
 
 import androidx.room.Room
+import com.google.firebase.auth.FirebaseAuth
 import com.saffron.cook.BuildConfig
+import com.saffron.cook.auth.AuthRepository
+import com.saffron.cook.auth.FirebaseAuthRepository
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.repository.MealDbRecipeRepository
 import com.saffron.cook.core.data.repository.RecipeRepository
@@ -11,6 +14,8 @@ import com.saffron.cook.ui.cooking.CookingModeViewModel
 import com.saffron.cook.ui.detail.RecipeDetailViewModel
 import com.saffron.cook.ui.favorites.FavoritesViewModel
 import com.saffron.cook.ui.home.HomeViewModel
+import com.saffron.cook.ui.login.LoginViewModel
+import com.saffron.cook.ui.profile.ProfileViewModel
 import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,6 +24,11 @@ import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
+val authModule = module {
+    single<FirebaseAuth> { FirebaseAuth.getInstance() }
+    single<AuthRepository> { FirebaseAuthRepository(get()) }
+}
 
 val networkModule = module {
     single {
@@ -72,4 +82,12 @@ val searchModule = module {
 
 val favoritesModule = module {
     viewModelOf(::FavoritesViewModel)
+}
+
+val loginModule = module {
+    viewModelOf(::LoginViewModel)
+}
+
+val profileModule = module {
+    viewModelOf(::ProfileViewModel)
 }
