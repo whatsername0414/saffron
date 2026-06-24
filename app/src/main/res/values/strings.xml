@@ -36,6 +36,10 @@
     <string name="search_idle_hint">Find your next recipe.</string>
     <string name="cd_clear_search">Clear search</string>
 
+    <!-- Favorites screen -->
+    <string name="favorites_title">Favorites</string>
+    <string name="favorites_empty">Your saved recipes will live here.</string>
+
     <!-- Bottom navigation -->
     <string name="nav_home">Home</string>
     <string name="nav_search">Search</string>

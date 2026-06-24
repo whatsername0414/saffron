@@ -1,15 +1,20 @@
 package com.saffron.cook.di
 
+import androidx.room.Room
 import com.saffron.cook.BuildConfig
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.repository.MealDbRecipeRepository
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.SavedRecipesRepository
+import com.saffron.cook.data.local.SaffronDatabase
 import com.saffron.cook.ui.cooking.CookingModeViewModel
 import com.saffron.cook.ui.detail.RecipeDetailViewModel
+import com.saffron.cook.ui.favorites.FavoritesViewModel
 import com.saffron.cook.ui.home.HomeViewModel
 import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -39,6 +44,16 @@ val coreDataModule = module {
     single<RecipeRepository> { MealDbRecipeRepository(get()) }
 }
 
+val savedRecipesModule = module {
+    single {
+        Room.databaseBuilder(androidContext(), SaffronDatabase::class.java, "saffron_db")
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
+    }
+    single { get<SaffronDatabase>().savedRecipeDao() }
+    single { SavedRecipesRepository(get()) }
+}
+
 val homeModule = module {
     viewModelOf(::HomeViewModel)
 }
@@ -53,4 +68,8 @@ val cookingModule = module {
 
 val searchModule = module {
     viewModelOf(::SearchViewModel)
+}
+
+val favoritesModule = module {
+    viewModelOf(::FavoritesViewModel)
 }

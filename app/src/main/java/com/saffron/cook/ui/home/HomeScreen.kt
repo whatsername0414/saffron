@@ -63,6 +63,7 @@ import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.Saffron160
 import com.saffron.cook.ui.theme.Saffron20
 import com.saffron.cook.ui.theme.Saffron40
+import com.saffron.cook.ui.components.RecipeCard
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
@@ -339,7 +340,7 @@ private fun FeaturedSection(
                 Icon(
                     imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint = Saffron
+                    tint = if (isSaved) Saffron else Cinnamon
                 )
             }
             Column(
@@ -447,87 +448,3 @@ private fun HomeLoadingPreview() {
     }
 }
 
-// ---- Recipe card (2-column grid) -------------------------------------------
-
-@Composable
-private fun RecipeCard(
-    recipe: Recipe,
-    isSaved: Boolean,
-    onToggleSave: (String) -> Unit,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .border(0.5.dp, Color(0xFFE4DFD5), RoundedCornerShape(14.dp))
-            .clickable(onClick = onClick),
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(4f / 3f)
-                .background(Cream),
-        ) {
-            AsyncImage(
-                model = recipe.imageUrl,
-                contentDescription = recipe.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
-            IconButton(
-                onClick = { onToggleSave(recipe.id) },
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(12.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xEBFFFFFF)),
-            ) {
-                Icon(
-                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                    contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint = Saffron,
-                )
-            }
-        }
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
-                style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
-            )
-            Text(
-                text = recipe.title,
-                style = MaterialTheme.typography.labelLarge.copy(
-                    fontFamily = PlayfairDisplayFamily,
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                ),
-                color = Truffle,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-            val metaItems = buildList {
-                recipe.cookTimeMinutes?.let { add(Icons.Outlined.Schedule to "$it min") }
-                recipe.servings?.let { add(Icons.Outlined.People to "$it") }
-            }
-            if (metaItems.isNotEmpty()) {
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    metaItems.forEach { (icon, label) ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(3.dp),
-                        ) {
-                            Icon(icon, null, Modifier.size(13.dp), Color(0xFF8A7A5C))
-                            Text(label, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8A7A5C))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}

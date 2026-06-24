@@ -113,7 +113,9 @@ fun SaffronApp() {
             composable(Screen.Search.route) {
                 SearchScreen(onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) })
             }
-            composable(Screen.Favorites.route) { FavoritesScreen() }
+            composable(Screen.Favorites.route) {
+                FavoritesScreen(onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) })
+            }
             composable(Screen.Profile.route)   { ProfileScreen() }
             composable(
                 route = Screen.RecipeDetail.route,

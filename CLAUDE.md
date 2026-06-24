@@ -30,6 +30,7 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 | Navigation | Navigation Compose 2.8.0 |
 | Min SDK | 24 / Target+Compile SDK 37 |
 | AGP | 9.3.0-rc01 |
+| Room | 2.7.1 (KSP 2.2.10-2.0.2) |
 | Build system | Gradle 9.5 (Kotlin DSL), version catalog `gradle/libs.versions.toml` |
 
 ## Module Structure
@@ -49,12 +50,15 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 
 :app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              di/         → AppModule (networkModule, coreDataModule, homeModule, detailModule, cookingModule, searchModule)
+              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule)
+              data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
+              data/local/ → SaffronDatabase, SavedRecipeDao, SavedRecipeEntity (Room)
+              ui/components/ → RecipeCard (shared 2-column grid card, used by Home + Favorites)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
                 ui/home/      → HomeScreen, HomeViewModel, HomeUiState
                 ui/detail/    → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
                 ui/search/    → SearchScreen, SearchViewModel, SearchUiState
-                ui/favorites/ → FavoritesScreen (stub)
+                ui/favorites/ → FavoritesScreen, FavoritesViewModel, FavoritesUiState
                 ui/profile/   → ProfileScreen (stub)
                 ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
 ```
@@ -74,7 +78,7 @@ Standard MVI / unidirectional data flow:
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule` wired in `SaffronApplication`.
+1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule` wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
@@ -100,8 +104,16 @@ Standard MVI / unidirectional data flow:
    - Results: 92×70dp thumbnail, category overline, Playfair Medium 16sp title, clock + people meta row, bookmark toggle. 12dp gap between rows (no dividers).
    - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
    - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
-   - `savedIds` managed in-memory in `SearchViewModel`; category filter applied client-side.
+   - `savedIds` sourced from shared `SavedRecipesRepository` (Room-backed); category filter applied client-side.
    - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint on Search result rows.
+7. Favorites screen — `FavoritesViewModel` + `FavoritesScreen` aligned with Claude Design spec:
+   - Header: "Favorites" in Playfair 26sp (same pattern as Search header).
+   - Empty state: 32dp `Icons.Outlined.BookmarkBorder` + "Your saved recipes will live here." — both `Color(0xFF8A7A5C)`, centered with `fillMaxSize`.
+   - Grid: 2-column, 12dp column gap, 16dp row gap, 16dp horizontal padding, 24dp bottom — same `RecipeCard` as Home (bookmark always filled/Saffron since all cards are saved).
+   - Tapping a card navigates to RecipeDetail; unsaving a card removes it from the grid instantly via Room Flow.
+   - `RecipeCard` extracted from `HomeScreen.kt` to `ui/components/RecipeCard.kt` (`internal`) — shared by Home and Favorites.
+   - Shared saved state — `SavedRecipesRepository` (Room `saved_recipes` table) is a Koin `single`. All four ViewModels (Home, Search, Detail, Favorites) inject it. `savedIdsFlow: Flow<Set<String>>` keeps bookmark icons in sync across screens. Saves survive app restarts.
+   - `RecipeDetailUiState` gained a `savedIds: Set<String>` field so `load()` can correctly set `isSaved` after the network call completes.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
@@ -111,7 +123,6 @@ Standard MVI / unidirectional data flow:
 - `MealDbRecipeRepository.getRecipes()` — `preferredCategoryIds` list (lowercase); fetches live category names from `getCategories()` at call time and resolves to exact API names (case-insensitive, falls back to `replaceFirstChar { uppercase }` if API fails).
 
 **Next features:**
-7. **Favorites screen** — implement `FavoritesScreen` with a 2-column grid of saved recipes. Requires shared saved-state persistence (DataStore or in-memory singleton) so saves in Detail/Search survive navigation.
 8. **Profile screen** — implement `ProfileScreen` with stats (saved count, cooked count) and settings rows.
 
 ## Brand Rules (non-negotiable)
@@ -149,5 +160,5 @@ Known open compose-rule violations (require manual fixes):
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
-- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components will move to `:core:ui` once there are two or more consumers.
+- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components that need `:core:data` types (e.g. `RecipeCard`) live in `app/ui/components/` (internal to `:app`). Pure design-system components with no data-model dependency move to `:core:ui`.
 - Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests — not yet wired into any test module.

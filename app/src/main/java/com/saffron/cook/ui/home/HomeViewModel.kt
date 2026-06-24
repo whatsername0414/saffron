@@ -3,6 +3,7 @@ package com.saffron.cook.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.SavedRecipesRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -14,7 +15,10 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
 
-class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
+class HomeViewModel(
+    private val repository: RecipeRepository,
+    private val savedRecipesRepository: SavedRecipesRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(buildShellState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -22,6 +26,11 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
     private var categoryJob: Job? = null
 
     init {
+        viewModelScope.launch {
+            savedRecipesRepository.savedIdsFlow.collect { ids ->
+                _uiState.update { it.copy(savedIds = ids) }
+            }
+        }
         viewModelScope.launch { loadData() }
     }
 
@@ -51,11 +60,10 @@ class HomeViewModel(private val repository: RecipeRepository) : ViewModel() {
     }
 
     fun onToggleSave(recipeId: String) {
-        _uiState.update { state ->
-            val saved = state.savedIds.toMutableSet()
-            if (recipeId in saved) saved.remove(recipeId) else saved.add(recipeId)
-            state.copy(savedIds = saved)
-        }
+        val recipe = _uiState.value.gridRecipes.find { it.id == recipeId }
+            ?: _uiState.value.featuredRecipe?.takeIf { it.id == recipeId }
+            ?: return
+        viewModelScope.launch { savedRecipesRepository.toggle(recipe) }
     }
 
     fun onSelectCategory(categoryId: String) {

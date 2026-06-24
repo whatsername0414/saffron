@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class RecipeDetailViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: RecipeRepository,
+    private val savedRecipesRepository: SavedRecipesRepository,
 ) : ViewModel() {
 
     private val recipeId: String = checkNotNull(savedStateHandle["recipeId"])
@@ -21,6 +23,11 @@ class RecipeDetailViewModel(
     val uiState: StateFlow<RecipeDetailUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            savedRecipesRepository.savedIdsFlow.collect { ids ->
+                _uiState.update { it.copy(savedIds = ids, isSaved = it.recipe?.id in ids) }
+            }
+        }
         viewModelScope.launch { load() }
     }
 
@@ -28,7 +35,13 @@ class RecipeDetailViewModel(
         _uiState.update { it.copy(isLoading = true, isError = false) }
         try {
             val recipe = repository.getRecipeById(recipeId)
-            _uiState.update { it.copy(isLoading = false, recipe = recipe) }
+            _uiState.update { state ->
+                state.copy(
+                    isLoading = false,
+                    recipe = recipe,
+                    isSaved = recipe?.id in state.savedIds,
+                )
+            }
         } catch (e: Exception) {
             _uiState.update { it.copy(isLoading = false, isError = true) }
         }
@@ -39,6 +52,7 @@ class RecipeDetailViewModel(
     }
 
     fun onToggleSave() {
-        _uiState.update { it.copy(isSaved = !it.isSaved) }
+        val recipe = _uiState.value.recipe ?: return
+        viewModelScope.launch { savedRecipesRepository.toggle(recipe) }
     }
 }

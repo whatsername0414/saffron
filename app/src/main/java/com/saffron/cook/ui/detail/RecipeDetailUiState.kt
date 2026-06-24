@@ -7,4 +7,5 @@ data class RecipeDetailUiState(
     val recipe: Recipe? = null,
     val isSaved: Boolean = false,
     val isError: Boolean = false,
+    val savedIds: Set<String> = emptySet(),
 )
