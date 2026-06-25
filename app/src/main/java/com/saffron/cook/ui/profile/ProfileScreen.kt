@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -368,8 +369,8 @@ private fun StatStrip(state: ProfileUiState, onOpenNotes: () -> Unit) {
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        StatCard(label = "Saved", value = state.savedCount, modifier = Modifier.weight(1f))
-        StatCard(label = "Cooked", value = state.cookedCount, modifier = Modifier.weight(1f))
+        StatCard(label = "Saved", value = state.savedCount, modifier = Modifier.weight(1f), onClick = {})
+        StatCard(label = "Cooked", value = state.cookedCount, modifier = Modifier.weight(1f), onClick = {})
         StatCard(
             label = "Notes",
             value = state.notesCount,
@@ -384,36 +385,40 @@ private fun StatCard(
     label: String,
     value: Int,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
+    onClick: (() -> Unit),
 ) {
-    val base = modifier
-        .background(Cream, RoundedCornerShape(10.dp))
-        .padding(vertical = 16.dp)
-    val cardModifier = if (onClick != null) base.clickable(onClick = onClick) else base
-
-    Column(
-        modifier = cardModifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
     ) {
-        Text(
-            text = value.toString(),
-            style = TextStyle(
-                fontFamily = PlayfairDisplayFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 28.sp,
-            ),
-            color = Saffron160,
-        )
-        Text(
-            text = label,
-            style = TextStyle(
-                fontFamily = InterFamily,
-                fontWeight = FontWeight.Normal,
-                fontSize = 12.sp,
-            ),
-            color = Cinnamon,
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Cream, RoundedCornerShape(10.dp))
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = value.toString(),
+                style = TextStyle(
+                    fontFamily = PlayfairDisplayFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 28.sp,
+                ),
+                color = Saffron160,
+            )
+            Text(
+                text = label,
+                style = TextStyle(
+                    fontFamily = InterFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp,
+                ),
+                color = Cinnamon,
+            )
+        }
     }
 }
 
