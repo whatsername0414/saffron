@@ -1,5 +1,8 @@
 package com.saffron.cook.ui.cooking
 
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -31,6 +34,8 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -42,18 +47,28 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,6 +93,21 @@ fun CookingModeScreen(
     viewModel: CookingModeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.timerFinishedEvent.collect {
+            @Suppress("DEPRECATION")
+            val vibrator = context.getSystemService(Vibrator::class.java)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 400, 100, 400), -1))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator?.vibrate(longArrayOf(0, 400, 100, 400), -1)
+            }
+        }
+    }
+
     CookingModeContent(
         state = state,
         onBack = onBack,
@@ -88,6 +118,13 @@ fun CookingModeScreen(
         onNext = viewModel::onNext,
         onPrevious = viewModel::onPrevious,
         onFinish = viewModel::onFinish,
+        onShowTimer = viewModel::onShowTimer,
+        onDismissTimerDialog = viewModel::onDismissTimerDialog,
+        onStartTimer = viewModel::onStartTimer,
+        onPauseTimer = viewModel::onPauseTimer,
+        onResetTimer = viewModel::onResetTimer,
+        onAddMinute = viewModel::onAddMinute,
+        onTimerDone = viewModel::onTimerDone,
     )
 }
 
@@ -103,6 +140,13 @@ private fun CookingModeContent(
     onNext: () -> Unit,
     onPrevious: () -> Unit,
     onFinish: () -> Unit,
+    onShowTimer: (Int, String) -> Unit,
+    onDismissTimerDialog: () -> Unit,
+    onStartTimer: () -> Unit,
+    onPauseTimer: () -> Unit,
+    onResetTimer: () -> Unit,
+    onAddMinute: () -> Unit,
+    onTimerDone: () -> Unit,
 ) {
     when {
         state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
@@ -142,6 +186,7 @@ private fun CookingModeContent(
                 onToggleStepDone = onToggleStepDone,
                 onNext = onNext,
                 onPrevious = onPrevious,
+                onShowTimer = onShowTimer,
             )
             if (state.isFinished) {
                 val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -158,9 +203,33 @@ private fun CookingModeContent(
                     )
                 }
             }
+            if (state.showTimerDialog) {
+                val timerSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+                ModalBottomSheet(
+                    onDismissRequest = onDismissTimerDialog,
+                    sheetState = timerSheetState,
+                    containerColor = Color.White,
+                ) {
+                    TimerSheetContent(
+                        totalSeconds = state.timerTotalSeconds ?: 0,
+                        remainingSeconds = state.timerRemainingSeconds ?: 0,
+                        stepTitle = state.timerStepTitle,
+                        isRunning = state.isTimerRunning,
+                        isFinished = state.timerFinished,
+                        onClose = onDismissTimerDialog,
+                        onStart = onStartTimer,
+                        onPause = onPauseTimer,
+                        onReset = onResetTimer,
+                        onAddMinute = onAddMinute,
+                        onDone = onTimerDone,
+                    )
+                }
+            }
         }
     }
 }
+
+// ---- Completion sheet -------------------------------------------------------
 
 @Composable
 private fun CompletionSheetContent(
@@ -292,6 +361,194 @@ private fun CompletionSheetContent(
     }
 }
 
+// ---- Timer sheet ------------------------------------------------------------
+
+@Composable
+private fun TimerSheetContent(
+    totalSeconds: Int,
+    remainingSeconds: Int,
+    stepTitle: String?,
+    isRunning: Boolean,
+    isFinished: Boolean,
+    onClose: () -> Unit,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onReset: () -> Unit,
+    onAddMinute: () -> Unit,
+    onDone: () -> Unit,
+) {
+    val progress = if (totalSeconds > 0) remainingSeconds.toFloat() / totalSeconds.toFloat() else 0f
+    val arcColor = if (isFinished) Saffron160 else Saffron
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        // Header row
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = if (isFinished) {
+                    stringResource(R.string.cooking_timer_finished)
+                } else {
+                    stringResource(R.string.cooking_timer_title)
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = Saffron,
+            )
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(R.string.cd_close_timer),
+                    tint = Truffle,
+                )
+            }
+        }
+
+        // "From step: …"
+        if (stepTitle != null) {
+            Text(
+                text = stringResource(R.string.cooking_timer_from_step, stepTitle),
+                style = MaterialTheme.typography.labelSmall,
+                color = Cinnamon,
+            )
+            Spacer(Modifier.height(10.dp))
+        } else {
+            Spacer(Modifier.height(6.dp))
+        }
+
+        // Progress ring with time + status caption
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(220.dp),
+        ) {
+            CircularProgressIndicator(
+                progress = { progress },
+                modifier = Modifier.size(220.dp),
+                strokeWidth = 10.dp,
+                strokeCap = StrokeCap.Round,
+                color = arcColor,
+                trackColor = Cream,
+            )
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = formatSeconds(remainingSeconds),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontFamily = PlayfairDisplayFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 48.sp,
+                        lineHeight = 52.sp,
+                    ),
+                    textAlign = TextAlign.Center,
+                    color = Truffle,
+                )
+                Text(
+                    text = when {
+                        isFinished -> stringResource(R.string.cooking_timer_done_label)
+                        isRunning -> stringResource(R.string.cooking_timer_counting_down)
+                        else -> stringResource(R.string.cooking_timer_paused_label)
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Cinnamon,
+                )
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+
+        // Button row: [↺] [Pause/Resume or Done] [+]
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(onClick = onReset) {
+                Icon(
+                    imageVector = Icons.Outlined.Refresh,
+                    contentDescription = stringResource(R.string.cooking_timer_reset),
+                    tint = Truffle,
+                )
+            }
+
+            if (isFinished) {
+                Button(
+                    onClick = onDone,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    elevation = ButtonDefaults.buttonElevation(0.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.CheckCircle,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.cooking_timer_done),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White,
+                    )
+                }
+            } else if (isRunning) {
+                Button(
+                    onClick = onPause,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    elevation = ButtonDefaults.buttonElevation(0.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.cooking_timer_pause),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White,
+                    )
+                }
+            } else {
+                Button(
+                    onClick = onStart,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    elevation = ButtonDefaults.buttonElevation(0.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.cooking_timer_resume),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = Color.White,
+                    )
+                }
+            }
+
+            IconButton(onClick = onAddMinute) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.cooking_timer_add_minute),
+                    tint = Truffle,
+                )
+            }
+        }
+    }
+}
+
+// ---- Cooking layout ---------------------------------------------------------
+
 @Composable
 private fun CookingLayout(
     state: CookingModeUiState,
@@ -302,13 +559,13 @@ private fun CookingLayout(
     onToggleStepDone: () -> Unit,
     onNext: () -> Unit,
     onPrevious: () -> Unit,
+    onShowTimer: (Int, String) -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
     ) {
-        // Header: exit × | Step N of M | spacer
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -367,6 +624,7 @@ private fun CookingLayout(
                             recipeName = recipe.title,
                             isDone = stepIndex in state.completedSteps,
                             onToggleDone = onToggleStepDone,
+                            onShowTimer = { seconds -> onShowTimer(seconds, step.title) },
                         )
                     }
                 }
@@ -384,7 +642,7 @@ private fun CookingLayout(
     }
 }
 
-// ---- Step indicator --------------------------------------------------------
+// ---- Step indicator ---------------------------------------------------------
 
 @Composable
 private fun StepIndicatorRow(
@@ -443,7 +701,7 @@ private fun StepPill(
     }
 }
 
-// ---- Step content ----------------------------------------------------------
+// ---- Step content -----------------------------------------------------------
 
 @Composable
 private fun StepContent(
@@ -451,8 +709,36 @@ private fun StepContent(
     recipeName: String,
     isDone: Boolean,
     onToggleDone: () -> Unit,
+    onShowTimer: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val timedSpans = remember(step.instruction) { parseTimedSpans(step.instruction) }
+
+    val annotated = remember(step.instruction, timedSpans) {
+        buildAnnotatedString {
+            var cursor = 0
+            timedSpans.forEach { span ->
+                append(step.instruction.substring(cursor, span.start))
+                val seconds = span.seconds
+                pushLink(
+                    LinkAnnotation.Clickable(tag = "TIMER") { onShowTimer(seconds) },
+                )
+                withStyle(
+                    SpanStyle(
+                        color = Saffron160,
+                        fontWeight = FontWeight.Medium,
+                        textDecoration = TextDecoration.Underline,
+                    ),
+                ) {
+                    append(step.instruction.substring(span.start, span.end))
+                }
+                pop()
+                cursor = span.end
+            }
+            append(step.instruction.substring(cursor))
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -478,13 +764,26 @@ private fun StepContent(
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = step.instruction,
+            text = annotated,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontSize = 17.sp,
                 lineHeight = 29.75.sp,
             ),
             color = Truffle,
         )
+        if (timedSpans.isNotEmpty()) {
+            Spacer(Modifier.height(16.dp))
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                timedSpans.forEach { span ->
+                    TimerChip(
+                        seconds = span.seconds,
+                        onClick = { onShowTimer(span.seconds) },
+                    )
+                }
+            }
+        }
         Spacer(Modifier.height(20.dp))
         Row(
             modifier = Modifier.clickable(onClick = onToggleDone),
@@ -509,7 +808,37 @@ private fun StepContent(
     }
 }
 
-// ---- Footer ----------------------------------------------------------------
+// ---- Timer chip -------------------------------------------------------------
+
+@Composable
+private fun TimerChip(seconds: Int, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(percent = 50),
+        color = Cream,
+        border = BorderStroke(0.5.dp, Color(0xFFD3CFC8)),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(7.dp),
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Timer,
+                contentDescription = null,
+                tint = Saffron160,
+                modifier = Modifier.size(15.dp),
+            )
+            Text(
+                text = stringResource(R.string.cooking_timer_set, formatSeconds(seconds)),
+                style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
+                color = Saffron160,
+            )
+        }
+    }
+}
+
+// ---- Footer -----------------------------------------------------------------
 
 @Composable
 private fun Footer(
@@ -594,7 +923,16 @@ private fun Footer(
     }
 }
 
-// ---- Preview ---------------------------------------------------------------
+// ---- Formatting helpers -----------------------------------------------------
+
+private fun formatSeconds(s: Int): String {
+    val h = s / 3600
+    val m = (s % 3600) / 60
+    val sec = s % 60
+    return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%d:%02d".format(m, sec)
+}
+
+// ---- Previews ---------------------------------------------------------------
 
 private val previewCookingRecipe = Recipe(
     id = "52772",
@@ -622,8 +960,8 @@ private fun CookingModePreview() {
             state = CookingModeUiState(
                 isLoading = false,
                 recipe = previewCookingRecipe,
-                currentStepIndex = 1,
-                completedSteps = setOf(0),
+                currentStepIndex = 2,
+                completedSteps = setOf(0, 1),
             ),
             recipe = previewCookingRecipe,
             onBack = {},
@@ -632,6 +970,47 @@ private fun CookingModePreview() {
             onToggleStepDone = {},
             onNext = {},
             onPrevious = {},
+            onShowTimer = { _, _ -> },
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TimerSheetRunningPreview() {
+    SaffronTheme {
+        TimerSheetContent(
+            totalSeconds = 1500,
+            remainingSeconds = 847,
+            stepTitle = "Bake",
+            isRunning = true,
+            isFinished = false,
+            onClose = {},
+            onStart = {},
+            onPause = {},
+            onReset = {},
+            onAddMinute = {},
+            onDone = {},
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TimerSheetFinishedPreview() {
+    SaffronTheme {
+        TimerSheetContent(
+            totalSeconds = 600,
+            remainingSeconds = 0,
+            stepTitle = "Bake",
+            isRunning = false,
+            isFinished = true,
+            onClose = {},
+            onStart = {},
+            onPause = {},
+            onReset = {},
+            onAddMinute = {},
+            onDone = {},
         )
     }
 }

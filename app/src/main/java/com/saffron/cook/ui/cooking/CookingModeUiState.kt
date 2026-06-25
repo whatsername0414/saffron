@@ -10,10 +10,18 @@ data class CookingModeUiState(
     val completedSteps: Set<Int> = emptySet(),
     val isError: Boolean = false,
     val isFinished: Boolean = false,
+    val timerInitialSeconds: Int? = null,
+    val timerTotalSeconds: Int? = null,
+    val timerRemainingSeconds: Int? = null,
+    val timerStepTitle: String? = null,
+    val isTimerRunning: Boolean = false,
+    val showTimerDialog: Boolean = false,
 ) {
     val steps: List<Step> get() = recipe?.steps.orEmpty()
     val totalSteps: Int get() = steps.size
     val isFirstStep: Boolean get() = currentStepIndex == 0
     val isLastStep: Boolean get() = totalSteps > 0 && currentStepIndex == totalSteps - 1
     val currentStepDone: Boolean get() = currentStepIndex in completedSteps
+    val hasTimer: Boolean get() = timerTotalSeconds != null
+    val timerFinished: Boolean get() = timerRemainingSeconds == 0 && timerTotalSeconds != null
 }

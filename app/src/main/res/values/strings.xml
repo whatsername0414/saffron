@@ -40,6 +40,23 @@
     <string name="favorites_title">Favorites</string>
     <string name="favorites_empty">Your saved recipes will live here.</string>
 
+    <!-- Cooking mode — timer -->
+    <string name="cooking_timer_title">Timer</string>
+    <string name="cooking_timer_set">Set timer · %1$s</string>
+    <string name="cooking_timer_remaining">%1$s remaining</string>
+    <string name="cooking_timer_finished">Time\'s up</string>
+    <string name="cooking_timer_start">Start</string>
+    <string name="cooking_timer_pause">Pause</string>
+    <string name="cooking_timer_reset">Reset</string>
+    <string name="cooking_timer_done">Done</string>
+    <string name="cd_close_timer">Close timer</string>
+    <string name="cooking_timer_from_step">From step: \"%1$s\"</string>
+    <string name="cooking_timer_add_minute">+1 min</string>
+    <string name="cooking_timer_counting_down">Counting down</string>
+    <string name="cooking_timer_paused_label">Paused</string>
+    <string name="cooking_timer_done_label">Done</string>
+    <string name="cooking_timer_resume">Resume</string>
+
     <!-- Cooking mode — completion sheet -->
     <string name="cooking_done_headline">That\'s it — you\'re done.</string>
     <string name="cooking_done_tagline">Jot down what you\'d change while it\'s fresh. A good note now is a better dish next time.</string>
