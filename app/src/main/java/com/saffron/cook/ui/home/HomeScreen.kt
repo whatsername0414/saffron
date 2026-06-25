@@ -69,7 +69,7 @@ import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.Saffron160
 import com.saffron.cook.ui.theme.Saffron20
 import com.saffron.cook.ui.theme.Saffron40
-import com.saffron.cook.ui.components.RecipeCard
+import com.saffron.cook.ui.components.RecipeListItem
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
@@ -99,7 +99,6 @@ private fun HomeContent(
     onNavigateToSearch: () -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
-    val gridRows = remember(state.gridRecipes) { state.gridRecipes.chunked(2) }
     val categoryPairs = remember(state.categories) { state.categories.map { it.id to it.name } }
 
     LazyColumn(
@@ -142,7 +141,7 @@ private fun HomeContent(
                     CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
                 }
             }
-        } else if (gridRows.isNotEmpty()) {
+        } else if (state.gridRecipes.isNotEmpty()) {
             item {
                 Text(
                     text = stringResource(R.string.saved_for_the_week).uppercase(),
@@ -151,23 +150,15 @@ private fun HomeContent(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
                 )
             }
-            items(gridRows) { row ->
-                Row(
+            items(state.gridRecipes, key = { it.id }) { recipe ->
+                RecipeListItem(
+                    recipe = recipe,
+                    isSaved = recipe.id in state.savedIds,
+                    onToggleSave = onToggleSave,
+                    onClick = { onOpenRecipe(recipe.id) },
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    row.forEach { recipe ->
-                        RecipeCard(
-                            recipe = recipe,
-                            isSaved = recipe.id in state.savedIds,
-                            onToggleSave = onToggleSave,
-                            onClick = { onOpenRecipe(recipe.id) },
-                            modifier = Modifier.weight(1f),
-                        )
-                    }
-                    if (row.size == 1) Spacer(Modifier.weight(1f))
-                }
-                Spacer(Modifier.height(16.dp))
+                )
+                Spacer(Modifier.height(12.dp))
             }
         }
     }

@@ -55,7 +55,8 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
                             RecipeNotesRepository (Room-backed, Koin single in notesModule)
               data/local/ → SaffronDatabase v2, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity (Room)
-              ui/components/ → RecipeCard (shared 2-column grid card, used by Home + Favorites)
+              ui/components/ → RecipeCard (4:3 card composable, kept for future use)
+                               RecipeListItem (horizontal list row, used by Home + Favorites)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
                 ui/home/       → HomeScreen, HomeViewModel, HomeUiState
                 ui/detail/     → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
@@ -85,12 +86,12 @@ Standard MVI / unidirectional data flow:
 
 **Completed:**
 1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `notesModule`, `authModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule`, `loginModule`, `profileModule` wired in `SaffronApplication`.
-2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, 2-column grid, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
+2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, vertical list rows, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
    - Section labels ("FEATURED TONIGHT", "SAVED FOR THE WEEK") are `.uppercase()`.
-   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved), always Saffron tint on Home cards.
-   - RecipeCard title: 16sp / 20sp line height.
+   - "Saved for the week" section: vertical list of `RecipeListItem` rows, 16dp horizontal padding, 12dp gap between rows.
+   - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved, Cinnamon when unsaved.
 3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` branch + `retry()` wired; 0dp button elevation; category label in sentence case.
    - Hero: 4:3 aspect ratio, Cream placeholder. Back (top-left) and bookmark (top-right) float on a 38dp circular pill (`rgba(255,255,255,0.92)`).
    - Bookmark tint: Saffron when saved, **Cinnamon when unsaved** (Detail screen differs from Home/Search).
@@ -116,9 +117,9 @@ Standard MVI / unidirectional data flow:
 7. Favorites screen — `FavoritesViewModel` + `FavoritesScreen` aligned with Claude Design spec:
    - Header: "Favorites" in Playfair 26sp (same pattern as Search header).
    - Empty state: 32dp `Icons.Outlined.BookmarkBorder` + "Your saved recipes will live here." — both `Color(0xFF8A7A5C)`, centered with `fillMaxSize`.
-   - Grid: 2-column, 12dp column gap, 16dp row gap, 16dp horizontal padding, 24dp bottom — same `RecipeCard` as Home (bookmark always filled/Saffron since all cards are saved).
-   - Tapping a card navigates to RecipeDetail; unsaving a card removes it from the grid instantly via Room Flow.
-   - `RecipeCard` extracted from `HomeScreen.kt` to `ui/components/RecipeCard.kt` (`internal`) — shared by Home and Favorites.
+   - List: vertical `LazyColumn` of `RecipeListItem` rows, 16dp horizontal padding, 12dp gap, 8dp top / 24dp bottom — bookmark always filled/Saffron since all entries are saved.
+   - Tapping a row navigates to RecipeDetail; unsaving removes it instantly via Room Flow.
+   - `RecipeListItem` in `ui/components/RecipeCard.kt` (`internal`) — shared by Home and Favorites. Layout: 92×70dp thumbnail (10dp radius, Cream bg), category overline, Playfair Medium 16sp title, clock + people meta row, bookmark `IconButton`.
    - Shared saved state — `SavedRecipesRepository` (Room `saved_recipes` table) is a Koin `single`. All four ViewModels (Home, Search, Detail, Favorites) inject it. `savedIdsFlow: Flow<Set<String>>` keeps bookmark icons in sync across screens. Saves survive app restarts.
    - `RecipeDetailUiState` gained a `savedIds: Set<String>` field so `load()` can correctly set `isSaved` after the network call completes.
    - No auth gate — saves and favorites work without sign-in. `FavoritesUiState` has no `isSignedIn` field; `FavoritesViewModel` does not inject `AuthRepository`.

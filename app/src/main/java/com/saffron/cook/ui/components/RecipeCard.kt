@@ -30,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +42,78 @@ import com.saffron.cook.ui.theme.Cream
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.Truffle
+
+@Composable
+internal fun RecipeListItem(
+    recipe: Recipe,
+    isSaved: Boolean,
+    onToggleSave: (String) -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        AsyncImage(
+            model = recipe.imageUrl,
+            contentDescription = recipe.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(width = 92.dp, height = 70.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Cream),
+        )
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
+                style = MaterialTheme.typography.labelMedium,
+                color = Saffron,
+            )
+            Text(
+                text = recipe.title,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontFamily = PlayfairDisplayFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                ),
+                color = Truffle,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+            val metaItems = buildList {
+                recipe.cookTimeMinutes?.let { add(Icons.Outlined.Schedule to "$it min") }
+                recipe.servings?.let { add(Icons.Outlined.People to "serves $it") }
+            }
+            if (metaItems.isNotEmpty()) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    metaItems.forEach { (icon, label) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp),
+                        ) {
+                            Icon(icon, null, Modifier.size(13.dp), Color(0xFF8A7A5C))
+                            Text(label, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8A7A5C))
+                        }
+                    }
+                }
+            }
+        }
+        IconButton(onClick = { onToggleSave(recipe.id) }) {
+            Icon(
+                imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
+                contentDescription = if (isSaved) "Saved" else "Save",
+                tint = if (isSaved) Saffron else Cinnamon,
+            )
+        }
+    }
+}
 
 @Composable
 internal fun RecipeCard(

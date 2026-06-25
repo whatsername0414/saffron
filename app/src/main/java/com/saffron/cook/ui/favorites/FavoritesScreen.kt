@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -32,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.saffron.cook.R
 import com.saffron.cook.data.local.SavedRecipeEntity
 import com.saffron.cook.data.local.toRecipe
-import com.saffron.cook.ui.components.RecipeCard
+import com.saffron.cook.ui.components.RecipeListItem
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
@@ -78,7 +77,7 @@ private fun FavoritesContent(
         if (state.savedRecipes.isEmpty()) {
             FavoritesEmptyState()
         } else {
-            FavoritesGrid(
+            FavoritesList(
                 savedRecipes = state.savedRecipes,
                 onToggleSave = onToggleSave,
                 onOpenRecipe = onOpenRecipe,
@@ -113,35 +112,26 @@ private fun FavoritesEmptyState() {
 }
 
 @Composable
-private fun FavoritesGrid(
+private fun FavoritesList(
     savedRecipes: List<SavedRecipeEntity>,
     onToggleSave: (String) -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
-    val rows = savedRecipes.chunked(2)
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            start = 16.dp,
-            end = 16.dp,
-            top = 8.dp,
-            bottom = 24.dp,
+            horizontal = 16.dp,
+            vertical = 8.dp,
         ),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(rows) { row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                row.forEach { entity ->
-                    RecipeCard(
-                        recipe = entity.toRecipe(),
-                        isSaved = true,
-                        onToggleSave = onToggleSave,
-                        onClick = { onOpenRecipe(entity.id) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                if (row.size == 1) Spacer(Modifier.weight(1f))
-            }
-            Spacer(Modifier.height(16.dp))
+        items(savedRecipes, key = { it.id }) { entity ->
+            RecipeListItem(
+                recipe = entity.toRecipe(),
+                isSaved = true,
+                onToggleSave = onToggleSave,
+                onClick = { onOpenRecipe(entity.id) },
+            )
         }
     }
 }
