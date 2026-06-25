@@ -57,14 +57,16 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               data/local/ → SaffronDatabase v2, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity (Room)
               ui/components/ → RecipeCard (shared 2-column grid card, used by Home + Favorites)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
-                ui/home/      → HomeScreen, HomeViewModel, HomeUiState
-                ui/detail/    → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
-                ui/search/    → SearchScreen, SearchViewModel, SearchUiState
-                ui/favorites/ → FavoritesScreen, FavoritesViewModel, FavoritesUiState
-                ui/profile/   → ProfileScreen, ProfileViewModel, ProfileUiState
-                ui/login/     → LoginScreen, LoginViewModel, LoginUiState, LoginEvent
-                ui/cooking/   → CookingModeScreen, CookingModeViewModel, CookingModeUiState
-                ui/notes/     → NoteEditorScreen, NoteEditorViewModel, NoteEditorUiState
+                ui/home/       → HomeScreen, HomeViewModel, HomeUiState
+                ui/detail/     → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
+                ui/search/     → SearchScreen, SearchViewModel, SearchUiState
+                ui/favorites/  → FavoritesScreen, FavoritesViewModel, FavoritesUiState
+                ui/profile/    → ProfileScreen, ProfileViewModel, ProfileUiState
+                ui/login/      → LoginScreen, LoginViewModel, LoginUiState, LoginEvent
+                ui/cooking/    → CookingModeScreen, CookingModeViewModel, CookingModeUiState
+                ui/notes/      → NoteEditorScreen, NoteEditorViewModel, NoteEditorUiState
+                ui/noteslist/  → NoteListScreen, NoteListViewModel, NoteListUiState
+                ui/notedetail/ → NoteDetailScreen, NoteDetailViewModel, NoteDetailUiState
 ```
 
 When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
@@ -129,17 +131,20 @@ Standard MVI / unidirectional data flow:
    - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
 
-9. Recipe Notes — post-cook journaling, create-from-cooking-mode flow:
-   - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`.
-   - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
-   - `NoteEditorScreen` — full-screen, own route `Screen.NoteEditor`. Params: `onCancel` (pop back), `onSaved` (navigate to Home, clearing back stack). Layout: header (× / "New note" label / "Save" ghost button enabled only when `canSave`), recipe context card (Cream, 44×44 image), borderless Playfair 26sp title input, hairline divider, star rating (5 stars, Saffron40 filled / `#C9C2B6` empty, 32dp tap target), label chips (`FlowRow`, pill, Saffron selected), notes `OutlinedTextField` (Inter Light 15sp, Saffron 1dp focus border), photo `LazyRow` (100×100 tiles, remove × overlay, dashed "Add photo" tile hidden at 4).
+9. Recipe Notes — post-cook journaling with full browse/edit/delete flow:
+   - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`. DAO has `observeAll`, `observeById` (Flow), `observeCount`, `getById`, `insert`, `update`, `deleteById`.
+   - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `observeNote(id)` (Flow), `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
+   - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4).
+   - `NoteListScreen` — route `notes_list`. Header: "Notes" Playfair 26sp + back arrow. Empty state: plus icon + caption. List: `LazyColumn`, cards with 14dp radius, 0.5dp border; each card shows 40×40 recipe image, recipe name overline (Saffron), note title (Playfair Medium 16sp), date (right), star rating (15dp, if > 0), body preview (2-line clamp), label chips. Navigated to from Profile "Notes" stat card.
+   - `NoteDetailScreen` — route `note_detail/{noteId}`. Subscribes to `observeNote` Flow so edits from NoteEditor auto-refresh. Header: back arrow, "Note" label, "Delete" ghost (error red). Content: recipe context card, Playfair 28sp title, "Added {date}" caption, 22dp stars, label chips, body, 132dp photo horizontal scroll. Footer: pinned "Update" primary button (48dp). Delete triggers `ModalBottomSheet` confirm ("Keep" secondary / "Delete" error primary).
    - Photo picker: two launchers registered unconditionally — `PickVisualMedia` (single, used when 1 slot remains) and `PickMultipleVisualMedia(4)` (used when 2+ slots remain). ViewModel caps with `.take(4)`. No `takePersistableUriPermission` needed (modern Photo Picker).
    - `canSave` — true when any of title / body / rating / labels / photos is non-empty.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
-- `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab — a sign-in entry point needs to be wired up.
-- `Screen.NoteEditor` — route `note_editor/{recipeId}`. Launched from CookingMode completion sheet. After save, navigates to Home with `popUpTo(Home, inclusive = false)` to clear the cooking + editor back stack.
+- `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab.
+- Notes flow: Profile "Notes" stat → `NotesList` → `NoteDetail` → (Update) → `NoteEditor` (edit mode, pops back to NoteDetail on save) / (Delete) → pops back to `NotesList`.
+- `Screen.NoteEditor` — route `note_editor/{recipeId}?noteId={noteId}`. Create (from CookingMode): noteId defaults to 0, saves → Home. Edit (from NoteDetail): noteId set, saves → popBackStack.
 
 **Data layer notes:**
 - `MealMapper.parseSteps` — paragraph-break detection first (`\r?\n\s*\r?\n`); falls back to single line splits if no paragraph breaks found.

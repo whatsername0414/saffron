@@ -19,6 +19,7 @@ class NoteEditorViewModel(
 ) : ViewModel() {
 
     private val recipeId: String = checkNotNull(savedStateHandle["recipeId"])
+    private val editNoteId: Long = savedStateHandle["noteId"] ?: 0L
 
     private val _uiState = MutableStateFlow(NoteEditorUiState())
     val uiState: StateFlow<NoteEditorUiState> = _uiState.asStateFlow()
@@ -26,11 +27,39 @@ class NoteEditorViewModel(
     init {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
-            try {
-                val recipe = recipeRepository.getRecipeById(recipeId)
-                _uiState.update { it.copy(isLoading = false, recipeName = recipe?.title.orEmpty(), recipeImage = recipe?.imageUrl.orEmpty()) }
-            } catch (_: Exception) {
-                _uiState.update { it.copy(isLoading = false) }
+            if (editNoteId != 0L) {
+                val note = notesRepository.getNote(editNoteId)
+                if (note != null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            existingNoteId = note.id,
+                            existingCreatedAt = note.createdAt,
+                            recipeName = note.recipeName,
+                            recipeImage = note.recipeImage,
+                            title = note.title,
+                            body = note.body,
+                            rating = note.rating,
+                            labels = RecipeNotesRepository.labelsFromString(note.labels),
+                            photos = RecipeNotesRepository.photosFromString(note.photos),
+                        )
+                    }
+                } else {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
+            } else {
+                try {
+                    val recipe = recipeRepository.getRecipeById(recipeId)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            recipeName = recipe?.title.orEmpty(),
+                            recipeImage = recipe?.imageUrl.orEmpty(),
+                        )
+                    }
+                } catch (_: Exception) {
+                    _uiState.update { it.copy(isLoading = false) }
+                }
             }
         }
     }
@@ -58,6 +87,8 @@ class NoteEditorViewModel(
             _uiState.update { it.copy(isSaving = true) }
             notesRepository.upsert(
                 RecipeNoteEntity(
+                    id = state.existingNoteId,
+                    createdAt = if (state.isEditMode) state.existingCreatedAt else System.currentTimeMillis(),
                     recipeId = recipeId,
                     recipeName = state.recipeName,
                     recipeImage = state.recipeImage,

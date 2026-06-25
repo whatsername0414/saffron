@@ -24,6 +24,9 @@ interface RecipeNoteDao {
     @Query("SELECT * FROM recipe_notes WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): RecipeNoteEntity?
 
+    @Query("SELECT * FROM recipe_notes WHERE id = :id LIMIT 1")
+    fun observeById(id: Long): Flow<RecipeNoteEntity?>
+
     @Query("SELECT COUNT(*) FROM recipe_notes")
     fun observeCount(): Flow<Int>
 }

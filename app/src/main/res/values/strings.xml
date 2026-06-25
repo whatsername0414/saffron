@@ -46,8 +46,24 @@
     <string name="cooking_add_note">Add a note</string>
     <string name="cooking_maybe_later">Maybe later</string>
 
+    <!-- Notes list screen -->
+    <string name="notes_title">Notes</string>
+    <string name="note_list_empty">Notes you take while cooking will gather here.</string>
+
+    <!-- Note detail screen -->
+    <string name="note_detail_header">Note</string>
+    <string name="note_added_date">Added %1$s</string>
+    <string name="note_delete_title">Delete this note?</string>
+    <string name="note_delete_body">This can\'t be undone.</string>
+    <string name="note_keep">Keep</string>
+
+    <!-- Common actions -->
+    <string name="action_delete">Delete</string>
+    <string name="action_update">Update</string>
+
     <!-- Note editor -->
     <string name="note_editor_title">New note</string>
+    <string name="note_editor_edit_title">Edit note</string>
     <string name="note_title_hint">Give it a title</string>
     <string name="note_body_hint">What did you change? What would you do differently? Write it down while it\'s fresh.</string>
     <string name="note_on_label">Note on</string>

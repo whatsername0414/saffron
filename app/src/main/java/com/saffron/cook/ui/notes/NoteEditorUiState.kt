@@ -2,6 +2,8 @@ package com.saffron.cook.ui.notes
 
 data class NoteEditorUiState(
     val isLoading: Boolean = false,
+    val existingNoteId: Long = 0L,
+    val existingCreatedAt: Long = 0L,
     val recipeName: String = "",
     val recipeImage: String = "",
     val title: String = "",
@@ -13,4 +15,6 @@ data class NoteEditorUiState(
 ) {
     val canSave: Boolean
         get() = title.isNotBlank() || body.isNotBlank() || rating > 0 || labels.isNotEmpty() || photos.isNotEmpty()
+    val isEditMode: Boolean
+        get() = existingNoteId != 0L
 }

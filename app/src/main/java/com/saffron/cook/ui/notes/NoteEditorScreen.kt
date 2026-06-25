@@ -139,7 +139,11 @@ private fun NoteEditorContent(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.note_editor_title),
+                    text = if (state.isEditMode) {
+                        stringResource(R.string.note_editor_edit_title)
+                    } else {
+                        stringResource(R.string.note_editor_title)
+                    },
                     style = MaterialTheme.typography.labelLarge,
                     color = Cinnamon,
                     modifier = Modifier.weight(1f),

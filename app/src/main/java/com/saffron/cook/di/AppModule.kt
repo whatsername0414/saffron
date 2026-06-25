@@ -16,7 +16,9 @@ import com.saffron.cook.ui.detail.RecipeDetailViewModel
 import com.saffron.cook.ui.favorites.FavoritesViewModel
 import com.saffron.cook.ui.home.HomeViewModel
 import com.saffron.cook.ui.login.LoginViewModel
+import com.saffron.cook.ui.notedetail.NoteDetailViewModel
 import com.saffron.cook.ui.notes.NoteEditorViewModel
+import com.saffron.cook.ui.noteslist.NoteListViewModel
 import com.saffron.cook.ui.profile.ProfileViewModel
 import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
@@ -70,6 +72,8 @@ val savedRecipesModule = module {
 val notesModule = module {
     single { RecipeNotesRepository(get<SaffronDatabase>().recipeNoteDao()) }
     viewModelOf(::NoteEditorViewModel)
+    viewModelOf(::NoteListViewModel)
+    viewModelOf(::NoteDetailViewModel)
 }
 
 val homeModule = module {

@@ -29,7 +29,9 @@ import com.saffron.cook.navigation.BottomNavDestination
 import com.saffron.cook.navigation.Screen
 import com.saffron.cook.ui.cooking.CookingModeScreen
 import com.saffron.cook.ui.detail.RecipeDetailScreen
+import com.saffron.cook.ui.notedetail.NoteDetailScreen
 import com.saffron.cook.ui.notes.NoteEditorScreen
+import com.saffron.cook.ui.noteslist.NoteListScreen
 import com.saffron.cook.ui.favorites.FavoritesScreen
 import com.saffron.cook.ui.home.HomeScreen
 import com.saffron.cook.ui.login.LoginScreen
@@ -133,7 +135,9 @@ fun SaffronApp() {
                 )
             }
             composable(Screen.Profile.route) {
-                ProfileScreen()
+                ProfileScreen(
+                    onOpenNotes = { navController.navigate(Screen.NotesList.route) },
+                )
             }
             composable(
                 route = Screen.RecipeDetail.route,
@@ -157,15 +161,42 @@ fun SaffronApp() {
                     },
                 )
             }
+            composable(Screen.NotesList.route) {
+                NoteListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenNote = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
+                )
+            }
+            composable(
+                route = Screen.NoteDetail.route,
+                arguments = listOf(navArgument("noteId") { type = NavType.LongType }),
+            ) { backStackEntry ->
+                val noteId = backStackEntry.arguments?.getLong("noteId") ?: return@composable
+                NoteDetailScreen(
+                    onBack = { navController.popBackStack() },
+                    onEdit = { recipeId ->
+                        navController.navigate(Screen.NoteEditor.createEditRoute(recipeId, noteId))
+                    },
+                    onDeleted = { navController.popBackStack() },
+                )
+            }
             composable(
                 route = Screen.NoteEditor.route,
-                arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
-            ) {
+                arguments = listOf(
+                    navArgument("recipeId") { type = NavType.StringType },
+                    navArgument("noteId") { type = NavType.LongType; defaultValue = 0L },
+                ),
+            ) { backStackEntry ->
+                val isEditMode = (backStackEntry.arguments?.getLong("noteId") ?: 0L) != 0L
                 NoteEditorScreen(
                     onCancel = { navController.popBackStack() },
                     onSaved = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Home.route) { inclusive = false }
+                        if (isEditMode) {
+                            navController.popBackStack()
+                        } else {
+                            navController.navigate(Screen.Home.route) {
+                                popUpTo(Screen.Home.route) { inclusive = false }
+                            }
                         }
                     },
                 )

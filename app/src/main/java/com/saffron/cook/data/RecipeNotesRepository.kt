@@ -9,6 +9,8 @@ class RecipeNotesRepository(private val dao: RecipeNoteDao) {
     val allNotesFlow: Flow<List<RecipeNoteEntity>> = dao.observeAll()
     val noteCountFlow: Flow<Int> = dao.observeCount()
 
+    fun observeNote(id: Long): Flow<RecipeNoteEntity?> = dao.observeById(id)
+
     suspend fun upsert(entity: RecipeNoteEntity): Long =
         if (entity.id == 0L) dao.insert(entity) else { dao.update(entity); entity.id }
 
