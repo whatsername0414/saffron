@@ -304,7 +304,7 @@ private fun DetailContent(
         ) {
             Button(
                 onClick = onStartCooking,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
+                modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                 elevation = ButtonDefaults.buttonElevation(0.dp),

@@ -94,7 +94,7 @@ Standard MVI / unidirectional data flow:
    - Bookmark tint: Saffron when saved, **Cinnamon when unsaved** (Detail screen differs from Home/Search).
    - Rating row (below title, above meta strip): 5 stars — filled = Saffron40 `#F5C76A`, empty = `#C9C2B6`; value + count in 12sp Inter Regular Cinnamon. Only rendered when `recipe.rating != null`.
    - Meta strip: 3-up cards (clock / users / flame), Cream bg, Saffron160 icon tint, `labelLarge` value, Cinnamon caption.
-   - "Start cooking" CTA: full-width, 52dp, 10dp radius, Saffron fill, 0dp elevation, trailing `Icons.Filled.ChevronRight` (18dp, white).
+   - "Start cooking" CTA: full-width, 48dp, 10dp radius, Saffron fill, 0dp elevation, trailing `Icons.Filled.ChevronRight` (18dp, white).
 4. Cooking Mode — `CookingModeScreen` + `CookingModeViewModel` fully aligned with Claude Design spec:
    - Header: × exit icon (left), "Step N of M" centered, 48dp spacer (right). No divider.
    - Step pills: active = Saffron/white; done = Cream/Saffron160; pending = Cream/Cinnamon. Numbers only — no check icon.
@@ -124,7 +124,7 @@ Standard MVI / unidirectional data flow:
    - `auth/AuthRepository.kt` — interface: `currentUser: Flow<FirebaseUser?>`, `currentUserSnapshot: FirebaseUser?`, `signInWithGoogle(idToken)`, `signOut()`.
    - `auth/FirebaseAuthRepository.kt` — implements via `callbackFlow` on `FirebaseAuth.AuthStateListener`; sign-in uses `GoogleAuthProvider` + `suspendCancellableCoroutine`.
    - `ui/login/` — `LoginScreen` (Saffron-branded, Credential Manager Google Sign-In), `LoginViewModel`, `LoginUiState`/`LoginEvent`. Standalone screen at `Screen.Login` route.
-   - `ui/profile/` — `ProfileScreen` always renders full layout: "S" avatar initial when signed out, real photo/name/email when signed in. Sign-out row only shown when signed in. No `onNavigateToLogin` parameter — login entry point TBD.
+   - `ui/profile/` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button (no navigation to LoginScreen). **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Account/Dietary preferences/Notifications/Help/Sign out (all uniform `SettingsRow` with ChevronRight). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`.
    - Bookmarking is ungated: `HomeViewModel` and `SearchViewModel` do not check auth; `onToggleSave` always calls `SavedRecipesRepository.toggle()`.
    - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.

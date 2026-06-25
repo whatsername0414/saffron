@@ -127,7 +127,7 @@ fun LoginScreen(
                     onClick = ::launchGoogleSignIn,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(52.dp),
+                        .height(48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
@@ -202,7 +202,7 @@ private fun LoginScreenPreview() {
                 Spacer(Modifier.height(48.dp))
                 Button(
                     onClick = {},
-                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                    modifier = Modifier.fillMaxWidth().height(48.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Saffron),
                     elevation = ButtonDefaults.buttonElevation(0.dp),

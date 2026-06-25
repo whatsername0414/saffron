@@ -3,6 +3,7 @@ package com.saffron.cook.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.auth.AuthRepository
+import com.saffron.cook.data.RecipeNotesRepository
 import com.saffron.cook.data.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class ProfileViewModel(
     private val authRepository: AuthRepository,
     private val savedRecipesRepository: SavedRecipesRepository,
+    private val notesRepository: RecipeNotesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -30,6 +32,20 @@ class ProfileViewModel(
             savedRecipesRepository.savedIdsFlow.collect { ids ->
                 _uiState.update { it.copy(savedCount = ids.size) }
             }
+        }
+        viewModelScope.launch {
+            notesRepository.noteCountFlow.collect { count ->
+                _uiState.update { it.copy(notesCount = count) }
+            }
+        }
+    }
+
+    fun handleGoogleIdToken(idToken: String) {
+        _uiState.update { it.copy(isSigningIn = true) }
+        viewModelScope.launch {
+            authRepository.signInWithGoogle(idToken)
+                .onSuccess { _uiState.update { it.copy(isSigningIn = false) } }
+                .onFailure { _uiState.update { it.copy(isSigningIn = false) } }
         }
     }
 
