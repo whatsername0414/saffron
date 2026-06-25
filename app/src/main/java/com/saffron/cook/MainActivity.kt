@@ -137,6 +137,13 @@ fun SaffronApp() {
             composable(Screen.Profile.route) {
                 ProfileScreen(
                     onOpenNotes = { navController.navigate(Screen.NotesList.route) },
+                    onOpenFavorites = {
+                        navController.navigate(Screen.Favorites.route) {
+                            popUpTo(Screen.Home.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                 )
             }
             composable(
