@@ -91,7 +91,7 @@ private fun CookedListContent(
                     )
                 }
                 Text(
-                    text = "Cooked",
+                    text = stringResource(R.string.cooked_title),
                     style = TextStyle(
                         fontFamily = PlayfairDisplayFamily,
                         fontWeight = FontWeight.Normal,
@@ -119,7 +119,7 @@ private fun CookedListContent(
                             modifier = Modifier.size(32.dp),
                         )
                         Text(
-                            text = "Recipes you finish in cooking mode will gather here.",
+                            text = stringResource(R.string.cooked_empty),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Cinnamon,
                             textAlign = TextAlign.Center,
@@ -129,7 +129,7 @@ private fun CookedListContent(
                 }
             } else {
                 Text(
-                    text = "${state.totalCooked} dishes cooked across ${state.items.size} recipes",
+                    text = stringResource(R.string.cooked_summary, state.totalCooked, state.items.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = TextTertiary,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
@@ -219,7 +219,7 @@ private fun CookedCard(
         IconButton(onClick = onToggleSave) {
             Icon(
                 imageVector = if (item.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                contentDescription = if (item.isSaved) "Unsave" else "Save",
+                contentDescription = if (item.isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
                 tint = if (item.isSaved) Saffron else Cinnamon,
             )
         }

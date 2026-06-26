@@ -43,7 +43,7 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               Exposes Compose/Material3 as api — feature modules need only depend on :core:ui
 
 :core:data  — domain models + repository (kotlin.jvm, no Android framework)
-              model/  → Recipe, Ingredient, Step, Difficulty, Category
+              model/  → Recipe, Ingredient, Step, Difficulty, Category, RecipeFilter, NoteLabel
               repository/ → RecipeRepository interface + MealDbRecipeRepository (TheMealDB)
               repository/fake/ → FakeRecipeRepository (in-memory, for tests)
               network/ → TheMealDbService (Retrofit), DTOs, MealMapper
@@ -109,7 +109,7 @@ Standard MVI / unidirectional data flow:
 6. Search screen — `SearchViewModel` + `SearchScreen` aligned with Claude Design spec:
    - Header: "Search" in Playfair 26sp.
    - Input: 48dp tall, 10dp radius, white bg, Saffron focus ring (1dp border on focus).
-   - Filter chips: horizontal scroll row — All / Breakfast / Lunch / Dinner / Baking. Pill shape, Saffron selected.
+   - Filter chips: horizontal scroll row — All / Breakfast / Lunch / Dinner / Baking. Pill shape, Saffron selected. Backed by `RecipeFilter` enum (`:core:data`); `categoryId` field drives client-side filtering, `labelRes` extension in `SearchScreen.kt` maps to `R.string.filter_*`.
    - Results: 92×70dp thumbnail, category overline, Playfair Medium 16sp title, clock + people meta row, bookmark toggle. 12dp gap between rows (no dividers).
    - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
    - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
@@ -136,7 +136,7 @@ Standard MVI / unidirectional data flow:
 9. Recipe Notes — post-cook journaling with full browse/edit/delete flow:
    - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`. DAO has `observeAll`, `observeById` (Flow), `observeCount`, `getById`, `insert`, `update`, `deleteById`.
    - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `observeNote(id)` (Flow), `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
-   - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4).
+   - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4). Label chips are backed by `NoteLabel` enum (`:core:data`); `key` field is the DB-stored string (stable English value), `labelRes` extension in `NoteEditorScreen.kt` maps to `R.string.note_label_*`.
    - `NoteListScreen` — route `notes_list`. Header: "Notes" Playfair 26sp + back arrow. Empty state: plus icon + caption. List: `LazyColumn`, cards with 14dp radius, 0.5dp border; each card shows 40×40 recipe image, recipe name overline (Saffron), note title (Playfair Medium 16sp), date (right), star rating (15dp, if > 0), body preview (2-line clamp), label chips. Navigated to from Profile "Notes" stat card.
    - `NoteDetailScreen` — route `note_detail/{noteId}`. Subscribes to `observeNote` Flow so edits from NoteEditor auto-refresh. Header: back arrow, "Note" label, "Delete" ghost (error red). Content: recipe context card, Playfair 28sp title, "Added {date}" caption, 22dp stars, label chips, body, 132dp photo horizontal scroll. Footer: pinned "Update" primary button (48dp). Delete triggers `ModalBottomSheet` confirm ("Keep" secondary / "Delete" error primary).
    - Photo picker: two launchers registered unconditionally — `PickVisualMedia` (single, used when 1 slot remains) and `PickMultipleVisualMedia(4)` (used when 2+ slots remain). ViewModel caps with `.take(4)`. No `takePersistableUriPermission` needed (modern Photo Picker).
@@ -193,3 +193,5 @@ Active `.editorconfig` suppressions:
 - `keepRules/rules.keep` holds ProGuard keep rules.
 - Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components that need `:core:data` types (e.g. `RecipeCard`) live in `app/ui/components/` (internal to `:app`). Pure design-system components with no data-model dependency move to `:core:ui`.
 - Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests — not yet wired into any test module.
+- **All user-visible strings live in `strings.xml`** — no hardcoded string literals in composables. Format strings use `%1$d`/`%1$s` placeholders and `stringResource(R.string.x, arg)`.
+- **Enums for bounded UI sets** (filter chips, label chips, etc.) live in `:core:data/model/` as plain Kotlin enums (no Android deps). The `@StringRes` mapping is a private extension property in the screen file (e.g. `RecipeFilter.labelRes`, `NoteLabel.labelRes`). This keeps the enum safe from R8 minification and separates domain identity from display text. Enums whose values are stored in Room use a stable `key: String` field as the DB value — never the enum `.name`.

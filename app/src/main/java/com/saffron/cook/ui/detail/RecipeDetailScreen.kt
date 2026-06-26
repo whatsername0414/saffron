@@ -119,6 +119,8 @@ private fun DetailContent(
     val cookTimeCaption = stringResource(R.string.meta_cook_time)
     val servingsCaption = stringResource(R.string.meta_servings)
     val difficultyCaption = stringResource(R.string.meta_difficulty)
+    val cookTimeStr = recipe.cookTimeMinutes?.let { stringResource(R.string.meta_duration_min, it) }
+    val servingsStr = recipe.servings?.let { stringResource(R.string.meta_serves, it) }
 
     Box(Modifier.fillMaxSize().background(Color.White)) {
         LazyColumn(contentPadding = PaddingValues(bottom = 96.dp)) {
@@ -231,8 +233,8 @@ private fun DetailContent(
 
             // 3-up meta strip (only if at least one value available)
             val metaCards = buildList {
-                recipe.cookTimeMinutes?.let { add(Triple(Icons.Outlined.Schedule, "$it min", cookTimeCaption)) }
-                recipe.servings?.let { add(Triple(Icons.Outlined.People, "serves $it", servingsCaption)) }
+                cookTimeStr?.let { add(Triple(Icons.Outlined.Schedule, it, cookTimeCaption)) }
+                servingsStr?.let { add(Triple(Icons.Outlined.People, it, servingsCaption)) }
                 recipe.difficulty?.let { add(Triple(Icons.Outlined.LocalFireDepartment, it.name, difficultyCaption)) }
             }
             if (metaCards.isNotEmpty()) {

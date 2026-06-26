@@ -97,7 +97,6 @@ fun CookingModeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.timerFinishedEvent.collect {
-            @Suppress("DEPRECATION")
             val vibrator = context.getSystemService(Vibrator::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 400, 100, 400), -1))

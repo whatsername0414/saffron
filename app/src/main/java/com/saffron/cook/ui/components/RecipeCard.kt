@@ -23,11 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.saffron.cook.R
 import com.saffron.cook.core.data.model.Recipe
 import com.saffron.cook.ui.theme.Cinnamon
 import com.saffron.cook.ui.theme.Cream
@@ -79,9 +81,11 @@ internal fun RecipeCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
+            val cookTimeStr = recipe.cookTimeMinutes?.let { stringResource(R.string.meta_duration_min, it) }
+            val servingsStr = recipe.servings?.let { stringResource(R.string.meta_serves, it) }
             val metaItems = buildList {
-                recipe.cookTimeMinutes?.let { add(Icons.Outlined.Schedule to "$it min") }
-                recipe.servings?.let { add(Icons.Outlined.People to "serves $it") }
+                cookTimeStr?.let { add(Icons.Outlined.Schedule to it) }
+                servingsStr?.let { add(Icons.Outlined.People to it) }
             }
             if (metaItems.isNotEmpty()) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -100,7 +104,7 @@ internal fun RecipeCard(
         IconButton(onClick = { onToggleSave(recipe.id) }) {
             Icon(
                 imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
-                contentDescription = if (isSaved) "Saved" else "Save",
+                contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
                 tint = if (isSaved) Saffron else Cinnamon,
             )
         }

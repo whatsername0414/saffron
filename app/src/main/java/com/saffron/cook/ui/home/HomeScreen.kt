@@ -360,8 +360,9 @@ private fun FeaturedSection(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
+                val cookTimeStr = recipe.cookTimeMinutes?.let { stringResource(R.string.meta_duration_min, it) }
                 val metaItems = buildList {
-                    recipe.cookTimeMinutes?.let { add(Icons.Outlined.Schedule to "$it min") }
+                    cookTimeStr?.let { add(Icons.Outlined.Schedule to it) }
                     recipe.difficulty?.let { add(Icons.Outlined.LocalFireDepartment to it.name) }
                 }
                 if (metaItems.isNotEmpty()) {

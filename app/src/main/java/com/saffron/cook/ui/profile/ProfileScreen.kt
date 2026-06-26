@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -125,7 +126,7 @@ private fun ProfileContent(
             .verticalScroll(rememberScrollState()),
     ) {
         Text(
-            text = "Profile",
+            text = stringResource(R.string.profile_title),
             style = TextStyle(
                 fontFamily = PlayfairDisplayFamily,
                 fontWeight = FontWeight.Normal,
@@ -190,7 +191,7 @@ private fun SignedOutContent(
 
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
-                text = "Your kitchen",
+                text = stringResource(R.string.profile_guest_name),
                 style = TextStyle(
                     fontFamily = PlayfairDisplayFamily,
                     fontWeight = FontWeight.Medium,
@@ -200,7 +201,7 @@ private fun SignedOutContent(
                 color = Truffle,
             )
             Text(
-                text = "On this device",
+                text = stringResource(R.string.profile_guest_subtitle),
                 style = TextStyle(
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Light,
@@ -223,7 +224,7 @@ private fun SignedOutContent(
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
-                text = "SYNC",
+                text = stringResource(R.string.profile_sync_label).uppercase(),
                 style = TextStyle(
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Medium,
@@ -233,7 +234,7 @@ private fun SignedOutContent(
                 color = Saffron,
             )
             Text(
-                text = "Add an account",
+                text = stringResource(R.string.profile_add_account),
                 style = TextStyle(
                     fontFamily = PlayfairDisplayFamily,
                     fontWeight = FontWeight.Medium,
@@ -243,7 +244,7 @@ private fun SignedOutContent(
                 color = Truffle,
             )
             Text(
-                text = "Your saved recipes, cooked count, and notes live on this device. Add an account to back them up and pick up cooking on any device.",
+                text = stringResource(R.string.profile_add_account_body),
                 style = TextStyle(
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Light,
@@ -271,7 +272,7 @@ private fun SignedOutContent(
                     )
                 } else {
                     Text(
-                        text = "Add an account",
+                        text = stringResource(R.string.profile_add_account),
                         style = TextStyle(
                             fontFamily = InterFamily,
                             fontWeight = FontWeight.Medium,
@@ -286,9 +287,9 @@ private fun SignedOutContent(
 
     SettingsSection(
         rows = listOf(
-            SettingsEntry("Dietary preferences"),
-            SettingsEntry("Notifications"),
-            SettingsEntry("Help"),
+            SettingsEntry(stringResource(R.string.profile_setting_dietary)),
+            SettingsEntry(stringResource(R.string.profile_setting_notifications)),
+            SettingsEntry(stringResource(R.string.profile_setting_help)),
         ),
     )
 }
@@ -368,11 +369,11 @@ private fun SignedInContent(
 
     SettingsSection(
         rows = listOf(
-            SettingsEntry("Account"),
-            SettingsEntry("Dietary preferences"),
-            SettingsEntry("Notifications"),
-            SettingsEntry("Help"),
-            SettingsEntry("Sign out", labelColor = Cinnamon, onClick = onSignOut),
+            SettingsEntry(stringResource(R.string.profile_setting_account)),
+            SettingsEntry(stringResource(R.string.profile_setting_dietary)),
+            SettingsEntry(stringResource(R.string.profile_setting_notifications)),
+            SettingsEntry(stringResource(R.string.profile_setting_help)),
+            SettingsEntry(stringResource(R.string.profile_sign_out), labelColor = Cinnamon, onClick = onSignOut),
         ),
     )
 }
@@ -386,14 +387,14 @@ private fun StatStrip(state: ProfileUiState, onOpenNotes: () -> Unit, onOpenFavo
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         StatCard(
-            label = "Saved",
+            label = stringResource(R.string.profile_stat_saved),
             value = state.savedCount,
             modifier = Modifier.weight(1f),
             onClick = onOpenFavorites,
         )
-        StatCard(label = "Cooked", value = state.cookedCount, modifier = Modifier.weight(1f), onClick = onOpenCooked)
+        StatCard(label = stringResource(R.string.cooked_title), value = state.cookedCount, modifier = Modifier.weight(1f), onClick = onOpenCooked)
         StatCard(
-            label = "Notes",
+            label = stringResource(R.string.notes_title),
             value = state.notesCount,
             modifier = Modifier.weight(1f),
             onClick = onOpenNotes,

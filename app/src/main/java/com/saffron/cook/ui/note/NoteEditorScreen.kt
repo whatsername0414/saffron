@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.R
+import com.saffron.cook.core.data.model.NoteLabel
 import com.saffron.cook.ui.theme.Cinnamon
 import com.saffron.cook.ui.theme.Cream
 import com.saffron.cook.ui.theme.InterFamily
@@ -68,6 +69,15 @@ import com.saffron.cook.ui.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
 
 private const val maxUpload = 4
+
+private val NoteLabel.labelRes: Int
+    get() = when (this) {
+        NoteLabel.MadeIt -> R.string.note_label_made_it
+        NoteLabel.WouldMakeAgain -> R.string.note_label_would_make_again
+        NoteLabel.TweakNextTime -> R.string.note_label_tweak_next_time
+        NoteLabel.HalvedIt -> R.string.note_label_halved_it
+        NoteLabel.ForGuests -> R.string.note_label_for_guests
+    }
 
 @Composable
 fun NoteEditorScreen(
@@ -120,8 +130,6 @@ private fun NoteEditorContent(
     onAddPhoto: () -> Unit,
     onRemovePhoto: (Int) -> Unit,
 ) {
-    val quickLabels = listOf("Made it", "Would make again", "Tweak next time", "Halved it", "For guests")
-
     Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
@@ -228,11 +236,11 @@ private fun NoteEditorContent(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    quickLabels.forEach { label ->
+                    NoteLabel.entries.forEach { label ->
                         LabelChip(
-                            text = label,
-                            selected = label in state.labels,
-                            onClick = { onToggleLabel(label) },
+                            text = stringResource(label.labelRes),
+                            selected = label.key in state.labels,
+                            onClick = { onToggleLabel(label.key) },
                         )
                     }
                 }

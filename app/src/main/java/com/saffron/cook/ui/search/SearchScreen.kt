@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.R
 import com.saffron.cook.core.data.model.Recipe
+import com.saffron.cook.core.data.model.RecipeFilter
 import com.saffron.cook.ui.theme.Cinnamon
 import com.saffron.cook.ui.theme.Cream
 import com.saffron.cook.ui.theme.InterFamily
@@ -68,7 +69,14 @@ import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
 
-private val filters = listOf("All", "Breakfast", "Lunch", "Dinner", "Baking")
+private val RecipeFilter.labelRes: Int
+    get() = when (this) {
+        RecipeFilter.All -> R.string.filter_all
+        RecipeFilter.Breakfast -> R.string.filter_breakfast
+        RecipeFilter.Lunch -> R.string.filter_lunch
+        RecipeFilter.Dinner -> R.string.filter_dinner
+        RecipeFilter.Baking -> R.string.filter_baking
+    }
 
 @Composable
 fun SearchScreen(
@@ -76,11 +84,11 @@ fun SearchScreen(
     viewModel: SearchViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
-    var activeFilter by remember { mutableStateOf("All") }
+    var activeFilter by remember { mutableStateOf(RecipeFilter.All) }
 
     val baseRecipes = if (state.query.isBlank()) state.initialRecipes else state.results
-    val displayedRecipes = if (activeFilter == "All") baseRecipes
-    else baseRecipes.filter { it.categoryId.equals(activeFilter, ignoreCase = true) }
+    val displayedRecipes = if (activeFilter == RecipeFilter.All) baseRecipes
+    else baseRecipes.filter { it.categoryId.equals(activeFilter.categoryId, ignoreCase = true) }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
         Text(
@@ -109,9 +117,9 @@ fun SearchScreen(
                 .padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            filters.forEach { filter ->
+            RecipeFilter.entries.forEach { filter ->
                 FilterChip(
-                    label = filter,
+                    label = stringResource(filter.labelRes),
                     selected = filter == activeFilter,
                     onClick = { activeFilter = filter },
                 )
@@ -314,15 +322,13 @@ private fun ResultRow(
                 maxLines = 2,
                 modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
             )
-            val hasMeta = recipe.cookTimeMinutes != null || recipe.servings != null
+            val cookTimeStr = recipe.cookTimeMinutes?.let { stringResource(R.string.meta_duration_min, it) }
+            val servingsStr = recipe.servings?.let { stringResource(R.string.meta_serves, it) }
+            val hasMeta = cookTimeStr != null || servingsStr != null
             if (hasMeta) {
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    recipe.cookTimeMinutes?.let {
-                        MetaItem(icon = Icons.Outlined.Schedule, text = "$it min")
-                    }
-                    recipe.servings?.let {
-                        MetaItem(icon = Icons.Outlined.People, text = "serves $it")
-                    }
+                    cookTimeStr?.let { MetaItem(icon = Icons.Outlined.Schedule, text = it) }
+                    servingsStr?.let { MetaItem(icon = Icons.Outlined.People, text = it) }
                 }
             }
         }
@@ -371,7 +377,7 @@ private fun SearchScreenIdlePreview() {
     SaffronTheme {
         Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
             Text(
-                text = "Search",
+                text = stringResource(R.string.nav_search),
                 style = TextStyle(fontFamily = PlayfairDisplayFamily, fontWeight = FontWeight.Normal, fontSize = 26.sp, letterSpacing = (-0.3).sp),
                 color = Truffle,
                 modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
@@ -383,7 +389,7 @@ private fun SearchScreenIdlePreview() {
                 modifier = Modifier.horizontalScroll(rememberScrollState()).padding(start = 16.dp, end = 16.dp, top = 2.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                filters.forEach { FilterChip(label = it, selected = it == "All", onClick = {}) }
+                RecipeFilter.entries.forEach { FilterChip(label = stringResource(it.labelRes), selected = it == RecipeFilter.All, onClick = {}) }
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
