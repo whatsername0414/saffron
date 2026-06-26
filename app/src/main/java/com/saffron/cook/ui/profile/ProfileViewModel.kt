@@ -3,6 +3,7 @@ package com.saffron.cook.ui.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.auth.AuthRepository
+import com.saffron.cook.data.CookedRecipesRepository
 import com.saffron.cook.data.RecipeNotesRepository
 import com.saffron.cook.data.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ class ProfileViewModel(
     private val authRepository: AuthRepository,
     private val savedRecipesRepository: SavedRecipesRepository,
     private val notesRepository: RecipeNotesRepository,
+    private val cookedRepository: CookedRecipesRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -36,6 +38,11 @@ class ProfileViewModel(
         viewModelScope.launch {
             notesRepository.noteCountFlow.collect { count ->
                 _uiState.update { it.copy(notesCount = count) }
+            }
+        }
+        viewModelScope.launch {
+            cookedRepository.totalCountFlow.collect { count ->
+                _uiState.update { it.copy(cookedCount = count) }
             }
         }
     }

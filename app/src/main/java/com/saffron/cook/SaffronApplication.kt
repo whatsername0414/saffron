@@ -3,11 +3,11 @@ package com.saffron.cook
 import android.app.Application
 import com.saffron.cook.di.authModule
 import com.saffron.cook.di.cookingModule
+import com.saffron.cook.di.cookedRecipesModule
 import com.saffron.cook.di.coreDataModule
 import com.saffron.cook.di.detailModule
 import com.saffron.cook.di.favoritesModule
 import com.saffron.cook.di.homeModule
-import com.saffron.cook.di.loginModule
 import com.saffron.cook.di.networkModule
 import com.saffron.cook.di.notesModule
 import com.saffron.cook.di.profileModule
@@ -21,7 +21,7 @@ class SaffronApplication : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@SaffronApplication)
-            modules(authModule, networkModule, coreDataModule, savedRecipesModule, notesModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
+            modules(authModule, networkModule, coreDataModule, savedRecipesModule, notesModule, cookedRecipesModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, profileModule)
         }
     }
 }

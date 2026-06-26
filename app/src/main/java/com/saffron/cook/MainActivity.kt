@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -28,13 +27,13 @@ import androidx.navigation.navArgument
 import com.saffron.cook.navigation.BottomNavDestination
 import com.saffron.cook.navigation.Screen
 import com.saffron.cook.ui.cooking.CookingModeScreen
+import com.saffron.cook.ui.cookedlist.CookedListScreen
 import com.saffron.cook.ui.detail.RecipeDetailScreen
 import com.saffron.cook.ui.notedetail.NoteDetailScreen
-import com.saffron.cook.ui.notes.NoteEditorScreen
-import com.saffron.cook.ui.noteslist.NoteListScreen
+import com.saffron.cook.ui.note.NoteEditorScreen
+import com.saffron.cook.ui.notelist.NoteListScreen
 import com.saffron.cook.ui.favorites.FavoritesScreen
 import com.saffron.cook.ui.home.HomeScreen
-import com.saffron.cook.ui.login.LoginScreen
 import com.saffron.cook.ui.profile.ProfileScreen
 import com.saffron.cook.ui.search.SearchScreen
 import com.saffron.cook.ui.theme.Cinnamon
@@ -61,8 +60,6 @@ fun SaffronApp() {
 
     val tabRoutes = BottomNavDestination.entries.map { it.screen.route }.toSet()
     val showBottomBar = currentDestination?.route in tabRoutes
-
-    val navigateToLogin = { navController.navigate(Screen.Login.route) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -113,11 +110,6 @@ fun SaffronApp() {
             startDestination = Screen.Home.route,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Screen.Login.route) {
-                LoginScreen(
-                    onSignedIn = { navController.popBackStack() },
-                )
-            }
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSearch = { navController.navigate(Screen.Search.route) },
@@ -144,6 +136,13 @@ fun SaffronApp() {
                             restoreState = true
                         }
                     },
+                    onOpenCooked = { navController.navigate(Screen.CookedList.route) },
+                )
+            }
+            composable(Screen.CookedList.route) {
+                CookedListScreen(
+                    onBack = { navController.popBackStack() },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
                 )
             }
             composable(

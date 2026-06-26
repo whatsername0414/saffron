@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -70,10 +71,12 @@ private val BorderTertiary = Color(0xFFE4DFD5)
 fun ProfileScreen(
     onOpenNotes: () -> Unit = {},
     onOpenFavorites: () -> Unit = {},
+    onOpenCooked: () -> Unit = {},
     viewModel: ProfileViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val credentialManager = CredentialManager.create(context)
 
@@ -82,7 +85,7 @@ fun ProfileScreen(
             try {
                 val option = GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(context.getString(R.string.default_web_client_id))
+                    .setServerClientId(resources.getString(R.string.default_web_client_id))
                     .setAutoSelectEnabled(true)
                     .build()
                 val request = GetCredentialRequest.Builder()
@@ -99,8 +102,9 @@ fun ProfileScreen(
     ProfileContent(
         state = state,
         onSignOut = { viewModel.signOut() },
-        onOpenNotes = onOpenNotes,
         onOpenFavorites = onOpenFavorites,
+        onOpenCooked = onOpenCooked,
+        onOpenNotes = onOpenNotes,
         onAddAccount = ::launchGoogleSignIn,
     )
 }
@@ -109,8 +113,9 @@ fun ProfileScreen(
 private fun ProfileContent(
     state: ProfileUiState,
     onSignOut: () -> Unit,
-    onOpenNotes: () -> Unit,
     onOpenFavorites: () -> Unit,
+    onOpenCooked: () -> Unit,
+    onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
 ) {
     Column(
@@ -134,15 +139,17 @@ private fun ProfileContent(
         if (state.user == null) {
             SignedOutContent(
                 state = state,
-                onOpenNotes = onOpenNotes,
                 onOpenFavorites = onOpenFavorites,
+                onOpenCooked = onOpenCooked,
+                onOpenNotes = onOpenNotes,
                 onAddAccount = onAddAccount,
             )
         } else {
             SignedInContent(
                 state = state,
-                onOpenNotes = onOpenNotes,
                 onOpenFavorites = onOpenFavorites,
+                onOpenCooked = onOpenCooked,
+                onOpenNotes = onOpenNotes,
                 onSignOut = onSignOut,
             )
         }
@@ -152,8 +159,9 @@ private fun ProfileContent(
 @Composable
 private fun SignedOutContent(
     state: ProfileUiState,
-    onOpenNotes: () -> Unit,
     onOpenFavorites: () -> Unit,
+    onOpenCooked: () -> Unit,
+    onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
 ) {
     // Generic avatar row
@@ -203,7 +211,7 @@ private fun SignedOutContent(
         }
     }
 
-    StatStrip(state = state, onOpenNotes = onOpenNotes, onOpenFavorites = onOpenFavorites)
+    StatStrip(state = state, onOpenNotes = onOpenNotes, onOpenFavorites = onOpenFavorites, onOpenCooked = onOpenCooked)
 
     // Add an account card
     Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp)) {
@@ -288,8 +296,9 @@ private fun SignedOutContent(
 @Composable
 private fun SignedInContent(
     state: ProfileUiState,
-    onOpenNotes: () -> Unit,
     onOpenFavorites: () -> Unit,
+    onOpenCooked: () -> Unit,
+    onOpenNotes: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     val user = state.user
@@ -355,7 +364,7 @@ private fun SignedInContent(
         }
     }
 
-    StatStrip(state = state, onOpenNotes = onOpenNotes, onOpenFavorites = onOpenFavorites)
+    StatStrip(state = state, onOpenNotes = onOpenNotes, onOpenFavorites = onOpenFavorites, onOpenCooked = onOpenCooked)
 
     SettingsSection(
         rows = listOf(
@@ -369,15 +378,20 @@ private fun SignedInContent(
 }
 
 @Composable
-private fun StatStrip(state: ProfileUiState, onOpenNotes: () -> Unit, onOpenFavorites: () -> Unit) {
+private fun StatStrip(state: ProfileUiState, onOpenNotes: () -> Unit, onOpenFavorites: () -> Unit, onOpenCooked: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        StatCard(label = "Saved", value = state.savedCount, modifier = Modifier.weight(1f), onClick = onOpenFavorites)
-        StatCard(label = "Cooked", value = state.cookedCount, modifier = Modifier.weight(1f), onClick = {})
+        StatCard(
+            label = "Saved",
+            value = state.savedCount,
+            modifier = Modifier.weight(1f),
+            onClick = onOpenFavorites,
+        )
+        StatCard(label = "Cooked", value = state.cookedCount, modifier = Modifier.weight(1f), onClick = onOpenCooked)
         StatCard(
             label = "Notes",
             value = state.notesCount,
@@ -483,8 +497,9 @@ private fun ProfileSignedOutPreview() {
         ProfileContent(
             state = ProfileUiState(savedCount = 5, notesCount = 2),
             onSignOut = {},
-            onOpenNotes = {},
             onOpenFavorites = {},
+            onOpenCooked = {},
+            onOpenNotes = {},
             onAddAccount = {},
         )
     }
@@ -497,8 +512,9 @@ private fun ProfileSignedInPreview() {
         ProfileContent(
             state = ProfileUiState(savedCount = 12, cookedCount = 42, notesCount = 7),
             onSignOut = {},
-            onOpenNotes = {},
             onOpenFavorites = {},
+            onOpenCooked = {},
+            onOpenNotes = {},
             onAddAccount = {},
         )
     }

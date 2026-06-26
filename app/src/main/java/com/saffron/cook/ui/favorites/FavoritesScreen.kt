@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.saffron.cook.R
 import com.saffron.cook.data.local.SavedRecipeEntity
 import com.saffron.cook.data.local.toRecipe
-import com.saffron.cook.ui.components.RecipeListItem
+import com.saffron.cook.ui.components.RecipeCard
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
@@ -126,7 +126,7 @@ private fun FavoritesList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(savedRecipes, key = { it.id }) { entity ->
-            RecipeListItem(
+            RecipeCard(
                 recipe = entity.toRecipe(),
                 isSaved = true,
                 onToggleSave = onToggleSave,

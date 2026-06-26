@@ -23,26 +23,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material.icons.outlined.LocalFireDepartment
-import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,13 +56,12 @@ import com.saffron.cook.core.data.model.Recipe
 import com.saffron.cook.core.data.model.Step
 import com.saffron.cook.ui.theme.Cinnamon
 import com.saffron.cook.ui.theme.Cream
-import com.saffron.cook.ui.theme.Linen
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.Saffron
 import com.saffron.cook.ui.theme.Saffron160
 import com.saffron.cook.ui.theme.Saffron20
 import com.saffron.cook.ui.theme.Saffron40
-import com.saffron.cook.ui.components.RecipeListItem
+import com.saffron.cook.ui.components.RecipeCard
 import com.saffron.cook.ui.theme.SaffronTheme
 import com.saffron.cook.ui.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
@@ -151,7 +143,7 @@ private fun HomeContent(
                 )
             }
             items(state.gridRecipes, key = { it.id }) { recipe ->
-                RecipeListItem(
+                RecipeCard(
                     recipe = recipe,
                     isSaved = recipe.id in state.savedIds,
                     onToggleSave = onToggleSave,

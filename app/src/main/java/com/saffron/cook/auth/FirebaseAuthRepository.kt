@@ -22,11 +22,11 @@ class FirebaseAuthRepository(private val auth: FirebaseAuth) : AuthRepository {
 
     override suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser> = runCatching {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        suspendCancellableCoroutine<FirebaseUser> { cont ->
+        suspendCancellableCoroutine { cont ->
             auth.signInWithCredential(credential)
                 .addOnSuccessListener { result ->
                     val user = result.user
-                    if (user != null) cont.resume(user) { }
+                    if (user != null) cont.resume(user) { _, _, _ -> }
                     else cont.resumeWithException(Exception("Sign-in succeeded but user was null"))
                 }
                 .addOnFailureListener { cont.resumeWithException(it) }

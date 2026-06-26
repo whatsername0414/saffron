@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.noteslist
+package com.saffron.cook.ui.notelist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

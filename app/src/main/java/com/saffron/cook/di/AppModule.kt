@@ -8,17 +8,18 @@ import com.saffron.cook.auth.FirebaseAuthRepository
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.repository.MealDbRecipeRepository
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.CookedRecipesRepository
 import com.saffron.cook.data.RecipeNotesRepository
 import com.saffron.cook.data.SavedRecipesRepository
 import com.saffron.cook.data.local.SaffronDatabase
 import com.saffron.cook.ui.cooking.CookingModeViewModel
+import com.saffron.cook.ui.cookedlist.CookedListViewModel
 import com.saffron.cook.ui.detail.RecipeDetailViewModel
 import com.saffron.cook.ui.favorites.FavoritesViewModel
 import com.saffron.cook.ui.home.HomeViewModel
-import com.saffron.cook.ui.login.LoginViewModel
 import com.saffron.cook.ui.notedetail.NoteDetailViewModel
-import com.saffron.cook.ui.notes.NoteEditorViewModel
-import com.saffron.cook.ui.noteslist.NoteListViewModel
+import com.saffron.cook.ui.note.NoteEditorViewModel
+import com.saffron.cook.ui.notelist.NoteListViewModel
 import com.saffron.cook.ui.profile.ProfileViewModel
 import com.saffron.cook.ui.search.SearchViewModel
 import okhttp3.OkHttpClient
@@ -61,7 +62,7 @@ val coreDataModule = module {
 val savedRecipesModule = module {
     single {
         Room.databaseBuilder(androidContext(), SaffronDatabase::class.java, "saffron_db")
-            .addMigrations(SaffronDatabase.MIGRATION_1_2)
+            .addMigrations(SaffronDatabase.MIGRATION_1_2, SaffronDatabase.MIGRATION_2_3)
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
@@ -84,6 +85,11 @@ val detailModule = module {
     viewModelOf(::RecipeDetailViewModel)
 }
 
+val cookedRecipesModule = module {
+    single { CookedRecipesRepository(get<SaffronDatabase>().cookedRecipeDao()) }
+    viewModelOf(::CookedListViewModel)
+}
+
 val cookingModule = module {
     viewModelOf(::CookingModeViewModel)
 }
@@ -94,10 +100,6 @@ val searchModule = module {
 
 val favoritesModule = module {
     viewModelOf(::FavoritesViewModel)
-}
-
-val loginModule = module {
-    viewModelOf(::LoginViewModel)
 }
 
 val profileModule = module {

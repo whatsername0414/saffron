@@ -54,7 +54,7 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, notesModule, authModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
               data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
                             RecipeNotesRepository (Room-backed, Koin single in notesModule)
-              data/local/ → SaffronDatabase v2, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity (Room)
+              data/local/ → SaffronDatabase v3, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity, CookedRecipeDao, CookedRecipeEntity (Room)
               ui/components/ → RecipeCard (4:3 card composable, kept for future use)
                                RecipeListItem (horizontal list row, used by Home + Favorites)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
@@ -143,10 +143,19 @@ Standard MVI / unidirectional data flow:
    - Photo picker: two launchers registered unconditionally — `PickVisualMedia` (single, used when 1 slot remains) and `PickMultipleVisualMedia(4)` (used when 2+ slots remain). ViewModel caps with `.take(4)`. No `takePersistableUriPermission` needed (modern Photo Picker).
    - `canSave` — true when any of title / body / rating / labels / photos is non-empty.
 
+10. Cooked list — tracks every recipe completed in cooking mode, with per-recipe cook counts and last-cooked dates:
+   - `CookedRecipeEntity` / `CookedRecipeDao` — Room table `cooked_recipes`; PK `recipeId` (TEXT); fields: recipeName, recipeImage, recipeCategory, times (INT, default 1), lastCookedAt (epoch millis). `SaffronDatabase` bumped to v3 with `MIGRATION_2_3`. DAO has `observeAll` (Flow, ordered by lastCookedAt DESC), `observeTotalCount` (Flow, SUM of times), insert-ignore + `incrementAndTouch`.
+   - `CookedRecipesRepository` — `allCookedFlow`, `totalCountFlow`, `recordCooked(recipeId, recipeName, recipeImage, recipeCategory)` (upsert: insert-ignore returns -1 → increment).
+   - `CookingModeViewModel.onFinish()` — sets `isFinished = true` AND calls `cookedRepository.recordCooked(...)` with the loaded recipe's id/title/imageUrl/categoryId.
+   - `ProfileViewModel` — subscribes to `cookedRepository.totalCountFlow` to populate `cookedCount` in state (same pattern as `notesCount`).
+   - `ui/cookedlist/` — `CookedListScreen`, `CookedListViewModel`, `CookedListUiState`/`CookedListItem`.
+   - Screen layout: header "Cooked" Playfair 26sp + back arrow; empty state: 32dp `LocalFireDepartment` icon + "Recipes you finish in cooking mode will gather here."; non-empty: caption "{total} dishes cooked across {N} recipes" (bodySmall, TextTertiary), then `LazyColumn` of rows — 92×70dp thumbnail, category overline (Saffron uppercase), Playfair Medium 16sp title, meta row (flame icon + "Once"/"N times" | check-circle icon + "last {d MMM}"), bookmark toggle.
+   - Profile "Cooked" stat card taps → `Screen.CookedList` (`"cooked_list"` route); tapping a cooked row navigates to RecipeDetail.
+
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
 - `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab.
-- Profile stat card flows: "Saved" → Favorites tab (uses `popUpTo(Home) / launchSingleTop / restoreState`, same as bottom nav tap); "Notes" → `NotesList` → `NoteDetail` → (Update) → `NoteEditor` (edit mode, pops back to NoteDetail on save) / (Delete) → pops back to `NotesList`.
+- Profile stat card flows: "Saved" → Favorites tab (uses `popUpTo(Home) / launchSingleTop / restoreState`, same as bottom nav tap); "Notes" → `NotesList` → `NoteDetail` → (Update) → `NoteEditor` (edit mode, pops back to NoteDetail on save) / (Delete) → pops back to `NotesList`; "Cooked" → `CookedList` (simple push, `popBackStack` to return).
 - `Screen.NoteEditor` — route `note_editor/{recipeId}?noteId={noteId}`. Create (from CookingMode): noteId defaults to 0, saves → Home. Edit (from NoteDetail): noteId set, saves → popBackStack.
 
 **Data layer notes:**

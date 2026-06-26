@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.notes
+package com.saffron.cook.ui.note
 
 data class NoteEditorUiState(
     val isLoading: Boolean = false,

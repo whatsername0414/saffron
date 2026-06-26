@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.data.CookedRecipesRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -50,6 +51,7 @@ private fun toSeconds(value: Double, unit: String): Int {
 class CookingModeViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: RecipeRepository,
+    private val cookedRepository: CookedRecipesRepository,
 ) : ViewModel() {
 
     private val recipeId: String = checkNotNull(savedStateHandle["recipeId"])
@@ -112,6 +114,16 @@ class CookingModeViewModel(
 
     fun onFinish() {
         _uiState.update { it.copy(isFinished = true) }
+        _uiState.value.recipe?.let { recipe ->
+            viewModelScope.launch {
+                cookedRepository.recordCooked(
+                    recipeId = recipe.id,
+                    recipeName = recipe.title,
+                    recipeImage = recipe.imageUrl,
+                    recipeCategory = recipe.categoryId,
+                )
+            }
+        }
     }
 
     fun onShowTimer(seconds: Int, stepTitle: String) {

@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.notes
+package com.saffron.cook.ui.note
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest

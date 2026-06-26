@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.notes
+package com.saffron.cook.ui.note
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
