@@ -133,7 +133,7 @@ private fun HomeContent(
                     CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
                 }
             }
-        } else if (state.gridRecipes.isNotEmpty()) {
+        } else if (state.recipes.isNotEmpty()) {
             item {
                 Text(
                     text = stringResource(R.string.saved_for_the_week).uppercase(),
@@ -142,7 +142,7 @@ private fun HomeContent(
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
                 )
             }
-            items(state.gridRecipes, key = { it.id }) { recipe ->
+            items(state.recipes, key = { it.id }) { recipe ->
                 RecipeCard(
                     recipe = recipe,
                     isSaved = recipe.id in state.savedIds,
@@ -414,7 +414,7 @@ private fun HomeContentPreview() {
                 ),
                 selectedCategoryId = "chicken",
                 featuredRecipe = previewRecipe,
-                gridRecipes = listOf(
+                recipes = listOf(
                     previewRecipe,
                     previewRecipe.copy(id = "2", title = "Pasta Carbonara", categoryId = "pasta"),
                     previewRecipe.copy(id = "3", title = "Grilled Salmon", categoryId = "seafood"),

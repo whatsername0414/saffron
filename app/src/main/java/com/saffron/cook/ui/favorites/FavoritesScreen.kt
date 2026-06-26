@@ -29,8 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saffron.cook.R
-import com.saffron.cook.data.local.SavedRecipeEntity
-import com.saffron.cook.data.local.toRecipe
+import com.saffron.cook.core.data.model.Difficulty
+import com.saffron.cook.core.data.model.Ingredient
+import com.saffron.cook.core.data.model.Recipe
+import com.saffron.cook.core.data.model.Step
 import com.saffron.cook.ui.components.RecipeCard
 import com.saffron.cook.ui.theme.PlayfairDisplayFamily
 import com.saffron.cook.ui.theme.SaffronTheme
@@ -74,11 +76,11 @@ private fun FavoritesContent(
             modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
         )
 
-        if (state.savedRecipes.isEmpty()) {
+        if (state.recipes.isEmpty()) {
             FavoritesEmptyState()
         } else {
             FavoritesList(
-                savedRecipes = state.savedRecipes,
+                recipes = state.recipes,
                 onToggleSave = onToggleSave,
                 onOpenRecipe = onOpenRecipe,
             )
@@ -113,7 +115,7 @@ private fun FavoritesEmptyState() {
 
 @Composable
 private fun FavoritesList(
-    savedRecipes: List<SavedRecipeEntity>,
+    recipes: List<Recipe>,
     onToggleSave: (String) -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
@@ -125,16 +127,29 @@ private fun FavoritesList(
         ),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        items(savedRecipes, key = { it.id }) { entity ->
+        items(recipes, key = { it.id }) { recipe ->
             RecipeCard(
-                recipe = entity.toRecipe(),
+                recipe = recipe,
                 isSaved = true,
                 onToggleSave = onToggleSave,
-                onClick = { onOpenRecipe(entity.id) },
+                onClick = { onOpenRecipe(recipe.id) },
             )
         }
     }
 }
+
+private val previewRecipe = Recipe(
+    id = "52772",
+    title = "Teriyaki Chicken Casserole",
+    description = "A hearty weeknight dinner the whole family will love.",
+    imageUrl = "",
+    categoryId = "chicken",
+    ingredients = listOf(Ingredient("3/4 cup", "soy sauce"), Ingredient("1/2 cup", "water")),
+    steps = listOf(Step("Marinate", "Mix soy sauce and water, pour over chicken.")),
+    cookTimeMinutes = 35,
+    servings = 4,
+    difficulty = Difficulty.Medium,
+)
 
 @Preview(showBackground = true)
 @Composable
@@ -142,10 +157,10 @@ private fun FavoritesScreenGridPreview() {
     SaffronTheme {
         FavoritesContent(
             state = FavoritesUiState(
-                savedRecipes = listOf(
-                    SavedRecipeEntity("1", "Saffron risotto", "", 35, 4, "Dinner"),
-                    SavedRecipeEntity("2", "Shakshuka", "", 25, 2, "Breakfast"),
-                    SavedRecipeEntity("3", "Rosemary focaccia", "", 60, 8, "Baking"),
+                recipes = listOf(
+                    previewRecipe,
+                    previewRecipe.copy(id = "2", title = "Pasta Carbonara", categoryId = "pasta"),
+                    previewRecipe.copy(id = "3", title = "Grilled Salmon", categoryId = "seafood"),
                 ),
             ),
             onToggleSave = {},

@@ -144,7 +144,7 @@ private fun CookedListContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(state.items, key = { it.recipeId }) { item ->
-                        CookedRow(
+                        CookedCard(
                             item = item,
                             onOpen = { onOpenRecipe(item.recipeId) },
                             onToggleSave = { onToggleSave(item.recipeId) },
@@ -157,7 +157,7 @@ private fun CookedListContent(
 }
 
 @Composable
-private fun CookedRow(
+private fun CookedCard(
     item: CookedListItem,
     onOpen: () -> Unit,
     onToggleSave: () -> Unit,

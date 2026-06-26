@@ -1,7 +1,7 @@
 package com.saffron.cook.ui.favorites
 
-import com.saffron.cook.data.local.SavedRecipeEntity
+import com.saffron.cook.core.data.model.Recipe
 
 data class FavoritesUiState(
-    val savedRecipes: List<SavedRecipeEntity> = emptyList(),
+    val recipes: List<Recipe> = emptyList(),
 )

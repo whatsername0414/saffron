@@ -3,7 +3,6 @@ package com.saffron.cook.ui.favorites
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.saffron.cook.data.SavedRecipesRepository
-import com.saffron.cook.data.local.toRecipe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +19,13 @@ class FavoritesViewModel(
     init {
         viewModelScope.launch {
             savedRecipesRepository.savedRecipesFlow.collect { recipes ->
-                _uiState.update { it.copy(savedRecipes = recipes) }
+                _uiState.update { it.copy(recipes = recipes) }
             }
         }
     }
 
     fun onToggleSave(recipeId: String) {
-        val entity = _uiState.value.savedRecipes.find { it.id == recipeId } ?: return
-        viewModelScope.launch { savedRecipesRepository.toggle(entity.toRecipe()) }
+        val recipe = _uiState.value.recipes.find { it.id == recipeId } ?: return
+        viewModelScope.launch { savedRecipesRepository.toggle(recipe) }
     }
 }

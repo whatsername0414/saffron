@@ -10,6 +10,6 @@ data class HomeUiState(
     val categories: List<Category> = emptyList(),
     val selectedCategoryId: String? = null,
     val featuredRecipe: Recipe? = null,
-    val gridRecipes: List<Recipe> = emptyList(),
+    val recipes: List<Recipe> = emptyList(),
     val savedIds: Set<String> = emptySet(),
 )

@@ -50,7 +50,7 @@ class HomeViewModel(
                         isLoading      = false,
                         categories     = categories,
                         featuredRecipe = featured,
-                        gridRecipes    = grid,
+                        recipes    = grid,
                     )
                 }
             }
@@ -60,7 +60,7 @@ class HomeViewModel(
     }
 
     fun onToggleSave(recipeId: String) {
-        val recipe = _uiState.value.gridRecipes.find { it.id == recipeId }
+        val recipe = _uiState.value.recipes.find { it.id == recipeId }
             ?: _uiState.value.featuredRecipe?.takeIf { it.id == recipeId }
             ?: return
         viewModelScope.launch { savedRecipesRepository.toggle(recipe) }
@@ -71,9 +71,9 @@ class HomeViewModel(
         _uiState.update { it.copy(selectedCategoryId = newId, isLoading = true) }
         categoryJob?.cancel()
         categoryJob = viewModelScope.launch {
-            val grid = if (newId == null) repository.getRecipes()
+            val recipes = if (newId == null) repository.getRecipes()
                        else repository.getRecipesByCategory(newId)
-            _uiState.update { it.copy(isLoading = false, gridRecipes = grid) }
+            _uiState.update { it.copy(isLoading = false, recipes = recipes) }
         }
     }
 
