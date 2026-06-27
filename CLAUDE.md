@@ -31,11 +31,15 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
 | Min SDK | 24 / Target+Compile SDK 37 |
 | AGP | 9.3.0-rc01 |
 | Room | 2.7.1 (KSP 2.2.10-2.0.2) |
-| Build system | Gradle 9.5 (Kotlin DSL), version catalog `gradle/libs.versions.toml` |
+| Build system | Gradle 9.5 (Kotlin DSL), version catalog `gradle/libs.versions.toml`, `:build-logic` convention plugins |
 
 ## Module Structure
 
 ```
+:build-logic — composite build (`includeBuild` in settings.gradle.kts) with Gradle convention
+              plugins. Holds shared AGP/Compose/JVM config so modules don't copy-paste `android {}`
+              blocks. See "Convention plugins" below.
+
 :core:ui    — brand theme layer (android.library)
               Color.kt, Type.kt, Theme.kt
               res/font/ → bundled TTF: inter_{light,regular,medium}.ttf +
@@ -69,7 +73,25 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
                 ui/notedetail/ → NoteDetailScreen, NoteDetailViewModel, NoteDetailUiState
 ```
 
-When adding a new feature module use `android.library` for anything with Compose/resources, `kotlin.jvm` for pure logic. Declare the plugin `apply false` in the root `build.gradle.kts` first.
+When adding a new module, apply a `:build-logic` convention plugin (below) instead of configuring AGP/Kotlin by hand: `saffron.android.library` (+ `saffron.android.compose` if it has Compose) for Android library modules, `saffron.jvm.library` for pure-logic JVM modules. Keep only module-specific bits (`namespace`, deps) in the module's own `build.gradle.kts`.
+
+## Convention plugins (`:build-logic`)
+
+`:build-logic` is a **separate composite build** wired via `pluginManagement { includeBuild("build-logic") }` in the root `settings.gradle.kts`. It registers convention plugins that centralize shared build config. The version catalog is read in via `build-logic/settings.gradle.kts` (`versionCatalogs { create("libs") { from(files("../gradle/libs.versions.toml")) } }`); the AGP/Kotlin/Compose **plugin markers** are added as `[libraries]` in the catalog and depended on `compileOnly` in `build-logic/build.gradle.kts`.
+
+| Plugin id | Applied to | Configures |
+|---|---|---|
+| `saffron.android.application` | `:app` | AGP application, compileSdk 37 / minSdk 24 / targetSdk 37, Java 11, `buildConfig=true`, release `optimization { enable = false }` (AGP 9 DSL); applies `saffron.android.compose` |
+| `saffron.android.library` | `:core:ui` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
+| `saffron.android.compose` | `:core:ui` (and via application) | applies `org.jetbrains.kotlin.plugin.compose`, sets `buildFeatures.compose = true`. Adds **no** Compose deps — each module keeps its own (preserves the exact dependency graph) |
+| `saffron.jvm.library` | `:core:data` | `kotlin.jvm` + Java 11, with Kotlin `jvmTarget` aligned to 11 to avoid inconsistent-target failures |
+
+Rules / gotchas:
+- **AGP 9 built-in Kotlin** — the Android plugins apply only AGP + the Compose compiler plugin. **Never** apply `org.jetbrains.kotlin.android` (it conflicts with `kotlin-compose` under AGP 9).
+- `build-logic` compiles against the AGP 9 API → it targets **JDK 17** (Java + Kotlin both 17 in `build-logic/build.gradle.kts`). The Gradle daemon must run on JDK 17+.
+- `google-services` + `ksp` are **not** in any convention plugin — they stay applied directly in `:app`'s `build.gradle.kts` (app-only).
+- ktlint is unchanged: `build-logic` is a separate included build, so the root `subprojects { …ktlint… }` block doesn't touch it. Each module still applies `alias(libs.plugins.ktlint)` itself.
+- Future plugins (`saffron.android.feature`, `saffron.android.room`, `saffron.koin`) will be added when their first consumer module is created.
 
 ## Architecture
 

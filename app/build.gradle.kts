@@ -1,6 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
+    id("saffron.android.application")
     alias(libs.plugins.ktlint)
     alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
@@ -8,32 +7,13 @@ plugins {
 
 android {
     namespace = "com.saffron.cook"
-    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.saffron.cook"
-        minSdk = 24
-        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            optimization {
-                enable = false
-            }
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-        buildConfig = true
     }
 }
 

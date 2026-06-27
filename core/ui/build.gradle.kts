@@ -1,24 +1,11 @@
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.compose)
+    id("saffron.android.library")
+    id("saffron.android.compose")
     alias(libs.plugins.ktlint)
 }
 
 android {
     namespace = "com.saffron.cook.core.ui"
-    compileSdk = 37
-
-    defaultConfig {
-        minSdk = 24
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-    }
 }
 
 dependencies {

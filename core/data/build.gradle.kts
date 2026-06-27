@@ -1,5 +1,5 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
+    id("saffron.jvm.library")
     alias(libs.plugins.ktlint)
 }
 
