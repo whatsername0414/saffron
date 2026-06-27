@@ -1,11 +1,11 @@
 package com.saffron.cook.core.data.repository.fake
 
-import com.saffron.cook.core.data.model.Category
-import com.saffron.cook.core.data.model.Difficulty
-import com.saffron.cook.core.data.model.Ingredient
-import com.saffron.cook.core.data.model.Recipe
-import com.saffron.cook.core.data.model.Step
-import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.core.domain.model.Category
+import com.saffron.cook.core.domain.model.Difficulty
+import com.saffron.cook.core.domain.model.Ingredient
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.model.Step
+import com.saffron.cook.core.domain.repository.RecipeRepository
 
 object FakeRecipeRepository : RecipeRepository {
     private val categories =

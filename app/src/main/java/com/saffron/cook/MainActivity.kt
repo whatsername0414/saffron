@@ -36,9 +36,9 @@ import com.saffron.cook.ui.favorites.FavoritesScreen
 import com.saffron.cook.ui.home.HomeScreen
 import com.saffron.cook.ui.profile.ProfileScreen
 import com.saffron.cook.ui.search.SearchScreen
-import com.saffron.cook.ui.theme.Cinnamon
-import com.saffron.cook.ui.theme.Saffron
-import com.saffron.cook.ui.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.Cinnamon
+import com.saffron.cook.core.designsystem.theme.Saffron
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

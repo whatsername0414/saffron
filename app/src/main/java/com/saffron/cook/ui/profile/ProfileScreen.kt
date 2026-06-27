@@ -54,15 +54,15 @@ import coil.compose.AsyncImage
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.saffron.cook.R
-import com.saffron.cook.ui.theme.Cinnamon
-import com.saffron.cook.ui.theme.Cream
-import com.saffron.cook.ui.theme.InterFamily
-import com.saffron.cook.ui.theme.PlayfairDisplayFamily
-import com.saffron.cook.ui.theme.Saffron
-import com.saffron.cook.ui.theme.Saffron160
-import com.saffron.cook.ui.theme.Saffron20
-import com.saffron.cook.ui.theme.SaffronTheme
-import com.saffron.cook.ui.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.Cinnamon
+import com.saffron.cook.core.designsystem.theme.Cream
+import com.saffron.cook.core.designsystem.theme.InterFamily
+import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
+import com.saffron.cook.core.designsystem.theme.Saffron
+import com.saffron.cook.core.designsystem.theme.Saffron160
+import com.saffron.cook.core.designsystem.theme.Saffron20
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.Truffle
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 

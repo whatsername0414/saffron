@@ -1,11 +1,12 @@
 package com.saffron.cook.core.data.repository
 
-import com.saffron.cook.core.data.model.Category
-import com.saffron.cook.core.data.model.Recipe
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.network.toCategory
 import com.saffron.cook.core.data.network.toPartialRecipe
 import com.saffron.cook.core.data.network.toRecipe
+import com.saffron.cook.core.domain.model.Category
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.repository.RecipeRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 
@@ -16,11 +17,12 @@ class MealDbRecipeRepository(
 
     override suspend fun getRecipes(): List<Recipe> =
         coroutineScope {
-            val liveCategories = runCatching {
-                service.getCategories().categories?.associate {
-                    it.name.lowercase() to it.name
-                } ?: emptyMap()
-            }.getOrDefault(emptyMap())
+            val liveCategories =
+                runCatching {
+                    service.getCategories().categories?.associate {
+                        it.name.lowercase() to it.name
+                    } ?: emptyMap()
+                }.getOrDefault(emptyMap())
 
             preferredCategoryIds
                 .map { id ->

@@ -2,8 +2,8 @@ package com.saffron.cook.ui.cookedlist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saffron.cook.data.CookedRecipesRepository
-import com.saffron.cook.data.SavedRecipesRepository
+import com.saffron.cook.core.database.repository.CookedRecipesRepository
+import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

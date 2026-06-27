@@ -51,15 +51,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.R
-import com.saffron.cook.ui.theme.Cinnamon
-import com.saffron.cook.ui.theme.Cream
-import com.saffron.cook.ui.theme.InterFamily
-import com.saffron.cook.ui.theme.PlayfairDisplayFamily
-import com.saffron.cook.ui.theme.Saffron
-import com.saffron.cook.ui.theme.Saffron40
-import com.saffron.cook.ui.theme.SaffronTheme
-import com.saffron.cook.ui.theme.SemanticError
-import com.saffron.cook.ui.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.Cinnamon
+import com.saffron.cook.core.designsystem.theme.Cream
+import com.saffron.cook.core.designsystem.theme.InterFamily
+import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
+import com.saffron.cook.core.designsystem.theme.Saffron
+import com.saffron.cook.core.designsystem.theme.Saffron40
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.SemanticError
+import com.saffron.cook.core.designsystem.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
 
 private val BorderTertiary = Color(0xFFE4DFD5)

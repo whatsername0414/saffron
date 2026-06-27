@@ -25,6 +25,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "Saffron"
 include(":app")
-include(":core:ui")
+include(":core:design-system")
+include(":core:domain")
 include(":core:data")
+include(":core:database")
+include(":core:auth")
  

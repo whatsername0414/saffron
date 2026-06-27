@@ -3,9 +3,9 @@ package com.saffron.cook.ui.note
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saffron.cook.data.RecipeNotesRepository
-import com.saffron.cook.data.local.RecipeNoteEntity
-import com.saffron.cook.core.data.repository.RecipeRepository
+import com.saffron.cook.core.database.repository.RecipeNotesRepository
+import com.saffron.cook.core.database.RecipeNoteEntity
+import com.saffron.cook.core.domain.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,7 +1,7 @@
 package com.saffron.cook.ui.cooking
 
-import com.saffron.cook.core.data.model.Recipe
-import com.saffron.cook.core.data.model.Step
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.model.Step
 
 data class CookingModeUiState(
     val isLoading: Boolean = true,

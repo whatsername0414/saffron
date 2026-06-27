@@ -1,6 +1,6 @@
 package com.saffron.cook.ui.search
 
-import com.saffron.cook.core.data.model.Recipe
+import com.saffron.cook.core.domain.model.Recipe
 
 data class SearchUiState(
     val query: String = "",

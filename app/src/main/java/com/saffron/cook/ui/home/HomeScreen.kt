@@ -49,21 +49,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.R
-import com.saffron.cook.core.data.model.Category
-import com.saffron.cook.core.data.model.Difficulty
-import com.saffron.cook.core.data.model.Ingredient
-import com.saffron.cook.core.data.model.Recipe
-import com.saffron.cook.core.data.model.Step
-import com.saffron.cook.ui.theme.Cinnamon
-import com.saffron.cook.ui.theme.Cream
-import com.saffron.cook.ui.theme.PlayfairDisplayFamily
-import com.saffron.cook.ui.theme.Saffron
-import com.saffron.cook.ui.theme.Saffron160
-import com.saffron.cook.ui.theme.Saffron20
-import com.saffron.cook.ui.theme.Saffron40
+import com.saffron.cook.core.domain.model.Category
+import com.saffron.cook.core.domain.model.Difficulty
+import com.saffron.cook.core.domain.model.Ingredient
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.model.Step
+import com.saffron.cook.core.designsystem.theme.Cinnamon
+import com.saffron.cook.core.designsystem.theme.Cream
+import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
+import com.saffron.cook.core.designsystem.theme.Saffron
+import com.saffron.cook.core.designsystem.theme.Saffron160
+import com.saffron.cook.core.designsystem.theme.Saffron20
+import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.ui.components.RecipeCard
-import com.saffron.cook.ui.theme.SaffronTheme
-import com.saffron.cook.ui.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

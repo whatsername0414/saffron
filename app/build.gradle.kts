@@ -1,7 +1,6 @@
 plugins {
     id("saffron.android.application")
     alias(libs.plugins.ktlint)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.google.services)
 }
 
@@ -19,22 +18,20 @@ android {
 
 dependencies {
     implementation(platform(libs.androidx.compose.bom))
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
     implementation(libs.credentials)
     implementation(libs.credentials.play.services)
     implementation(libs.googleid)
-    implementation(project(":core:ui"))
+    implementation(project(":core:design-system"))
+    implementation(project(":core:domain"))
     implementation(project(":core:data"))
+    implementation(project(":core:database"))
+    implementation(project(":core:auth"))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.coil.compose)
     implementation(libs.retrofit)
     implementation(libs.retrofit.converter.gson)
     debugImplementation(libs.okhttp.logging)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.navigation.compose)

@@ -2,10 +2,10 @@ package com.saffron.cook.ui.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saffron.cook.auth.AuthRepository
-import com.saffron.cook.data.CookedRecipesRepository
-import com.saffron.cook.data.RecipeNotesRepository
-import com.saffron.cook.data.SavedRecipesRepository
+import com.saffron.cook.core.auth.AuthRepository
+import com.saffron.cook.core.database.repository.CookedRecipesRepository
+import com.saffron.cook.core.database.repository.RecipeNotesRepository
+import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

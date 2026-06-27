@@ -40,25 +40,39 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               plugins. Holds shared AGP/Compose/JVM config so modules don't copy-paste `android {}`
               blocks. See "Convention plugins" below.
 
-:core:ui    — brand theme layer (android.library)
-              Color.kt, Type.kt, Theme.kt
+:core:design-system — brand theme layer (android.library; namespace com.saffron.cook.core.designsystem)
+              theme/ → Color.kt, Type.kt, Theme.kt (package com.saffron.cook.core.designsystem.theme)
               res/font/ → bundled TTF: inter_{light,regular,medium}.ttf +
                           playfair_display_{regular,medium}.ttf
-              Exposes Compose/Material3 as api — feature modules need only depend on :core:ui
+              Exposes Compose/Material3 as api — feature modules need only depend on :core:design-system
 
-:core:data  — domain models + repository (kotlin.jvm, no Android framework)
+:core:domain — domain models + repository interface (kotlin.jvm, no deps at all)
               model/  → Recipe, Ingredient, Step, Difficulty, Category, RecipeFilter, NoteLabel
-              repository/ → RecipeRepository interface + MealDbRecipeRepository (TheMealDB)
+              repository/ → RecipeRepository interface
+
+:core:data  — network + repository impls (kotlin.jvm) → :core:domain
+              repository/ → MealDbRecipeRepository (TheMealDB)
               repository/fake/ → FakeRecipeRepository (in-memory, for tests)
               network/ → TheMealDbService (Retrofit), DTOs, MealMapper
+              Exposes :core:domain as api (its public API returns domain types)
+
+:core:database — Room persistence + the 3 shared repos (android.library + ksp) → :core:domain
+              SaffronDatabase v3, SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
+              migrations, entity↔Recipe mappers (package com.saffron.cook.core.database)
+              repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository
+              di/ → databaseModule (DB single + 3 DAO singles + 3 repo singles)
+              Exposes Room runtime/ktx as api so :app sees entity types
+
+:core:auth  — Firebase auth (android.library; owns Firebase types) → no internal deps
+              AuthRepository interface + FirebaseAuthRepository (Google Sign-In)
+              di/ → authModule. api(firebase-bom) + api(firebase-auth); does NOT apply google-services
 
 :app        — shell: MainActivity, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              auth/       → AuthRepository interface + FirebaseAuthRepository (Firebase Auth + Google Sign-In via Credential Manager)
-              di/         → AppModule (networkModule, coreDataModule, savedRecipesModule, notesModule, authModule, homeModule, detailModule, cookingModule, searchModule, favoritesModule, loginModule, profileModule)
-              data/       → SavedRecipesRepository (Room-backed singleton, shared across all ViewModels)
-                            RecipeNotesRepository (Room-backed, Koin single in notesModule)
-              data/local/ → SaffronDatabase v3, SavedRecipeDao, SavedRecipeEntity, RecipeNoteDao, RecipeNoteEntity, CookedRecipeDao, CookedRecipeEntity (Room)
+              di/         → AppModule (networkModule, coreDataModule, notesModule, cookedRecipesModule,
+                            homeModule, detailModule, cookingModule, searchModule, favoritesModule, profileModule)
+                            — DB/repo singles live in :core:database's databaseModule; authModule in :core:auth.
+                            Keeps the google-services plugin + Credential Manager (credentials/googleid).
               ui/components/ → RecipeCard (horizontal list row composable, shared by Home + Favorites; accepts `Recipe`)
               ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
                 ui/home/       → HomeScreen, HomeViewModel, HomeUiState
@@ -82,9 +96,9 @@ When adding a new module, apply a `:build-logic` convention plugin (below) inste
 | Plugin id | Applied to | Configures |
 |---|---|---|
 | `saffron.android.application` | `:app` | AGP application, compileSdk 37 / minSdk 24 / targetSdk 37, Java 11, `buildConfig=true`, release `optimization { enable = false }` (AGP 9 DSL); applies `saffron.android.compose` |
-| `saffron.android.library` | `:core:ui` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
-| `saffron.android.compose` | `:core:ui` (and via application) | applies `org.jetbrains.kotlin.plugin.compose`, sets `buildFeatures.compose = true`. Adds **no** Compose deps — each module keeps its own (preserves the exact dependency graph) |
-| `saffron.jvm.library` | `:core:data` | `kotlin.jvm` + Java 11, with Kotlin `jvmTarget` aligned to 11 to avoid inconsistent-target failures |
+| `saffron.android.library` | `:core:design-system`, `:core:database`, `:core:auth` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
+| `saffron.android.compose` | `:core:design-system` (and via application) | applies `org.jetbrains.kotlin.plugin.compose`, sets `buildFeatures.compose = true`. Adds **no** Compose deps — each module keeps its own (preserves the exact dependency graph) |
+| `saffron.jvm.library` | `:core:domain`, `:core:data` | `kotlin.jvm` + Java 11, with Kotlin `jvmTarget` aligned to 11 to avoid inconsistent-target failures |
 
 Rules / gotchas:
 - **AGP 9 built-in Kotlin** — the Android plugins apply only AGP + the Compose compiler plugin. **Never** apply `org.jetbrains.kotlin.android` (it conflicts with `kotlin-compose` under AGP 9).
@@ -98,7 +112,10 @@ Rules / gotchas:
 Standard MVI / unidirectional data flow:
 
 ```
-:core:data  ←  repositories (interface + fake impl)
+:core:domain    ←  models + RecipeRepository interface (depends on nothing)
+:core:data      ←  RecipeRepository impl + fake            → :core:domain
+:core:database  ←  Saved/Notes/Cooked repos (Room)         → :core:domain
+:core:auth      ←  AuthRepository + FirebaseAuthRepository
     ↓
 :app (ViewModels — inject via Koin)
     ↓
@@ -131,7 +148,7 @@ Standard MVI / unidirectional data flow:
 6. Search screen — `SearchViewModel` + `SearchScreen` aligned with Claude Design spec:
    - Header: "Search" in Playfair 26sp.
    - Input: 48dp tall, 10dp radius, white bg, Saffron focus ring (1dp border on focus).
-   - Filter chips: horizontal scroll row — All / Breakfast / Lunch / Dinner / Baking. Pill shape, Saffron selected. Backed by `RecipeFilter` enum (`:core:data`); `categoryId` field drives client-side filtering, `labelRes` extension in `SearchScreen.kt` maps to `R.string.filter_*`.
+   - Filter chips: horizontal scroll row — All / Breakfast / Lunch / Dinner / Baking. Pill shape, Saffron selected. Backed by `RecipeFilter` enum (`:core:domain`); `categoryId` field drives client-side filtering, `labelRes` extension in `SearchScreen.kt` maps to `R.string.filter_*`.
    - Results: 92×70dp thumbnail, category overline, Playfair Medium 16sp title, clock + people meta row, bookmark toggle. 12dp gap between rows (no dividers).
    - Empty state: 32dp search icon + "No results for "X". Try a different ingredient or dish."
    - Pre-loads initial recipes on open via `getRecipes()`; debounced full-text search (300ms) via `searchMeals(query)`.
@@ -158,7 +175,7 @@ Standard MVI / unidirectional data flow:
 9. Recipe Notes — post-cook journaling with full browse/edit/delete flow:
    - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`. DAO has `observeAll`, `observeById` (Flow), `observeCount`, `getById`, `insert`, `update`, `deleteById`.
    - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `observeNote(id)` (Flow), `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
-   - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4). Label chips are backed by `NoteLabel` enum (`:core:data`); `key` field is the DB-stored string (stable English value), `labelRes` extension in `NoteEditorScreen.kt` maps to `R.string.note_label_*`.
+   - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4). Label chips are backed by `NoteLabel` enum (`:core:domain`); `key` field is the DB-stored string (stable English value), `labelRes` extension in `NoteEditorScreen.kt` maps to `R.string.note_label_*`.
    - `NoteListScreen` — route `notes_list`. Header: "Notes" Playfair 26sp + back arrow. Empty state: plus icon + caption. List: `LazyColumn`, cards with 14dp radius, 0.5dp border; each card shows 40×40 recipe image, recipe name overline (Saffron), note title (Playfair Medium 16sp), date (right), star rating (15dp, if > 0), body preview (2-line clamp), label chips. Navigated to from Profile "Notes" stat card.
    - `NoteDetailScreen` — route `note_detail/{noteId}`. Subscribes to `observeNote` Flow so edits from NoteEditor auto-refresh. Header: back arrow, "Note" label, "Delete" ghost (error red). Content: recipe context card, Playfair 28sp title, "Added {date}" caption, 22dp stars, label chips, body, 132dp photo horizontal scroll. Footer: pinned "Update" primary button (48dp). Delete triggers `ModalBottomSheet` confirm ("Keep" secondary / "Delete" error primary).
    - Photo picker: two launchers registered unconditionally — `PickVisualMedia` (single, used when 1 slot remains) and `PickMultipleVisualMedia(4)` (used when 2+ slots remain). ViewModel caps with `.take(4)`. No `takePersistableUriPermission` needed (modern Photo Picker).
@@ -185,7 +202,7 @@ Standard MVI / unidirectional data flow:
 
 ## Brand Rules (non-negotiable)
 
-- **Color** — Saffron `#C8860A` is the only hero color. Apply sparingly (CTAs, active states, bookmark). Full palette in `:core:ui/Color.kt`.
+- **Color** — Saffron `#C8860A` is the only hero color. Apply sparingly (CTAs, active states, bookmark). Full palette in `:core:design-system` `theme/Color.kt`.
 - **Type** — Playfair Display for recipe titles, screen headers, category names (never below 18sp, never in paragraphs). Inter Light (300) for body copy. Inter Medium (500) max for labels/buttons — never Bold.
 - **Flat UI** — zero elevation shadow on resting cards/buttons. Use `0.dp` `tonalElevation` on `NavigationBar`. Hairline borders (`0.5dp`) instead of shadows.
 - **Voice** — sentence case everywhere. No emoji. No "Amazing!" — say "Saved." Metadata abbreviates ("35 min"); instructions spell out ("thirty-five minutes").
@@ -197,8 +214,8 @@ Standard MVI / unidirectional data flow:
 ktlint **1.4.1** + `io.nlopez.compose.rules:ktlint:0.4.22`. Config in `.editorconfig` at project root.
 
 **Coverage limitation:** ktlint-gradle cannot detect Android source sets under AGP 9.x + Kotlin 2.x (adding `kotlin-android` explicitly conflicts with `kotlin-compose`). As a result:
-- `:core:data` (Kotlin JVM) — fully covered; `ktlintFormat` auto-fixes on every run.
-- `:app`, `:core:ui` (Android) — only `.kts` build scripts are checked. Kotlin source files must be formatted manually via Android Studio (`Code → Reformat Code`) or by hand.
+- `:core:domain`, `:core:data` (Kotlin JVM) — fully covered; `ktlintFormat` auto-fixes on every run.
+- `:app`, `:core:design-system`, `:core:database`, `:core:auth` (Android) — only `.kts` build scripts are checked. Kotlin source files must be formatted manually via Android Studio (`Code → Reformat Code`) or by hand.
 
 The plugin is applied per-module via `plugins { alias(libs.plugins.ktlint) }` and configured in root `build.gradle.kts` using `subprojects { plugins.withId("org.jlleitschuh.gradle.ktlint") { ... } }`.
 
@@ -213,7 +230,7 @@ Active `.editorconfig` suppressions:
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
-- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components that need `:core:data` types (e.g. `RecipeCard`) live in `app/ui/components/` (internal to `:app`). Pure design-system components with no data-model dependency move to `:core:ui`.
+- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components that need `:core:domain` types (e.g. `RecipeCard`) live in `app/ui/components/` (internal to `:app`) for now — they move to `:core:presentation` in a later phase. Pure design-system components with no data-model dependency move to `:core:design-system`.
 - Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests — not yet wired into any test module.
 - **All user-visible strings live in `strings.xml`** — no hardcoded string literals in composables. Format strings use `%1$d`/`%1$s` placeholders and `stringResource(R.string.x, arg)`.
-- **Enums for bounded UI sets** (filter chips, label chips, etc.) live in `:core:data/model/` as plain Kotlin enums (no Android deps). The `@StringRes` mapping is a private extension property in the screen file (e.g. `RecipeFilter.labelRes`, `NoteLabel.labelRes`). This keeps the enum safe from R8 minification and separates domain identity from display text. Enums whose values are stored in Room use a stable `key: String` field as the DB value — never the enum `.name`.
+- **Enums for bounded UI sets** (filter chips, label chips, etc.) live in `:core:domain` `model/` as plain Kotlin enums (no Android deps). The `@StringRes` mapping is a private extension property in the screen file (e.g. `RecipeFilter.labelRes`, `NoteLabel.labelRes`). This keeps the enum safe from R8 minification and separates domain identity from display text. Enums whose values are stored in Room use a stable `key: String` field as the DB value — never the enum `.name`.

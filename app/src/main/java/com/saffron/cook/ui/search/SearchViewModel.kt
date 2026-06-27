@@ -2,8 +2,8 @@ package com.saffron.cook.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saffron.cook.core.data.repository.RecipeRepository
-import com.saffron.cook.data.SavedRecipesRepository
+import com.saffron.cook.core.domain.repository.RecipeRepository
+import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

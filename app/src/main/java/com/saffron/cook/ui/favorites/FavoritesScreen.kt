@@ -29,14 +29,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.saffron.cook.R
-import com.saffron.cook.core.data.model.Difficulty
-import com.saffron.cook.core.data.model.Ingredient
-import com.saffron.cook.core.data.model.Recipe
-import com.saffron.cook.core.data.model.Step
+import com.saffron.cook.core.domain.model.Difficulty
+import com.saffron.cook.core.domain.model.Ingredient
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.model.Step
 import com.saffron.cook.ui.components.RecipeCard
-import com.saffron.cook.ui.theme.PlayfairDisplayFamily
-import com.saffron.cook.ui.theme.SaffronTheme
-import com.saffron.cook.ui.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.Truffle
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

@@ -1,12 +1,12 @@
 package com.saffron.cook.core.data.network
 
-import com.saffron.cook.core.data.model.Category
-import com.saffron.cook.core.data.model.Ingredient
-import com.saffron.cook.core.data.model.Recipe
-import com.saffron.cook.core.data.model.Step
 import com.saffron.cook.core.data.network.dto.CategoryDto
 import com.saffron.cook.core.data.network.dto.MealDto
 import com.saffron.cook.core.data.network.dto.MealFilterItemDto
+import com.saffron.cook.core.domain.model.Category
+import com.saffron.cook.core.domain.model.Ingredient
+import com.saffron.cook.core.domain.model.Recipe
+import com.saffron.cook.core.domain.model.Step
 
 fun MealDto.toRecipe(isFeatured: Boolean = false): Recipe {
     val names =
@@ -104,17 +104,20 @@ fun CategoryDto.toCategory(): Category =
 private val paragraphSplit = Regex("""\r?\n\s*\r?\n""")
 
 private fun String.parseSteps(): List<Step> {
-    val paragraphs = paragraphSplit.split(this)
-        .map { it.trim() }
-        .filter { it.isNotBlank() }
-
-    val lines = if (paragraphs.size > 1) {
-        paragraphs
-    } else {
-        split("\r\n", "\n", "\r")
+    val paragraphs =
+        paragraphSplit
+            .split(this)
             .map { it.trim() }
             .filter { it.isNotBlank() }
-    }
+
+    val lines =
+        if (paragraphs.size > 1) {
+            paragraphs
+        } else {
+            split("\r\n", "\n", "\r")
+                .map { it.trim() }
+                .filter { it.isNotBlank() }
+        }
 
     return lines.mapIndexed { index, text ->
         Step(title = "Step ${index + 1}", instruction = text)

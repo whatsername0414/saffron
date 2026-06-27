@@ -1,7 +1,7 @@
 package com.saffron.cook.ui.home
 
-import com.saffron.cook.core.data.model.Category
-import com.saffron.cook.core.data.model.Recipe
+import com.saffron.cook.core.domain.model.Category
+import com.saffron.cook.core.domain.model.Recipe
 
 data class HomeUiState(
     val isLoading: Boolean = true,

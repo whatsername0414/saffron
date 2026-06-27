@@ -3,8 +3,8 @@ package com.saffron.cook.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.saffron.cook.core.data.repository.RecipeRepository
-import com.saffron.cook.data.SavedRecipesRepository
+import com.saffron.cook.core.domain.repository.RecipeRepository
+import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
