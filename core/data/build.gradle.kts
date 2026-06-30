@@ -1,5 +1,6 @@
 plugins {
     id("saffron.jvm.library")
+    id("saffron.jvm.test")
     alias(libs.plugins.ktlint)
 }
 
