@@ -42,5 +42,13 @@ gradlePlugin {
             id = "saffron.jvm.library"
             implementationClass = "JvmLibraryConventionPlugin"
         }
+        register("androidTest") {
+            id = "saffron.android.test"
+            implementationClass = "AndroidTestConventionPlugin"
+        }
+        register("jvmTest") {
+            id = "saffron.jvm.test"
+            implementationClass = "JvmTestConventionPlugin"
+        }
     }
 }
