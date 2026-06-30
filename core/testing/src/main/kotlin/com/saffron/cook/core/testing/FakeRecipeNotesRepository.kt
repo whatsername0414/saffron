@@ -4,6 +4,7 @@ import com.saffron.cook.core.database.entity.RecipeNoteEntity
 import com.saffron.cook.core.database.repository.RecipeNotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -12,7 +13,7 @@ class FakeRecipeNotesRepository : RecipeNotesRepository {
     private val notes = MutableStateFlow<List<RecipeNoteEntity>>(emptyList())
     private var nextId = 1L
 
-    override val allNotesFlow: Flow<List<RecipeNoteEntity>> = notes.asStateFlow()
+    override val allNotesFlow: StateFlow<List<RecipeNoteEntity>> = notes.asStateFlow()
     override val noteCountFlow: Flow<Int> = notes.map { it.size }
 
     override fun observeNote(id: Long): Flow<RecipeNoteEntity?> =
