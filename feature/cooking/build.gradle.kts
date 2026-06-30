@@ -10,6 +10,9 @@ android {
 }
 
 dependencies {
+    testImplementation(project(":core:testing"))
+    testImplementation(project(":core:data"))
+
     implementation(project(":core:domain"))
     implementation(project(":core:database"))
     implementation(project(":core:design-system"))
