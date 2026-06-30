@@ -1,22 +1,16 @@
 package com.saffron.cook.core.database.repository
 
-import com.saffron.cook.core.database.dao.RecipeNoteDao
 import com.saffron.cook.core.database.entity.RecipeNoteEntity
 import kotlinx.coroutines.flow.Flow
 
-class RecipeNotesRepository(private val dao: RecipeNoteDao) {
+interface RecipeNotesRepository {
+    val allNotesFlow: Flow<List<RecipeNoteEntity>>
+    val noteCountFlow: Flow<Int>
 
-    val allNotesFlow: Flow<List<RecipeNoteEntity>> = dao.observeAll()
-    val noteCountFlow: Flow<Int> = dao.observeCount()
-
-    fun observeNote(id: Long): Flow<RecipeNoteEntity?> = dao.observeById(id)
-
-    suspend fun upsert(entity: RecipeNoteEntity): Long =
-        if (entity.id == 0L) dao.insert(entity) else { dao.update(entity); entity.id }
-
-    suspend fun getNote(id: Long): RecipeNoteEntity? = dao.getById(id)
-
-    suspend fun delete(id: Long) = dao.deleteById(id)
+    fun observeNote(id: Long): Flow<RecipeNoteEntity?>
+    suspend fun upsert(entity: RecipeNoteEntity): Long
+    suspend fun getNote(id: Long): RecipeNoteEntity?
+    suspend fun delete(id: Long)
 
     companion object {
         fun labelsToString(labels: Set<String>): String = labels.joinToString(",")

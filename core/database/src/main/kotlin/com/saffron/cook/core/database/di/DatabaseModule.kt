@@ -4,6 +4,9 @@ import androidx.room.Room
 import com.saffron.cook.core.database.SaffronDatabase
 import com.saffron.cook.core.database.repository.CookedRecipesRepository
 import com.saffron.cook.core.database.repository.RecipeNotesRepository
+import com.saffron.cook.core.database.repository.RoomCookedRecipesRepository
+import com.saffron.cook.core.database.repository.RoomRecipeNotesRepository
+import com.saffron.cook.core.database.repository.RoomSavedRecipesRepository
 import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
@@ -18,7 +21,7 @@ val databaseModule = module {
     single { get<SaffronDatabase>().savedRecipeDao() }
     single { get<SaffronDatabase>().recipeNoteDao() }
     single { get<SaffronDatabase>().cookedRecipeDao() }
-    single { SavedRecipesRepository(get()) }
-    single { RecipeNotesRepository(get()) }
-    single { CookedRecipesRepository(get()) }
+    single<SavedRecipesRepository> { RoomSavedRecipesRepository(get()) }
+    single<RecipeNotesRepository> { RoomRecipeNotesRepository(get()) }
+    single<CookedRecipesRepository> { RoomCookedRecipesRepository(get()) }
 }

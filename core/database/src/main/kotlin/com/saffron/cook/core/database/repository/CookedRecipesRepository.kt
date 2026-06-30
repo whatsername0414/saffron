@@ -1,30 +1,16 @@
 package com.saffron.cook.core.database.repository
 
-import com.saffron.cook.core.database.dao.CookedRecipeDao
 import com.saffron.cook.core.database.entity.CookedRecipeEntity
 import kotlinx.coroutines.flow.Flow
 
-class CookedRecipesRepository(private val dao: CookedRecipeDao) {
-
-    val allCookedFlow: Flow<List<CookedRecipeEntity>> = dao.observeAll()
-    val totalCountFlow: Flow<Int> = dao.observeTotalCount()
+interface CookedRecipesRepository {
+    val allCookedFlow: Flow<List<CookedRecipeEntity>>
+    val totalCountFlow: Flow<Int>
 
     suspend fun recordCooked(
         recipeId: String,
         recipeName: String,
         recipeImage: String,
         recipeCategory: String,
-    ) {
-        val inserted = dao.insert(
-            CookedRecipeEntity(
-                recipeId = recipeId,
-                recipeName = recipeName,
-                recipeImage = recipeImage,
-                recipeCategory = recipeCategory,
-            ),
-        )
-        if (inserted == -1L) {
-            dao.incrementAndTouch(recipeId, System.currentTimeMillis())
-        }
-    }
+    )
 }
