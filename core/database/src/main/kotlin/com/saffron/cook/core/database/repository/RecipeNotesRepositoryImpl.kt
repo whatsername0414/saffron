@@ -4,7 +4,7 @@ import com.saffron.cook.core.database.dao.RecipeNoteDao
 import com.saffron.cook.core.database.entity.RecipeNoteEntity
 import kotlinx.coroutines.flow.Flow
 
-class RoomRecipeNotesRepository(private val dao: RecipeNoteDao) : RecipeNotesRepository {
+class RecipeNotesRepositoryImpl(private val dao: RecipeNoteDao) : RecipeNotesRepository {
 
     override val allNotesFlow: Flow<List<RecipeNoteEntity>> = dao.observeAll()
     override val noteCountFlow: Flow<Int> = dao.observeCount()

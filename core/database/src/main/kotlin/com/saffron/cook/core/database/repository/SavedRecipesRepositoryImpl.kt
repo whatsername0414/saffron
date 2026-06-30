@@ -7,7 +7,7 @@ import com.saffron.cook.core.domain.model.Recipe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class RoomSavedRecipesRepository(private val dao: SavedRecipeDao) : SavedRecipesRepository {
+class SavedRecipesRepositoryImpl(private val dao: SavedRecipeDao) : SavedRecipesRepository {
 
     override val savedIdsFlow: Flow<Set<String>> = dao.observeIds().map { it.toSet() }
     override val savedRecipesFlow: Flow<List<Recipe>> =
