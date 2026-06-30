@@ -1,5 +1,6 @@
 plugins {
     id("saffron.android.library")
+    id("saffron.android.test")
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktlint)
 }
