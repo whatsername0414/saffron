@@ -1,7 +1,7 @@
 package com.saffron.cook.core.database.repository
 
-import com.saffron.cook.core.database.CookedRecipeDao
-import com.saffron.cook.core.database.CookedRecipeEntity
+import com.saffron.cook.core.database.dao.CookedRecipeDao
+import com.saffron.cook.core.database.entity.CookedRecipeEntity
 import kotlinx.coroutines.flow.Flow
 
 class CookedRecipesRepository(private val dao: CookedRecipeDao) {

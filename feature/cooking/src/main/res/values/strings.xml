@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Error states -->
+    <string name="error_load_failed">Couldn\'t load this recipe.</string>
+    <string name="error_retry">Try again</string>
+    <string name="recipe_not_found">Recipe not found.</string>
+
+    <!-- Cooking mode -->
+    <string name="cooking_step_progress">Step %1$d of %2$d</string>
+    <string name="cooking_mark_done">Mark this step done</string>
+    <string name="cooking_previous">Back</string>
+    <string name="cooking_next">Next step</string>
+    <string name="cooking_finish">Finish</string>
+    <string name="cooking_no_steps">No steps available for this recipe.</string>
+    <string name="cd_exit">Exit</string>
+
+    <!-- Cooking mode — timer -->
+    <string name="cooking_timer_title">Timer</string>
+    <string name="cooking_timer_set">Set timer · %1$s</string>
+    <string name="cooking_timer_finished">Time\'s up</string>
+    <string name="cooking_timer_pause">Pause</string>
+    <string name="cooking_timer_reset">Reset</string>
+    <string name="cooking_timer_done">Done</string>
+    <string name="cd_close_timer">Close timer</string>
+    <string name="cooking_timer_from_step">From step: \"%1$s\"</string>
+    <string name="cooking_timer_add_minute">+1 min</string>
+    <string name="cooking_timer_counting_down">Counting down</string>
+    <string name="cooking_timer_paused_label">Paused</string>
+    <string name="cooking_timer_done_label">Done</string>
+    <string name="cooking_timer_resume">Resume</string>
+
+    <!-- Cooking mode — completion sheet -->
+    <string name="cooking_done_headline">That\'s it — you\'re done.</string>
+    <string name="cooking_done_tagline">Jot down what you\'d change while it\'s fresh. A good note now is a better dish next time.</string>
+    <string name="cooking_add_note">Add a note</string>
+    <string name="cooking_maybe_later">Maybe later</string>
+</resources>

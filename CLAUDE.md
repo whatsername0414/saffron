@@ -67,24 +67,34 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               AuthRepository interface + FirebaseAuthRepository (Google Sign-In)
               di/ → authModule. api(firebase-bom) + api(firebase-auth); does NOT apply google-services
 
-:app        — shell: MainActivity, NavHost, BottomNav
+:core:presentation — shared UI components that depend on domain types (android.library + Compose) → :core:domain
+              RecipeCard (horizontal list row composable, shared by Home + Favorites; accepts `Recipe`)
+              (package com.saffron.cook.core.presentation)
+
+:app        — shell only: MainActivity, SaffronApplication, NavHost, BottomNav
               navigation/ → Screen (route definitions), BottomNavDestination (tab metadata)
-              di/         → AppModule (networkModule, coreDataModule, notesModule, cookedRecipesModule,
-                            homeModule, detailModule, cookingModule, searchModule, favoritesModule, profileModule)
-                            — DB/repo singles live in :core:database's databaseModule; authModule in :core:auth.
+              di/         → AppModule (networkModule, coreDataModule)
+                            — DB/repo singles in :core:database's databaseModule; authModule in :core:auth;
+                            feature DI in each :feature:* module.
                             Keeps the google-services plugin + Credential Manager (credentials/googleid).
-              ui/components/ → RecipeCard (horizontal list row composable, shared by Home + Favorites; accepts `Recipe`)
-              ui/<feature>/ — each feature owns its Screen, ViewModel, and UiState:
-                ui/home/       → HomeScreen, HomeViewModel, HomeUiState
-                ui/detail/     → RecipeDetailScreen, RecipeDetailViewModel, RecipeDetailUiState
-                ui/search/     → SearchScreen, SearchViewModel, SearchUiState
-                ui/favorites/  → FavoritesScreen, FavoritesViewModel, FavoritesUiState
-                ui/profile/    → ProfileScreen, ProfileViewModel, ProfileUiState
-                ui/login/      → LoginScreen, LoginViewModel, LoginUiState, LoginEvent
-                ui/cooking/    → CookingModeScreen, CookingModeViewModel, CookingModeUiState
-                ui/notes/      → NoteEditorScreen, NoteEditorViewModel, NoteEditorUiState
-                ui/noteslist/  → NoteListScreen, NoteListViewModel, NoteListUiState
-                ui/notedetail/ → NoteDetailScreen, NoteDetailViewModel, NoteDetailUiState
+
+:feature:home     — HomeScreen, HomeViewModel, HomeUiState, homeModule
+                    (com.saffron.cook.feature.home.main / .di)
+:feature:search   — SearchScreen, SearchViewModel, SearchUiState, searchModule
+                    (com.saffron.cook.feature.search.main / .di)
+:feature:recipe   — RecipeScreen (detail view), RecipeViewModel, RecipeUiState, recipeModule
+                    (com.saffron.cook.feature.recipe.main / .di)
+:feature:favorite — FavoriteScreen, FavoriteViewModel, FavoritesUiState, favoriteModule
+                    (com.saffron.cook.feature.favorite.main / .di)
+:feature:cooking  — CookingModeScreen, CookingModeViewModel, CookingModeUiState, cookingModule
+                    (com.saffron.cook.feature.cooking.main / .di)
+:feature:cooked   — CookedListScreen, CookedListViewModel, CookedListUiState, cookedModule
+                    (com.saffron.cook.feature.cooked.main / .di)
+:feature:note     — NoteListScreen/ViewModel/UiState (main/), NoteEditorScreen/ViewModel/UiState (editor/),
+                    NoteDetailScreen/ViewModel/UiState (detail/), noteModule (di/)
+                    (com.saffron.cook.feature.note)
+:feature:profile  — ProfileScreen, ProfileViewModel, ProfileUiState, profileModule
+                    (com.saffron.cook.feature.profile.main / .di)
 ```
 
 When adding a new module, apply a `:build-logic` convention plugin (below) instead of configuring AGP/Kotlin by hand: `saffron.android.library` (+ `saffron.android.compose` if it has Compose) for Android library modules, `saffron.jvm.library` for pure-logic JVM modules. Keep only module-specific bits (`namespace`, deps) in the module's own `build.gradle.kts`.
@@ -96,7 +106,7 @@ When adding a new module, apply a `:build-logic` convention plugin (below) inste
 | Plugin id | Applied to | Configures |
 |---|---|---|
 | `saffron.android.application` | `:app` | AGP application, compileSdk 37 / minSdk 24 / targetSdk 37, Java 11, `buildConfig=true`, release `optimization { enable = false }` (AGP 9 DSL); applies `saffron.android.compose` |
-| `saffron.android.library` | `:core:design-system`, `:core:database`, `:core:auth` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
+| `saffron.android.library` | `:core:design-system`, `:core:presentation`, `:core:database`, `:core:auth`, `:feature:*` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
 | `saffron.android.compose` | `:core:design-system` (and via application) | applies `org.jetbrains.kotlin.plugin.compose`, sets `buildFeatures.compose = true`. Adds **no** Compose deps — each module keeps its own (preserves the exact dependency graph) |
 | `saffron.jvm.library` | `:core:domain`, `:core:data` | `kotlin.jvm` + Java 11, with Kotlin `jvmTarget` aligned to 11 to avoid inconsistent-target failures |
 
@@ -105,32 +115,33 @@ Rules / gotchas:
 - `build-logic` compiles against the AGP 9 API → it targets **JDK 17** (Java + Kotlin both 17 in `build-logic/build.gradle.kts`). The Gradle daemon must run on JDK 17+.
 - `google-services` + `ksp` are **not** in any convention plugin — they stay applied directly in `:app`'s `build.gradle.kts` (app-only).
 - ktlint is unchanged: `build-logic` is a separate included build, so the root `subprojects { …ktlint… }` block doesn't touch it. Each module still applies `alias(libs.plugins.ktlint)` itself.
-- Future plugins (`saffron.android.feature`, `saffron.android.room`, `saffron.koin`) will be added when their first consumer module is created.
+- Future plugins (`saffron.android.room`, `saffron.koin`) will be added when their first consumer module is created. Feature modules currently use `saffron.android.library` + `saffron.android.compose` directly.
 
 ## Architecture
 
 Standard MVI / unidirectional data flow:
 
 ```
-:core:domain    ←  models + RecipeRepository interface (depends on nothing)
-:core:data      ←  RecipeRepository impl + fake            → :core:domain
-:core:database  ←  Saved/Notes/Cooked repos (Room)         → :core:domain
-:core:auth      ←  AuthRepository + FirebaseAuthRepository
+:core:domain        ←  models + RecipeRepository interface (depends on nothing)
+:core:data          ←  RecipeRepository impl + fake            → :core:domain
+:core:database      ←  Saved/Notes/Cooked repos (Room)         → :core:domain
+:core:auth          ←  AuthRepository + FirebaseAuthRepository
+:core:presentation  ←  shared composables (RecipeCard)         → :core:domain
     ↓
-:app (ViewModels — inject via Koin)
+:feature:* (ViewModels + Screens — inject via Koin, each owns its DI module)
     ↓
-:app (Composable screens ← StateFlow/UiState)
+:app (NavHost shell — wires feature screens into navigation graph)
 ```
 
 **Completed:**
-1. Koin DI — `networkModule`, `coreDataModule`, `savedRecipesModule`, `notesModule`, `authModule`, `homeModule`, `detailModule`, `cookingModule`, `searchModule`, `favoritesModule`, `loginModule`, `profileModule` wired in `SaffronApplication`.
+1. Koin DI — `networkModule` + `coreDataModule` in `:app`'s `AppModule`; `databaseModule` in `:core:database`; `authModule` in `:core:auth`; each feature owns its module (`homeModule`, `searchModule`, `recipeModule`, `favoriteModule`, `cookingModule`, `cookedModule`, `noteModule`, `profileModule`). All wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, vertical list rows, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
    - Section labels ("FEATURED TONIGHT", "SAVED FOR THE WEEK") are `.uppercase()`.
    - "Saved for the week" section: vertical list of `RecipeCard` rows (`HomeUiState.recipes: List<Recipe>`), 16dp horizontal padding, 12dp gap between rows.
    - Bookmark: `Icons.Outlined.BookmarkBorder` (unsaved) / `Icons.Filled.Bookmark` (saved). Tint: Saffron when saved, Cinnamon when unsaved.
-3. Recipe Detail screen — `RecipeDetailViewModel` + `RecipeDetailScreen` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` branch + `retry()` wired; 0dp button elevation; category label in sentence case.
+3. Recipe Detail screen — `RecipeViewModel` + `RecipeScreen` in `:feature:recipe` (hero, meta strip, ingredient list, "Start cooking" CTA). `isError` branch + `retry()` wired; 0dp button elevation; category label in sentence case.
    - Hero: 4:3 aspect ratio, Cream placeholder. Back (top-left) and bookmark (top-right) float on a 38dp circular pill (`rgba(255,255,255,0.92)`).
    - Bookmark tint: Saffron when saved, **Cinnamon when unsaved** (Detail screen differs from Home/Search).
    - Rating row (below title, above meta strip): 5 stars — filled = Saffron40 `#F5C76A`, empty = `#C9C2B6`; value + count in 12sp Inter Regular Cinnamon. Only rendered when `recipe.rating != null`.
@@ -159,15 +170,14 @@ Standard MVI / unidirectional data flow:
    - Empty state: 32dp `Icons.Outlined.BookmarkBorder` + "Your saved recipes will live here." — both `Color(0xFF8A7A5C)`, centered with `fillMaxSize`.
    - List: vertical `LazyColumn` of `RecipeCard` rows (`FavoritesUiState.recipes: List<Recipe>`), 16dp horizontal padding, 12dp gap, 8dp top / 24dp bottom — bookmark always filled/Saffron since all entries are saved.
    - Tapping a row navigates to RecipeDetail; unsaving removes it instantly via Room Flow.
-   - `RecipeCard` in `ui/components/RecipeCard.kt` (`internal`) — shared by Home and Favorites. Accepts `recipe: Recipe`. Layout: 92×70dp thumbnail (10dp radius, Cream bg), category overline, Playfair Medium 16sp title, clock + people meta row, bookmark `IconButton`.
+   - `RecipeCard` in `:core:presentation` — shared by Home and Favorites. Accepts `recipe: Recipe`. Layout: 92×70dp thumbnail (10dp radius, Cream bg), category overline, Playfair Medium 16sp title, clock + people meta row, bookmark `IconButton`.
    - Shared saved state — `SavedRecipesRepository` (Room `saved_recipes` table) is a Koin `single`. All four ViewModels (Home, Search, Detail, Favorites) inject it. `savedIdsFlow: Flow<Set<String>>` keeps bookmark icons in sync across screens. `savedRecipesFlow: Flow<List<Recipe>>` maps entities to `Recipe` inside the repository (using `SavedRecipeEntity.toRecipe()`). Saves survive app restarts.
    - `RecipeDetailUiState` gained a `savedIds: Set<String>` field so `load()` can correctly set `isSaved` after the network call completes.
    - No auth gate — saves and favorites work without sign-in. `FavoritesUiState` has no `isSignedIn` field; `FavoritesViewModel` does not inject `AuthRepository`.
 8. Firebase Auth — Google Sign-In, no forced gates:
    - `auth/AuthRepository.kt` — interface: `currentUser: Flow<FirebaseUser?>`, `currentUserSnapshot: FirebaseUser?`, `signInWithGoogle(idToken)`, `signOut()`.
    - `auth/FirebaseAuthRepository.kt` — implements via `callbackFlow` on `FirebaseAuth.AuthStateListener`; sign-in uses `GoogleAuthProvider` + `suspendCancellableCoroutine`.
-   - `ui/login/` — `LoginScreen` (Saffron-branded, Credential Manager Google Sign-In), `LoginViewModel`, `LoginUiState`/`LoginEvent`. Standalone screen at `Screen.Login` route.
-   - `ui/profile/` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button (no navigation to LoginScreen). **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Account/Dietary preferences/Notifications/Help/Sign out (all uniform `SettingsRow` with ChevronRight). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`. Stat card taps: "Saved" → Favorites tab (standard tab-switch nav); "Notes" → `NotesList`; "Cooked" → no-op.
+   - `:feature:profile` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button. **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Account/Dietary preferences/Notifications/Help/Sign out (all uniform `SettingsRow` with ChevronRight). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`. Stat card taps: "Saved" → Favorites tab (standard tab-switch nav); "Notes" → `NotesList`; "Cooked" → no-op.
    - Bookmarking is ungated: `HomeViewModel` and `SearchViewModel` do not check auth; `onToggleSave` always calls `SavedRecipesRepository.toggle()`.
    - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
@@ -186,13 +196,12 @@ Standard MVI / unidirectional data flow:
    - `CookedRecipesRepository` — `allCookedFlow`, `totalCountFlow`, `recordCooked(recipeId, recipeName, recipeImage, recipeCategory)` (upsert: insert-ignore returns -1 → increment).
    - `CookingModeViewModel.onFinish()` — sets `isFinished = true` AND calls `cookedRepository.recordCooked(...)` with the loaded recipe's id/title/imageUrl/categoryId.
    - `ProfileViewModel` — subscribes to `cookedRepository.totalCountFlow` to populate `cookedCount` in state (same pattern as `notesCount`).
-   - `ui/cookedlist/` — `CookedListScreen`, `CookedListViewModel`, `CookedListUiState`/`CookedListItem`.
+   - `:feature:cooked` — `CookedListScreen`, `CookedListViewModel`, `CookedListUiState`/`CookedListItem` (in `main/`).
    - Screen layout: header "Cooked" Playfair 26sp + back arrow; empty state: 32dp `LocalFireDepartment` icon + "Recipes you finish in cooking mode will gather here."; non-empty: caption "{total} dishes cooked across {N} recipes" (bodySmall, TextTertiary), then `LazyColumn` of rows — 92×70dp thumbnail, category overline (Saffron uppercase), Playfair Medium 16sp title, meta row (flame icon + "Once"/"N times" | check-circle icon + "last {d MMM}"), bookmark toggle.
    - Profile "Cooked" stat card taps → `Screen.CookedList` (`"cooked_list"` route); tapping a cooked row navigates to RecipeDetail.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.
-- `Screen.Login` exists as a standalone route but is not currently reachable from any bottom-nav tab.
 - Profile stat card flows: "Saved" → Favorites tab (uses `popUpTo(Home) / launchSingleTop / restoreState`, same as bottom nav tap); "Notes" → `NotesList` → `NoteDetail` → (Update) → `NoteEditor` (edit mode, pops back to NoteDetail on save) / (Delete) → pops back to `NotesList`; "Cooked" → `CookedList` (simple push, `popBackStack` to return).
 - `Screen.NoteEditor` — route `note_editor/{recipeId}?noteId={noteId}`. Create (from CookingMode): noteId defaults to 0, saves → Home. Edit (from NoteDetail): noteId set, saves → popBackStack.
 
@@ -215,7 +224,7 @@ ktlint **1.4.1** + `io.nlopez.compose.rules:ktlint:0.4.22`. Config in `.editorco
 
 **Coverage limitation:** ktlint-gradle cannot detect Android source sets under AGP 9.x + Kotlin 2.x (adding `kotlin-android` explicitly conflicts with `kotlin-compose`). As a result:
 - `:core:domain`, `:core:data` (Kotlin JVM) — fully covered; `ktlintFormat` auto-fixes on every run.
-- `:app`, `:core:design-system`, `:core:database`, `:core:auth` (Android) — only `.kts` build scripts are checked. Kotlin source files must be formatted manually via Android Studio (`Code → Reformat Code`) or by hand.
+- `:app`, `:core:design-system`, `:core:presentation`, `:core:database`, `:core:auth`, `:feature:*` (Android) — only `.kts` build scripts are checked. Kotlin source files must be formatted manually via Android Studio (`Code → Reformat Code`) or by hand.
 
 The plugin is applied per-module via `plugins { alias(libs.plugins.ktlint) }` and configured in root `build.gradle.kts` using `subprojects { plugins.withId("org.jlleitschuh.gradle.ktlint") { ... } }`.
 
@@ -230,7 +239,7 @@ Active `.editorconfig` suppressions:
 - All UI in Compose — no XML layouts.
 - BOM-managed Compose deps have no version in the catalog (BOM provides it). Navigation Compose and Koin need explicit versions.
 - `keepRules/rules.keep` holds ProGuard keep rules.
-- Each feature lives in `app/ui/<feature>/` — Screen, ViewModel, and UiState co-located. Shared UI components that need `:core:domain` types (e.g. `RecipeCard`) live in `app/ui/components/` (internal to `:app`) for now — they move to `:core:presentation` in a later phase. Pure design-system components with no data-model dependency move to `:core:design-system`.
+- Each feature lives in `:feature:<name>/` as a standalone Android library module. Screen, ViewModel, and UiState are co-located under `main/`; DI module under `di/`; note feature sub-packages further split into `main/`, `editor/`, `detail/`. Shared UI components that depend on `:core:domain` types (e.g. `RecipeCard`) live in `:core:presentation`. Pure design-system components with no data-model dependency live in `:core:design-system`.
 - Data API is TheMealDB v1 (free, no key). `MealDbRecipeRepository` in `:core:data` is the live impl; `FakeRecipeRepository` is the in-memory fallback for tests — not yet wired into any test module.
 - **All user-visible strings live in `strings.xml`** — no hardcoded string literals in composables. Format strings use `%1$d`/`%1$s` placeholders and `stringResource(R.string.x, arg)`.
 - **Enums for bounded UI sets** (filter chips, label chips, etc.) live in `:core:domain` `model/` as plain Kotlin enums (no Android deps). The `@StringRes` mapping is a private extension property in the screen file (e.g. `RecipeFilter.labelRes`, `NoteLabel.labelRes`). This keeps the enum safe from R8 minification and separates domain identity from display text. Enums whose values are stored in Room use a stable `key: String` field as the DB value — never the enum `.name`.

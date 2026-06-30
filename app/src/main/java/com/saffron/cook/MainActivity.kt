@@ -26,16 +26,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.saffron.cook.navigation.BottomNavDestination
 import com.saffron.cook.navigation.Screen
-import com.saffron.cook.ui.cooking.CookingModeScreen
-import com.saffron.cook.ui.cookedlist.CookedListScreen
-import com.saffron.cook.ui.detail.RecipeDetailScreen
-import com.saffron.cook.ui.notedetail.NoteDetailScreen
-import com.saffron.cook.ui.note.NoteEditorScreen
-import com.saffron.cook.ui.notelist.NoteListScreen
-import com.saffron.cook.ui.favorites.FavoritesScreen
-import com.saffron.cook.ui.home.HomeScreen
-import com.saffron.cook.ui.profile.ProfileScreen
-import com.saffron.cook.ui.search.SearchScreen
+import com.saffron.cook.feature.cooked.main.CookedListScreen
+import com.saffron.cook.feature.cooking.main.CookingModeScreen
+import com.saffron.cook.feature.favorite.main.FavoritesScreen
+import com.saffron.cook.feature.home.main.HomeScreen
+import com.saffron.cook.feature.note.detail.NoteDetailScreen
+import com.saffron.cook.feature.note.editor.NoteEditorScreen
+import com.saffron.cook.feature.note.main.NoteListScreen
+import com.saffron.cook.feature.profile.main.ProfileScreen
+import com.saffron.cook.feature.recipe.main.RecipeDetailScreen
+import com.saffron.cook.feature.search.main.SearchScreen
 import com.saffron.cook.core.designsystem.theme.Cinnamon
 import com.saffron.cook.core.designsystem.theme.Saffron
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
@@ -128,6 +128,7 @@ fun SaffronApp() {
             }
             composable(Screen.Profile.route) {
                 ProfileScreen(
+                    serverClientId = stringResource(R.string.default_web_client_id),
                     onOpenNotes = { navController.navigate(Screen.NotesList.route) },
                     onOpenFavorites = {
                         navController.navigate(Screen.Favorites.route) {

@@ -1,10 +1,9 @@
 package com.saffron.cook.core.database.repository
 
 import com.saffron.cook.core.domain.model.Recipe
-import com.saffron.cook.core.database.SavedRecipeDao
-import com.saffron.cook.core.database.SavedRecipeEntity
-import com.saffron.cook.core.database.toEntity
-import com.saffron.cook.core.database.toRecipe
+import com.saffron.cook.core.database.dao.SavedRecipeDao
+import com.saffron.cook.core.database.entity.toEntity
+import com.saffron.cook.core.database.entity.toRecipe
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

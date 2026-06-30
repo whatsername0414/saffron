@@ -4,6 +4,12 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.saffron.cook.core.database.dao.CookedRecipeDao
+import com.saffron.cook.core.database.dao.RecipeNoteDao
+import com.saffron.cook.core.database.dao.SavedRecipeDao
+import com.saffron.cook.core.database.entity.CookedRecipeEntity
+import com.saffron.cook.core.database.entity.RecipeNoteEntity
+import com.saffron.cook.core.database.entity.SavedRecipeEntity
 
 @Database(
     entities = [SavedRecipeEntity::class, RecipeNoteEntity::class, CookedRecipeEntity::class],

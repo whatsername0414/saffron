@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cd_back">Back</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_update">Update</string>
+    <string name="notes_title">Notes</string>
+    <string name="note_list_empty">Notes you take while cooking will gather here.</string>
+    <string name="note_detail_header">Note</string>
+    <string name="note_added_date">Added %1$s</string>
+    <string name="note_on_label">Note on</string>
+    <string name="note_section_photos">Photos</string>
+    <string name="note_delete_title">Delete this note?</string>
+    <string name="note_delete_body">This can\'t be undone.</string>
+    <string name="note_keep">Keep</string>
+    <string name="note_editor_title">New note</string>
+    <string name="note_editor_edit_title">Edit note</string>
+    <string name="note_title_hint">Give it a title</string>
+    <string name="note_body_hint">What did you change? What would you do differently? Write it down while it\'s fresh.</string>
+    <string name="note_section_rating">How it turned out</string>
+    <string name="note_section_labels">Add a label</string>
+    <string name="note_section_notes">Notes</string>
+    <string name="note_add_photo">Add photo</string>
+    <string name="note_add_more_photos">Add more</string>
+    <string name="note_remove_photo">Remove photo</string>
+    <string name="note_label_made_it">Made it</string>
+    <string name="note_label_would_make_again">Would make again</string>
+    <string name="note_label_tweak_next_time">Tweak next time</string>
+    <string name="note_label_halved_it">Halved it</string>
+    <string name="note_label_for_guests">For guests</string>
+</resources>

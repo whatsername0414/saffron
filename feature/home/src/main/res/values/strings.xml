@@ -1,0 +1,11 @@
+<resources>
+    <!-- Home screen -->
+    <string name="search_hint">Search recipes, ingredients</string>
+    <string name="featured_tonight">Featured tonight</string>
+    <string name="saved_for_the_week">Saved for the week</string>
+
+    <!-- Shared bookmark / meta labels (referenced via this module's R) -->
+    <string name="action_save">Save</string>
+    <string name="action_saved">Saved</string>
+    <string name="meta_duration_min">%1$d min</string>
+</resources>

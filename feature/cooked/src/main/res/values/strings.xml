@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cooked_title">Cooked</string>
+    <string name="cooked_empty">Recipes you finish in cooking mode will gather here.</string>
+    <string name="cooked_summary">%1$d dishes cooked across %2$d recipes</string>
+    <string name="cd_back">Back</string>
+    <string name="action_save">Save</string>
+    <string name="action_saved">Saved</string>
+</resources>
