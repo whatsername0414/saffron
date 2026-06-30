@@ -1,6 +1,7 @@
 plugins {
     id("saffron.android.library")
     id("saffron.android.compose")
+    id("saffron.android.test")
     alias(libs.plugins.ktlint)
 }
 
@@ -9,6 +10,9 @@ android {
 }
 
 dependencies {
+    testImplementation(project(":core:testing"))
+    testImplementation(project(":core:data"))
+
     implementation(project(":core:domain"))
     implementation(project(":core:database"))
     implementation(project(":core:presentation"))
