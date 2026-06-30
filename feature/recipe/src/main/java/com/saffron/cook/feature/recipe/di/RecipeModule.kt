@@ -1,9 +1,9 @@
-package com.saffron.cook.feature.home.di
+package com.saffron.cook.feature.recipe.di
 
-import com.saffron.cook.feature.home.main.HomeViewModel
+import com.saffron.cook.feature.recipe.main.RecipeViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val homeModule = module {
-    viewModelOf(::HomeViewModel)
+val recipeModule = module {
+    viewModelOf(::RecipeViewModel)
 }

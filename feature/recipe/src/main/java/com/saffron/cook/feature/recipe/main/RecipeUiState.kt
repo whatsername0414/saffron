@@ -1,8 +1,8 @@
-package com.saffron.cook.ui.detail
+package com.saffron.cook.feature.recipe.main
 
 import com.saffron.cook.core.domain.model.Recipe
 
-data class RecipeDetailUiState(
+data class RecipeUiState(
     val isLoading: Boolean = true,
     val recipe: Recipe? = null,
     val isSaved: Boolean = false,

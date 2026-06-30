@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.detail
+package com.saffron.cook.feature.recipe.main
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class RecipeDetailViewModel(
+class RecipeViewModel(
     savedStateHandle: SavedStateHandle,
     private val repository: RecipeRepository,
     private val savedRecipesRepository: SavedRecipesRepository,
@@ -19,8 +19,8 @@ class RecipeDetailViewModel(
 
     private val recipeId: String = checkNotNull(savedStateHandle["recipeId"])
 
-    private val _uiState = MutableStateFlow(RecipeDetailUiState())
-    val uiState: StateFlow<RecipeDetailUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(RecipeUiState())
+    val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -42,7 +42,7 @@ class RecipeDetailViewModel(
                     isSaved = recipe?.id in state.savedIds,
                 )
             }
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             _uiState.update { it.copy(isLoading = false, isError = true) }
         }
     }

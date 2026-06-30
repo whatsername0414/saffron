@@ -1,4 +1,4 @@
-package com.saffron.cook.ui.detail
+package com.saffron.cook.feature.recipe.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -53,7 +53,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.saffron.cook.R
 import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
@@ -66,6 +65,7 @@ import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
 import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.feature.recipe.R
 import kotlin.math.roundToInt
 import org.koin.androidx.compose.koinViewModel
 
@@ -74,7 +74,7 @@ fun RecipeDetailScreen(
     recipeId: String,
     onBack: () -> Unit,
     onStartCooking: (String) -> Unit,
-    viewModel: RecipeDetailViewModel = koinViewModel(),
+    viewModel: RecipeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 

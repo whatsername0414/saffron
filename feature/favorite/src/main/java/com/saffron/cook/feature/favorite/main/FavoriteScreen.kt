@@ -1,15 +1,17 @@
-package com.saffron.cook.ui.favorites
+package com.saffron.cook.feature.favorite.main
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
@@ -27,22 +29,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.saffron.cook.R
+import com.saffron.cook.feature.favorite.R
+import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
+import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.Truffle
 import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.Step
 import com.saffron.cook.core.presentation.RecipeCard
-import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
-import com.saffron.cook.feature.favorite.main.FavoritesViewModel
+import com.saffron.cook.ui.favorites.FavoritesUiState
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun FavoritesScreen(
     onOpenRecipe: (String) -> Unit,
-    viewModel: FavoritesViewModel = koinViewModel(),
+    viewModel: FavoriteViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -121,7 +123,7 @@ private fun FavoritesList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             horizontal = 16.dp,
             vertical = 8.dp,
         ),

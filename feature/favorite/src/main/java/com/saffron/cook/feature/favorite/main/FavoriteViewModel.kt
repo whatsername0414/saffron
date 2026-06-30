@@ -2,6 +2,7 @@ package com.saffron.cook.feature.favorite.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.saffron.cook.core.database.repository.SavedRecipesRepository
 import com.saffron.cook.ui.favorites.FavoritesUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.collections.find
 
-class FavoritesViewModel(
+class FavoriteViewModel(
     private val savedRecipesRepository: SavedRecipesRepository,
 ) : ViewModel() {
 

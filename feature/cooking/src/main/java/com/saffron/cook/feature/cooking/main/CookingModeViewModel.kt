@@ -115,14 +115,7 @@ class CookingModeViewModel(
     fun onFinish() {
         _uiState.update { it.copy(isFinished = true) }
         _uiState.value.recipe?.let { recipe ->
-            viewModelScope.launch {
-                cookedRepository.recordCooked(
-                    recipeId = recipe.id,
-                    recipeName = recipe.title,
-                    recipeImage = recipe.imageUrl,
-                    recipeCategory = recipe.categoryId,
-                )
-            }
+            viewModelScope.launch { cookedRepository.recordCooked(recipe) }
         }
     }
 

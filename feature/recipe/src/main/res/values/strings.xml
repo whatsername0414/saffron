@@ -1,3 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_save">Save</string>
+    <string name="action_saved">Saved</string>
+    <string name="cd_back">Back</string>
+
+    <string name="recipe_not_found">Recipe not found.</string>
+    <string name="error_load_failed">Couldn\'t load this recipe.</string>
+    <string name="error_retry">Try again</string>
+    <string name="start_cooking">Start cooking</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="meta_cook_time">cook time</string>
+    <string name="meta_servings">servings</string>
+    <string name="meta_difficulty">difficulty</string>
+
+    <string name="meta_duration_min">%1$d min</string>
+    <string name="meta_serves">serves %1$d</string>
 </resources>

@@ -1,9 +1,9 @@
-package com.saffron.cook.feature.recipe.di
+package com.saffron.cook.feature.favorite.di
 
-import com.saffron.cook.feature.recipe.main.RecipeViewModel
+import com.saffron.cook.feature.favorite.main.FavoriteViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val recipeModule = module {
-    viewModelOf(::RecipeViewModel)
+val favoriteModule = module {
+    viewModelOf(::FavoriteViewModel)
 }

@@ -7,7 +7,7 @@ import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.Step
 import com.saffron.cook.core.domain.repository.RecipeRepository
 
-object FakeRecipeRepository : RecipeRepository {
+class FakeRecipeRepository(var shouldThrow: Boolean = false) : RecipeRepository {
     private val categories =
         listOf(
             Category("italian", "Italian"),
@@ -276,23 +276,32 @@ object FakeRecipeRepository : RecipeRepository {
             ),
         )
 
-    override suspend fun getRecipes(): List<Recipe> = recipes
+    override suspend fun getRecipes(): List<Recipe> = guard { recipes }
 
-    override suspend fun getRecipeById(id: String): Recipe? = recipes.find { it.id == id }
+    override suspend fun getRecipeById(id: String): Recipe? = guard { recipes.find { it.id == id } }
 
-    override suspend fun getCategories(): List<Category> = categories
+    override suspend fun getCategories(): List<Category> = guard { categories }
 
-    override suspend fun getFeaturedRecipe(): Recipe? = recipes.find { it.isFeatured }
+    override suspend fun getFeaturedRecipe(): Recipe? = guard { recipes.find { it.isFeatured } }
 
-    override suspend fun getRecipesByCategory(categoryId: String): List<Recipe> = recipes.filter { it.categoryId == categoryId }
+    override suspend fun getRecipesByCategory(categoryId: String): List<Recipe> =
+        guard { recipes.filter { it.categoryId == categoryId } }
 
-    override suspend fun searchRecipes(query: String): List<Recipe> {
+    override suspend fun searchRecipes(query: String): List<Recipe> = guard {
         val q = query.trim().lowercase()
-        if (q.isEmpty()) return recipes
-        return recipes.filter { recipe ->
-            recipe.title.lowercase().contains(q) ||
-                recipe.description.lowercase().contains(q) ||
-                recipe.ingredients.any { it.name.lowercase().contains(q) }
+        if (q.isEmpty()) {
+            recipes
+        } else {
+            recipes.filter { recipe ->
+                recipe.title.lowercase().contains(q) ||
+                    recipe.description.lowercase().contains(q) ||
+                    recipe.ingredients.any { it.name.lowercase().contains(q) }
+            }
         }
+    }
+
+    private inline fun <T> guard(block: () -> T): T {
+        if (shouldThrow) throw IllegalStateException("FakeRecipeRepository error")
+        return block()
     }
 }
