@@ -14,12 +14,6 @@ import org.koin.dsl.module
 val databaseModule = module {
     single {
         Room.databaseBuilder(androidContext(), SaffronDatabase::class.java, "saffron_db")
-            .addMigrations(
-                SaffronDatabase.MIGRATION_1_2,
-                SaffronDatabase.MIGRATION_2_3,
-                SaffronDatabase.MIGRATION_3_4,
-                SaffronDatabase.MIGRATION_4_5,
-            )
             .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }

@@ -57,8 +57,9 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               Exposes :core:domain as api (its public API returns domain types)
 
 :core:database — Room persistence + the 3 shared repos (android.library + ksp) → :core:domain
-              SaffronDatabase v3, SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
-              migrations, entity↔Recipe mappers (package com.saffron.cook.core.database)
+              SaffronDatabase v1 (single fresh schema, no migrations — dev-only, destructive fallback),
+              SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
+              entity↔Recipe mappers (package com.saffron.cook.core.database)
               repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository
               di/ → databaseModule (DB single + 3 DAO singles + 3 repo singles)
               Exposes Room runtime/ktx as api so :app sees entity types
@@ -183,7 +184,7 @@ Standard MVI / unidirectional data flow:
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
 
 9. Recipe Notes — post-cook journaling with full browse/edit/delete flow:
-   - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. `SaffronDatabase` bumped to v2 with `MIGRATION_1_2`. DAO has `observeAll`, `observeById` (Flow), `observeCount`, `getById`, `insert`, `update`, `deleteById`.
+   - `RecipeNoteEntity` / `RecipeNoteDao` — Room table `recipe_notes`; fields: id, recipeId, recipeName, recipeImage, title, body, rating (0–5), labels (comma-separated), photos (comma-separated URIs, max 4), createdAt. Part of the `SaffronDatabase` v1 schema. DAO has `observeAll`, `observeById` (Flow), `observeCount`, `getById`, `insert`, `update`, `deleteById`.
    - `RecipeNotesRepository` — `allNotesFlow`, `noteCountFlow`, `observeNote(id)` (Flow), `upsert`, `getNote`, `delete`. `labelsToString/fromString` and `photosToString/fromString` helpers (comma-split).
    - `NoteEditorScreen` — full-screen, route `note_editor/{recipeId}?noteId={noteId}`. Create mode (noteId=0): fetches recipe info from API, saves and navigates to Home. Edit mode (noteId≠0): loads existing note from Room, preserves original `createdAt` on save, pops back to NoteDetail. Header shows "New note" / "Edit note". Layout: ×, label, "Save" ghost; recipe context card (Cream, 44×44); borderless Playfair 26sp title; hairline divider; star rating (32dp); label chips (FlowRow, pill, Saffron selected); OutlinedTextField body; photo LazyRow (100×100, max 4). Label chips are backed by `NoteLabel` enum (`:core:domain`); `key` field is the DB-stored string (stable English value), `labelRes` extension in `NoteEditorScreen.kt` maps to `R.string.note_label_*`.
    - `NoteListScreen` — route `notes_list`. Header: "Notes" Playfair 26sp + back arrow. Empty state: plus icon + caption. List: `LazyColumn`, cards with 14dp radius, 0.5dp border; each card shows 40×40 recipe image, recipe name overline (Saffron), note title (Playfair Medium 16sp), date (right), star rating (15dp, if > 0), body preview (2-line clamp), label chips. Navigated to from Profile "Notes" stat card.
@@ -192,7 +193,7 @@ Standard MVI / unidirectional data flow:
    - `canSave` — true when any of title / body / rating / labels / photos is non-empty.
 
 10. Cooked list — tracks every recipe completed in cooking mode, with per-recipe cook counts and last-cooked dates:
-   - `CookedRecipeEntity` / `CookedRecipeDao` — Room table `cooked_recipes`; PK `recipeId` (TEXT); fields: recipeName, recipeImage, recipeCategory, times (INT, default 1), lastCookedAt (epoch millis). `SaffronDatabase` bumped to v3 with `MIGRATION_2_3`. DAO has `observeAll` (Flow, ordered by lastCookedAt DESC), `observeTotalCount` (Flow, SUM of times), insert-ignore + `incrementAndTouch`.
+   - `CookedRecipeEntity` / `CookedRecipeDao` — Room table `cooked_recipes`; PK `recipeId` (TEXT); fields: recipeName, recipeImage, recipeCategory, times (INT, default 1), lastCookedAt (epoch millis). Part of the `SaffronDatabase` v1 schema. DAO has `observeAll` (Flow, ordered by lastCookedAt DESC), `observeTotalCount` (Flow, SUM of times), insert-ignore + `incrementAndTouch`.
    - `CookedRecipesRepository` — `allCookedFlow`, `totalCountFlow`, `recordCooked(recipeId, recipeName, recipeImage, recipeCategory)` (upsert: insert-ignore returns -1 → increment).
    - `CookingModeViewModel.onFinish()` — sets `isFinished = true` AND calls `cookedRepository.recordCooked(...)` with the loaded recipe's id/title/imageUrl/categoryId.
    - `ProfileViewModel` — subscribes to `cookedRepository.totalCountFlow` to populate `cookedCount` in state (same pattern as `notesCount`).
