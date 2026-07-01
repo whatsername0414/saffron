@@ -12,6 +12,9 @@ android {
 dependencies {
     testImplementation(project(":core:testing"))
     testImplementation(project(":core:data"))
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(project(":core:domain"))
     implementation(project(":core:database"))

@@ -129,7 +129,7 @@ fun CookingModeScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CookingModeContent(
+internal fun CookingModeContent(
     state: CookingModeUiState,
     onBack: () -> Unit,
     onAddNote: (recipeId: String) -> Unit,
