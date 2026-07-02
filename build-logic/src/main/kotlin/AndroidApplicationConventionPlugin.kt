@@ -6,7 +6,12 @@ import org.gradle.kotlin.dsl.configure
 
 /**
  * Convention plugin for the `:app` module: AGP application + Compose, SDK levels,
- * Java 11, BuildConfig, and the AGP 9 release `optimization` block.
+ * Java 11, BuildConfig, and the debug/release build types (AGP 9 `optimization` DSL).
+ *
+ * debug: `.debug` applicationIdSuffix/versionNameSuffix so it can install alongside release;
+ * requires a matching Firebase Android app (`com.saffron.cook.debug`) in `google-services.json`.
+ * release: R8 shrink+obfuscate enabled via `optimization { enable = true }`, picking up keep
+ * rules from every module's `src/main/keepRules/rules.keep`.
  *
  * Module-specific config (namespace, applicationId, versionCode/Name, testInstrumentationRunner)
  * stays in `app/build.gradle.kts`.
@@ -37,9 +42,15 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                 }
 
                 buildTypes {
+                    debug {
+                        applicationIdSuffix = ".debug"
+                        versionNameSuffix = "-debug"
+                        isDebuggable = true
+                    }
                     release {
+                        isDebuggable = false
                         optimization {
-                            enable = false
+                            enable = true
                         }
                     }
                 }

@@ -10,3 +10,8 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Gson deserializes TheMealDB DTOs via reflection on field names (@SerializedName) —
+# without these, R8 shrinking/renaming breaks network parsing at runtime.
+-keepattributes Signature,*Annotation*
+-keep class com.saffron.cook.core.data.network.dto.** { *; }

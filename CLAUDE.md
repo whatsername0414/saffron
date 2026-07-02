@@ -110,7 +110,7 @@ When adding a new module, apply a `:build-logic` convention plugin (below) inste
 
 | Plugin id | Applied to | Configures |
 |---|---|---|
-| `saffron.android.application` | `:app` | AGP application, compileSdk 37 / minSdk 24 / targetSdk 37, Java 11, `buildConfig=true`, release `optimization { enable = false }` (AGP 9 DSL); applies `saffron.android.compose` |
+| `saffron.android.application` | `:app` | AGP application, compileSdk 37 / minSdk 24 / targetSdk 37, Java 11, `buildConfig=true`; debug (`.debug` applicationIdSuffix/versionNameSuffix) and release (R8 shrink+obfuscate via `optimization { enable = true }`, AGP 9 DSL) build types; applies `saffron.android.compose` |
 | `saffron.android.library` | `:core:design-system`, `:core:presentation`, `:core:database`, `:core:auth`, `:feature:*` | AGP library base, SDK 24/37, Java 11. `namespace` stays per-module |
 | `saffron.android.compose` | `:core:design-system` (and via application) | applies `org.jetbrains.kotlin.plugin.compose`, sets `buildFeatures.compose = true`. Adds **no** Compose deps — each module keeps its own (preserves the exact dependency graph) |
 | `saffron.jvm.library` | `:core:domain`, `:core:data` | `kotlin.jvm` + Java 11, with Kotlin `jvmTarget` aligned to 11 to avoid inconsistent-target failures |
@@ -184,7 +184,7 @@ Standard MVI / unidirectional data flow:
    - `auth/FirebaseAuthRepository.kt` — implements via `callbackFlow` on `FirebaseAuth.AuthStateListener`; sign-in uses `GoogleAuthProvider` + `suspendCancellableCoroutine`.
    - `:feature:profile` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button. **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Theme/Help (signed-out) or Theme/Help/Sign out (signed-in) (all uniform `SettingsRow` with optional trailing value + ChevronRight — see item 12 for the Theme row/picker). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`. Stat card taps: "Saved" → Favorites tab (standard tab-switch nav); "Notes" → `NotesList`; "Cooked" → no-op.
    - Bookmarking is ungated: `HomeViewModel` and `SearchViewModel` do not check auth; `onToggleSave` always calls `SavedRecipesRepository.toggle()`.
-   - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
+   - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present, with two registered Android apps — `com.saffron.cook` (release) and `com.saffron.cook.debug` (debug, matching the `.debug` applicationIdSuffix) — both with the shared debug-keystore SHA-1 registered so Google Sign-In works on debug builds too.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
 
 9. Recipe Notes — post-cook journaling with full browse/edit/delete flow:
