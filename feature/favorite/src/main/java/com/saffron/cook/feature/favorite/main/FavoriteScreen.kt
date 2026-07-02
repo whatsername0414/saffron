@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.saffron.cook.feature.favorite.R
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
@@ -61,10 +60,11 @@ private fun FavoritesContent(
     onToggleSave: (String) -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         Text(
             text = stringResource(R.string.favorites_title),
@@ -74,7 +74,7 @@ private fun FavoritesContent(
                 fontSize = 26.sp,
                 letterSpacing = (-0.3).sp,
             ),
-            color = Truffle,
+            color = colors.textPrimary,
             modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
         )
 
@@ -92,6 +92,7 @@ private fun FavoritesContent(
 
 @Composable
 private fun FavoritesEmptyState() {
+    val colors = MaterialTheme.saffronColors
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -103,13 +104,13 @@ private fun FavoritesEmptyState() {
                 imageVector = Icons.Outlined.BookmarkBorder,
                 contentDescription = null,
                 modifier = Modifier.size(32.dp),
-                tint = Color(0xFF8A7A5C),
+                tint = colors.textTertiary,
             )
             Spacer(Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.favorites_empty),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF8A7A5C),
+                color = colors.textTertiary,
             )
         }
     }
@@ -123,10 +124,7 @@ private fun FavoritesList(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(
-            horizontal = 16.dp,
-            vertical = 8.dp,
-        ),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(recipes, key = { it.id }) { recipe ->

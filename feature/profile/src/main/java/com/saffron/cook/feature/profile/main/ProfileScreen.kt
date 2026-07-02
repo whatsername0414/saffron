@@ -51,20 +51,15 @@ import androidx.credentials.exceptions.GetCredentialException
 import coil.compose.AsyncImage
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
+import androidx.compose.material3.MaterialTheme
 import com.saffron.cook.core.designsystem.theme.InterFamily
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.Saffron20
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import com.saffron.cook.feature.profile.R
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-
-private val BorderTertiary = Color(0xFFE4DFD5)
 
 @Composable
 fun ProfileScreen(
@@ -117,10 +112,11 @@ private fun ProfileContent(
     onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .verticalScroll(rememberScrollState()),
     ) {
         Text(
@@ -131,7 +127,7 @@ private fun ProfileContent(
                 fontSize = 26.sp,
                 letterSpacing = (-0.3).sp,
             ),
-            color = Truffle,
+            color = colors.textPrimary,
             modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
         )
 
@@ -163,6 +159,7 @@ private fun SignedOutContent(
     onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     // Generic avatar row
     Row(
         modifier = Modifier
@@ -175,14 +172,14 @@ private fun SignedOutContent(
             modifier = Modifier
                 .size(64.dp)
                 .clip(CircleShape)
-                .background(Cream)
-                .border(BorderStroke(0.5.dp, BorderTertiary), CircleShape),
+                .background(colors.surfaceCream)
+                .border(BorderStroke(0.5.dp, colors.borderTertiary), CircleShape),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Outlined.Person,
                 contentDescription = null,
-                tint = Saffron160,
+                tint = colors.onCream,
                 modifier = Modifier.size(28.dp),
             )
         }
@@ -196,7 +193,7 @@ private fun SignedOutContent(
                     fontSize = 22.sp,
                     letterSpacing = (-0.2).sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
             )
             Text(
                 text = stringResource(R.string.profile_guest_subtitle),
@@ -205,7 +202,7 @@ private fun SignedOutContent(
                     fontWeight = FontWeight.Light,
                     fontSize = 12.sp,
                 ),
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
         }
     }
@@ -217,7 +214,7 @@ private fun SignedOutContent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Cream, RoundedCornerShape(10.dp))
+                .background(colors.surfaceCream, RoundedCornerShape(10.dp))
                 .padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
@@ -229,7 +226,7 @@ private fun SignedOutContent(
                     fontSize = 11.sp,
                     letterSpacing = 1.1.sp,
                 ),
-                color = Saffron,
+                color = colors.accent,
             )
             Text(
                 text = stringResource(R.string.profile_add_account),
@@ -239,7 +236,7 @@ private fun SignedOutContent(
                     fontSize = 20.sp,
                     letterSpacing = (-0.2).sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
             )
             Text(
                 text = stringResource(R.string.profile_add_account_body),
@@ -249,7 +246,7 @@ private fun SignedOutContent(
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                 ),
-                color = Cinnamon,
+                color = colors.textSecondary,
                 modifier = Modifier.padding(bottom = 10.dp),
             )
             Button(
@@ -259,7 +256,7 @@ private fun SignedOutContent(
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 if (state.isSigningIn) {
@@ -301,6 +298,7 @@ private fun SignedInContent(
     onSignOut: () -> Unit,
 ) {
     val user = state.user
+    val colors = MaterialTheme.saffronColors
 
     // User avatar row
     Row(
@@ -318,7 +316,7 @@ private fun SignedInContent(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(Cream),
+                    .background(colors.surfaceCream),
             )
         } else {
             Box(
@@ -335,7 +333,7 @@ private fun SignedInContent(
                         fontWeight = FontWeight.Normal,
                         fontSize = 26.sp,
                     ),
-                    color = Saffron160,
+                    color = colors.onCream,
                 )
             }
         }
@@ -349,7 +347,7 @@ private fun SignedInContent(
                     fontSize = 22.sp,
                     letterSpacing = (-0.2).sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
             )
             Text(
                 text = user?.email ?: "",
@@ -358,7 +356,7 @@ private fun SignedInContent(
                     fontWeight = FontWeight.Light,
                     fontSize = 12.sp,
                 ),
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
         }
     }
@@ -371,7 +369,7 @@ private fun SignedInContent(
             SettingsEntry(stringResource(R.string.profile_setting_dietary)),
             SettingsEntry(stringResource(R.string.profile_setting_notifications)),
             SettingsEntry(stringResource(R.string.profile_setting_help)),
-            SettingsEntry(stringResource(R.string.profile_sign_out), labelColor = Cinnamon, onClick = onSignOut),
+            SettingsEntry(stringResource(R.string.profile_sign_out), labelColor = colors.textSecondary, onClick = onSignOut),
         ),
     )
 }
@@ -407,6 +405,7 @@ private fun StatCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit),
 ) {
+    val colors = MaterialTheme.saffronColors
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(10.dp))
@@ -415,7 +414,7 @@ private fun StatCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Cream, RoundedCornerShape(10.dp))
+                .background(colors.surfaceCream, RoundedCornerShape(10.dp))
                 .padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -427,7 +426,7 @@ private fun StatCard(
                     fontWeight = FontWeight.Normal,
                     fontSize = 28.sp,
                 ),
-                color = Saffron160,
+                color = colors.onCream,
             )
             Text(
                 text = label,
@@ -436,7 +435,7 @@ private fun StatCard(
                     fontWeight = FontWeight.Normal,
                     fontSize = 12.sp,
                 ),
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
         }
     }
@@ -451,11 +450,12 @@ private data class SettingsEntry(
 
 @Composable
 private fun SettingsSection(rows: List<SettingsEntry>) {
+    val colors = MaterialTheme.saffronColors
     Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp)) {
         rows.forEachIndexed { i, entry ->
             SettingsRow(entry = entry)
             if (i < rows.lastIndex) {
-                HorizontalDivider(thickness = 0.5.dp, color = BorderTertiary)
+                HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
             }
         }
     }
@@ -463,6 +463,7 @@ private fun SettingsSection(rows: List<SettingsEntry>) {
 
 @Composable
 private fun SettingsRow(entry: SettingsEntry) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -478,12 +479,12 @@ private fun SettingsRow(entry: SettingsEntry) {
                 fontWeight = FontWeight.Light,
                 fontSize = 15.sp,
             ),
-            color = if (entry.labelColor == Color.Unspecified) Truffle else entry.labelColor,
+            color = if (entry.labelColor == Color.Unspecified) colors.textPrimary else entry.labelColor,
         )
         Icon(
             imageVector = entry.icon,
             contentDescription = null,
-            tint = Cinnamon,
+            tint = colors.textSecondary,
             modifier = Modifier.size(18.dp),
         )
     }

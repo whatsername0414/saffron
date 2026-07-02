@@ -54,16 +54,13 @@ import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.Step
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.Saffron20
 import com.saffron.cook.core.designsystem.theme.Saffron40
+import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.presentation.RecipeCard
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -91,12 +88,13 @@ private fun HomeContent(
     onNavigateToSearch: () -> Unit,
     onOpenRecipe: (String) -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     val categoryPairs = remember(state.categories) { state.categories.map { it.id to it.name } }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.surface),
         contentPadding = PaddingValues(bottom = 24.dp),
     ) {
         item { HomeHeader(greeting = state.greeting, dateLabel = state.dateLabel) }
@@ -130,7 +128,7 @@ private fun HomeContent(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = colors.accent, strokeWidth = 2.dp)
                 }
             }
         } else if (state.recipes.isNotEmpty()) {
@@ -138,7 +136,7 @@ private fun HomeContent(
                 Text(
                     text = stringResource(R.string.saved_for_the_week).uppercase(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = Color(0xFF8A7A5C),
+                    color = colors.textTertiary,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp),
                 )
             }
@@ -160,6 +158,7 @@ private fun HomeContent(
 
 @Composable
 private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -171,7 +170,7 @@ private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier =
             Text(
                 text = dateLabel.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF8A7A5C),
+                color = colors.textTertiary,
             )
             Spacer(Modifier.height(4.dp))
             Text(
@@ -181,7 +180,7 @@ private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier =
                     fontSize = 28.sp,
                     letterSpacing = (-0.3).sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
             )
         }
         InitialsAvatar(initial = "M", size = 44)
@@ -209,13 +208,14 @@ private fun InitialsAvatar(initial: String, size: Int, modifier: Modifier = Modi
 
 @Composable
 private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(Color.White)
-            .border(0.5.dp, Color(0xFFD3CFC8), RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(0.5.dp, colors.borderPrimary, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -224,13 +224,13 @@ private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
         Icon(
             imageVector = Icons.Outlined.Search,
             contentDescription = null,
-            tint = Color(0xFF8A7A5C),
+            tint = colors.textTertiary,
             modifier = Modifier.size(20.dp),
         )
         Text(
             text = stringResource(R.string.search_hint),
             style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFF8A7A5C),
+            color = colors.textTertiary,
         )
     }
 }
@@ -264,8 +264,9 @@ private fun CategoryRow(
 
 @Composable
 private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val bg = if (selected) Saffron else Cream
-    val text = if (selected) Color.White else Saffron160
+    val colors = MaterialTheme.saffronColors
+    val bg = if (selected) colors.accent else colors.surfaceCream
+    val text = if (selected) Color.White else colors.onCream
 
     Box(
         modifier = modifier
@@ -293,11 +294,12 @@ private fun FeaturedSection(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 18.dp)) {
         Text(
             text = stringResource(R.string.featured_tonight).uppercase(),
             style = MaterialTheme.typography.labelMedium,
-            color = Saffron,
+            color = colors.accent,
             modifier = Modifier.padding(bottom = 8.dp),
         )
         Box(
@@ -334,7 +336,7 @@ private fun FeaturedSection(
                 Icon(
                     imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                     contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                    tint = if (isSaved) Saffron else Cinnamon
+                    tint = if (isSaved) colors.accent else colors.textSecondary,
                 )
             }
             Column(

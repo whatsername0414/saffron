@@ -46,17 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.feature.note.R
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
 import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.androidx.compose.koinViewModel
-
-private val BorderTertiary = Color(0xFFE4DFD5)
-private val TextTertiary = Color(0xFF8A7A5C)
 
 @Composable
 fun NoteListScreen(
@@ -75,7 +69,8 @@ private fun NoteListContent(
     onBack: () -> Unit,
     onOpenNote: (Long) -> Unit,
 ) {
-    Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
+    val colors = MaterialTheme.saffronColors
+    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -87,7 +82,7 @@ private fun NoteListContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = Truffle,
+                        tint = colors.textPrimary,
                     )
                 }
                 Text(
@@ -98,7 +93,7 @@ private fun NoteListContent(
                         fontSize = 26.sp,
                         letterSpacing = (-0.3).sp,
                     ),
-                    color = Truffle,
+                    color = colors.textPrimary,
                 )
             }
 
@@ -115,13 +110,13 @@ private fun NoteListContent(
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = colors.textTertiary,
                             modifier = Modifier.size(32.dp),
                         )
                         Text(
                             text = stringResource(R.string.note_list_empty),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.widthIn(max = 240.dp),
                         )
@@ -149,12 +144,13 @@ private fun NoteListContent(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
-            .background(Color.White)
-            .border(0.5.dp, BorderTertiary, RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(0.5.dp, colors.borderTertiary, RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -167,7 +163,7 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Cream),
+                    .background(colors.surfaceCream),
             ) {
                 AsyncImage(
                     model = note.recipeImage,
@@ -180,7 +176,7 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
                 Text(
                     text = note.recipeName.uppercase(),
                     style = MaterialTheme.typography.labelMedium,
-                    color = Saffron,
+                    color = colors.accent,
                 )
                 Text(
                     text = note.title,
@@ -190,13 +186,13 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                     ),
-                    color = Truffle,
+                    color = colors.textPrimary,
                 )
             }
             Text(
                 text = note.dateLabel,
                 style = MaterialTheme.typography.bodySmall,
-                color = TextTertiary,
+                color = colors.textTertiary,
             )
         }
 
@@ -217,7 +213,7 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
             Text(
                 text = note.body,
                 style = MaterialTheme.typography.bodySmall,
-                color = Cinnamon,
+                color = colors.textSecondary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -232,13 +228,13 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(percent = 50))
-                            .background(Cream)
+                            .background(colors.surfaceCream)
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelLarge,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                         )
                     }
                 }

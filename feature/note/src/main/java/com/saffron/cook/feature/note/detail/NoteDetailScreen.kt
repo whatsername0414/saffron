@@ -51,18 +51,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.feature.note.R
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.InterFamily
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
 import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
 import com.saffron.cook.core.designsystem.theme.SemanticError
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.androidx.compose.koinViewModel
-
-private val BorderTertiary = Color(0xFFE4DFD5)
 
 @Composable
 fun NoteDetailScreen(
@@ -92,7 +87,8 @@ private fun NoteDetailContent(
     onDismissDeleteConfirm: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
+    val colors = MaterialTheme.saffronColors
+    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -104,13 +100,13 @@ private fun NoteDetailContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = Truffle,
+                        tint = colors.textPrimary,
                     )
                 }
                 Text(
                     text = stringResource(R.string.note_detail_header),
                     style = MaterialTheme.typography.labelLarge,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(onClick = onShowDeleteConfirm) {
@@ -134,7 +130,7 @@ private fun NoteDetailContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(8.dp))
-                                .background(Cream)
+                                .background(colors.surfaceCream)
                                 .padding(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -143,7 +139,7 @@ private fun NoteDetailContent(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(Color.White),
+                                    .background(MaterialTheme.colorScheme.surface),
                             ) {
                                 AsyncImage(
                                     model = note.recipeImage,
@@ -156,7 +152,7 @@ private fun NoteDetailContent(
                                 Text(
                                     text = stringResource(R.string.note_on_label).uppercase(),
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Saffron,
+                                    color = colors.accent,
                                 )
                                 Text(
                                     text = note.recipeName,
@@ -165,7 +161,7 @@ private fun NoteDetailContent(
                                         fontWeight = FontWeight.Medium,
                                         fontSize = 15.sp,
                                     ),
-                                    color = Truffle,
+                                    color = colors.textPrimary,
                                 )
                             }
                         }
@@ -181,7 +177,7 @@ private fun NoteDetailContent(
                                 lineHeight = 34.sp,
                                 letterSpacing = (-0.3).sp,
                             ),
-                            color = Truffle,
+                            color = colors.textPrimary,
                         )
 
                         Spacer(Modifier.height(8.dp))
@@ -189,7 +185,7 @@ private fun NoteDetailContent(
                         Text(
                             text = stringResource(R.string.note_added_date, note.dateLabel),
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF8A7A5C),
+                            color = colors.textTertiary,
                         )
 
                         Spacer(Modifier.height(16.dp))
@@ -217,13 +213,13 @@ private fun NoteDetailContent(
                                     Box(
                                         modifier = Modifier
                                             .clip(RoundedCornerShape(percent = 50))
-                                            .background(Cream)
+                                            .background(colors.surfaceCream)
                                             .padding(horizontal = 14.dp, vertical = 8.dp),
                                     ) {
                                         Text(
                                             text = label,
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = Cinnamon,
+                                            color = colors.textSecondary,
                                         )
                                     }
                                 }
@@ -235,7 +231,7 @@ private fun NoteDetailContent(
                             Text(
                                 text = note.body,
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Truffle,
+                                color = colors.textPrimary,
                             )
                         }
                     }
@@ -245,7 +241,7 @@ private fun NoteDetailContent(
                         Text(
                             text = stringResource(R.string.note_section_photos).uppercase(),
                             style = MaterialTheme.typography.labelMedium,
-                            color = Color(0xFF8A7A5C),
+                            color = colors.textTertiary,
                             modifier = Modifier.padding(horizontal = 16.dp),
                         )
                         Spacer(Modifier.height(10.dp))
@@ -258,7 +254,7 @@ private fun NoteDetailContent(
                                     modifier = Modifier
                                         .size(132.dp)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(Cream),
+                                        .background(colors.surfaceCream),
                                 ) {
                                     AsyncImage(
                                         model = uri,
@@ -274,7 +270,7 @@ private fun NoteDetailContent(
                     Spacer(Modifier.height(24.dp))
                 }
 
-                HorizontalDivider(thickness = 0.5.dp, color = BorderTertiary)
+                HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
                 Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
                     Button(
                         onClick = onEdit,
@@ -282,7 +278,7 @@ private fun NoteDetailContent(
                             .fillMaxWidth()
                             .height(48.dp),
                         shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                         elevation = ButtonDefaults.buttonElevation(0.dp),
                     ) {
                         Text(
@@ -305,7 +301,7 @@ private fun NoteDetailContent(
         ModalBottomSheet(
             onDismissRequest = onDismissDeleteConfirm,
             sheetState = sheetState,
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
             dragHandle = null,
         ) {
@@ -317,13 +313,13 @@ private fun NoteDetailContent(
                         fontWeight = FontWeight.Medium,
                         fontSize = 20.sp,
                     ),
-                    color = Truffle,
+                    color = colors.textPrimary,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
                     text = stringResource(R.string.note_delete_body),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                 )
                 Spacer(Modifier.height(18.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -331,7 +327,7 @@ private fun NoteDetailContent(
                         onClick = onDismissDeleteConfirm,
                         modifier = Modifier.weight(1f).height(48.dp),
                         shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Cream, contentColor = Truffle),
+                        colors = ButtonDefaults.buttonColors(containerColor = colors.surfaceCream, contentColor = colors.textPrimary),
                         elevation = ButtonDefaults.buttonElevation(0.dp),
                     ) {
                         Text(

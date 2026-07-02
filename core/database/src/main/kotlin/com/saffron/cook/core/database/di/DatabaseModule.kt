@@ -4,6 +4,8 @@ import androidx.room.Room
 import com.saffron.cook.core.database.SaffronDatabase
 import com.saffron.cook.core.database.repository.CookedRecipesRepository
 import com.saffron.cook.core.database.repository.CookedRecipesRepositoryImpl
+import com.saffron.cook.core.database.repository.OnboardingRepository
+import com.saffron.cook.core.database.repository.OnboardingRepositoryImpl
 import com.saffron.cook.core.database.repository.RecipeNotesRepository
 import com.saffron.cook.core.database.repository.RecipeNotesRepositoryImpl
 import com.saffron.cook.core.database.repository.SavedRecipesRepository
@@ -23,4 +25,5 @@ val databaseModule = module {
     single<SavedRecipesRepository> { SavedRecipesRepositoryImpl(get()) }
     single<RecipeNotesRepository> { RecipeNotesRepositoryImpl(get()) }
     single<CookedRecipesRepository> { CookedRecipesRepositoryImpl(get()) }
+    single<OnboardingRepository> { OnboardingRepositoryImpl(androidContext()) }
 }

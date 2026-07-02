@@ -21,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,11 +30,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.core.presentation.R
 import com.saffron.cook.core.domain.model.Recipe
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 
 @Composable
 fun RecipeCard(
@@ -45,6 +41,7 @@ fun RecipeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -59,7 +56,7 @@ fun RecipeCard(
             modifier = Modifier
                 .size(width = 92.dp, height = 70.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Cream),
+                .background(colors.surfaceCream),
         )
         Column(
             modifier = Modifier.weight(1f),
@@ -68,7 +65,7 @@ fun RecipeCard(
             Text(
                 text = recipe.categoryId.replaceFirstChar { it.uppercase() }.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
+                color = colors.accent,
             )
             Text(
                 text = recipe.title,
@@ -77,7 +74,7 @@ fun RecipeCard(
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -94,8 +91,8 @@ fun RecipeCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(3.dp),
                         ) {
-                            Icon(icon, null, Modifier.size(13.dp), Color(0xFF8A7A5C))
-                            Text(label, style = MaterialTheme.typography.bodySmall, color = Color(0xFF8A7A5C))
+                            Icon(icon, null, Modifier.size(13.dp), colors.textTertiary)
+                            Text(label, style = MaterialTheme.typography.bodySmall, color = colors.textTertiary)
                         }
                     }
                 }
@@ -105,7 +102,7 @@ fun RecipeCard(
             Icon(
                 imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                tint = if (isSaved) Saffron else Cinnamon,
+                tint = if (isSaved) colors.accent else colors.textSecondary,
             )
         }
     }

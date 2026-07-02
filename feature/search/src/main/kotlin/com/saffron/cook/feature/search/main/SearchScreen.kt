@@ -60,14 +60,10 @@ import coil.compose.AsyncImage
 import com.saffron.cook.feature.search.R
 import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.RecipeFilter
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.InterFamily
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.androidx.compose.koinViewModel
 
 private val RecipeFilter.labelRes: Int
@@ -86,12 +82,13 @@ fun SearchScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     var activeFilter by remember { mutableStateOf(RecipeFilter.All) }
+    val colors = MaterialTheme.saffronColors
 
     val baseRecipes = if (state.query.isBlank()) state.initialRecipes else state.results
     val displayedRecipes = if (activeFilter == RecipeFilter.All) baseRecipes
     else baseRecipes.filter { it.categoryId.equals(activeFilter.categoryId, ignoreCase = true) }
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         Text(
             text = stringResource(R.string.nav_search),
             style = TextStyle(
@@ -100,7 +97,7 @@ fun SearchScreen(
                 fontSize = 26.sp,
                 letterSpacing = (-0.3).sp,
             ),
-            color = Truffle,
+            color = colors.textPrimary,
             modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
         )
 
@@ -130,14 +127,14 @@ fun SearchScreen(
         Box(modifier = Modifier.fillMaxSize()) {
             when {
                 state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
+                    CircularProgressIndicator(color = colors.accent, strokeWidth = 2.dp)
                 }
                 state.isError -> Box(Modifier.fillMaxSize(), Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = stringResource(R.string.search_error),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                         )
                         Spacer(Modifier.height(12.dp))
                         Button(
@@ -155,14 +152,14 @@ fun SearchScreen(
                         Icon(
                             imageVector = Icons.Outlined.Search,
                             contentDescription = null,
-                            tint = Cinnamon,
+                            tint = colors.textSecondary,
                             modifier = Modifier.size(32.dp),
                         )
                         Spacer(Modifier.height(12.dp))
                         Text(
                             text = stringResource(R.string.search_no_results, state.query),
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                         )
                     }
                 }
@@ -194,10 +191,11 @@ private fun SearchInput(
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
     val borderWidth = if (isFocused) 1.dp else 0.5.dp
-    val borderColor = if (isFocused) Saffron else Color(0xFFE4DFD5)
+    val borderColor = if (isFocused) colors.accent else colors.borderTertiary
 
     BasicTextField(
         value = query,
@@ -208,10 +206,10 @@ private fun SearchInput(
             fontFamily = InterFamily,
             fontWeight = FontWeight.Normal,
             fontSize = 15.sp,
-            color = Truffle,
+            color = colors.textPrimary,
         ),
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        cursorBrush = SolidColor(Saffron),
+        cursorBrush = SolidColor(colors.accent),
         interactionSource = interactionSource,
         decorationBox = { innerTextField ->
             Row(
@@ -219,7 +217,7 @@ private fun SearchInput(
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .border(borderWidth, borderColor, RoundedCornerShape(10.dp))
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -227,7 +225,7 @@ private fun SearchInput(
                 Icon(
                     imageVector = Icons.Outlined.Search,
                     contentDescription = null,
-                    tint = Color(0xFF8A7A5C),
+                    tint = colors.textTertiary,
                     modifier = Modifier.size(20.dp),
                 )
                 Spacer(Modifier.width(8.dp))
@@ -239,7 +237,7 @@ private fun SearchInput(
                                 fontFamily = InterFamily,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 15.sp,
-                                color = Color(0xFF8A7A5C),
+                                color = colors.textTertiary,
                             ),
                         )
                     }
@@ -257,11 +255,12 @@ private fun FilterChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .clip(RoundedCornerShape(999.dp))
-            .background(if (selected) Saffron else Cream)
+            .background(if (selected) colors.accent else colors.surfaceCream)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 4.dp),
     ) {
@@ -273,7 +272,7 @@ private fun FilterChip(
                 fontSize = 11.sp,
                 letterSpacing = 0.88.sp,
             ),
-            color = if (selected) Color.White else Saffron160,
+            color = if (selected) Color.White else colors.onCream,
         )
     }
 }
@@ -286,6 +285,7 @@ private fun ResultRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -301,14 +301,14 @@ private fun ResultRow(
                 .width(92.dp)
                 .height(70.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Cream),
+                .background(colors.surfaceCream),
         )
         Column(modifier = Modifier.weight(1f)) {
             if (recipe.categoryId.isNotBlank()) {
                 Text(
                     text = recipe.categoryId.replaceFirstChar { it.uppercase() },
                     style = MaterialTheme.typography.labelMedium,
-                    color = Saffron,
+                    color = colors.accent,
                 )
             }
             Text(
@@ -319,7 +319,7 @@ private fun ResultRow(
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
                 maxLines = 2,
                 modifier = Modifier.padding(top = 2.dp, bottom = 4.dp),
             )
@@ -337,7 +337,7 @@ private fun ResultRow(
             Icon(
                 imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                tint = if (isSaved) Saffron else Cinnamon,
+                tint = if (isSaved) colors.accent else colors.textSecondary,
             )
         }
     }
@@ -345,6 +345,7 @@ private fun ResultRow(
 
 @Composable
 private fun MetaItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -353,7 +354,7 @@ private fun MetaItem(icon: ImageVector, text: String, modifier: Modifier = Modif
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = Color(0xFF8A7A5C),
+            tint = colors.textTertiary,
             modifier = Modifier.size(15.dp),
         )
         Text(
@@ -362,7 +363,7 @@ private fun MetaItem(icon: ImageVector, text: String, modifier: Modifier = Modif
                 fontFamily = InterFamily,
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
-                color = Color(0xFF8A7A5C),
+                color = colors.textTertiary,
             ),
         )
     }
@@ -376,11 +377,11 @@ private fun SearchScreenIdlePreview() {
         Recipe(id = "2", title = "Chicken Alfredo", description = "", imageUrl = "", categoryId = "pasta", ingredients = emptyList(), steps = emptyList(), servings = 2),
     )
     SaffronTheme {
-        Column(modifier = Modifier.fillMaxSize().background(Color.White)) {
+        Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
             Text(
                 text = stringResource(R.string.nav_search),
                 style = TextStyle(fontFamily = PlayfairDisplayFamily, fontWeight = FontWeight.Normal, fontSize = 26.sp, letterSpacing = (-0.3).sp),
-                color = Truffle,
+                color = MaterialTheme.saffronColors.textPrimary,
                 modifier = Modifier.padding(top = 14.dp, start = 16.dp, end = 16.dp, bottom = 6.dp),
             )
             Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 10.dp)) {

@@ -56,12 +56,13 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               network/ → TheMealDbService (Retrofit), DTOs, MealMapper
               Exposes :core:domain as api (its public API returns domain types)
 
-:core:database — Room persistence + the 3 shared repos (android.library + ksp) → :core:domain
+:core:database — Room persistence + the shared repos (android.library + ksp) → :core:domain
               SaffronDatabase v1 (single fresh schema, no migrations — dev-only, destructive fallback),
               SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
               entity↔Recipe mappers (package com.saffron.cook.core.database)
-              repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository
-              di/ → databaseModule (DB single + 3 DAO singles + 3 repo singles)
+              repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository,
+                            OnboardingRepository (SharedPreferences-backed, no Room table — first-launch flag)
+              di/ → databaseModule (DB single + 3 DAO singles + 4 repo singles)
               Exposes Room runtime/ktx as api so :app sees entity types
 
 :core:auth  — Firebase auth (android.library; owns Firebase types) → no internal deps
@@ -96,6 +97,8 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
                     (com.saffron.cook.feature.note)
 :feature:profile  — ProfileScreen, ProfileViewModel, ProfileUiState, profileModule
                     (com.saffron.cook.feature.profile.main / .di)
+:feature:welcome  — WelcomeScreen (3-slide first-launch onboarding), WelcomeViewModel, WelcomeUiState,
+                    welcomeModule (com.saffron.cook.feature.welcome.main / .di)
 ```
 
 When adding a new module, apply a `:build-logic` convention plugin (below) instead of configuring AGP/Kotlin by hand: `saffron.android.library` (+ `saffron.android.compose` if it has Compose) for Android library modules, `saffron.jvm.library` for pure-logic JVM modules. Keep only module-specific bits (`namespace`, deps) in the module's own `build.gradle.kts`.
@@ -135,7 +138,7 @@ Standard MVI / unidirectional data flow:
 ```
 
 **Completed:**
-1. Koin DI — `networkModule` + `coreDataModule` in `:app`'s `AppModule`; `databaseModule` in `:core:database`; `authModule` in `:core:auth`; each feature owns its module (`homeModule`, `searchModule`, `recipeModule`, `favoriteModule`, `cookingModule`, `cookedModule`, `noteModule`, `profileModule`). All wired in `SaffronApplication`.
+1. Koin DI — `networkModule` + `coreDataModule` in `:app`'s `AppModule`; `databaseModule` in `:core:database`; `authModule` in `:core:auth`; each feature owns its module (`homeModule`, `searchModule`, `recipeModule`, `favoriteModule`, `cookingModule`, `cookedModule`, `noteModule`, `profileModule`, `welcomeModule`). All wired in `SaffronApplication`.
 2. Home screen — `HomeViewModel` + `HomeScreen` (featured card, category chips, vertical list rows, async load from TheMealDB). `categoryJob` cancellation + structured concurrency in `loadData()`.
    - Background: white (not Linen).
    - Category chips: pill shape (`RoundedCornerShape(percent=50)`), filled Saffron/white (selected) or Cream/Saffron160 (unselected), no border, uppercase labels.
@@ -200,6 +203,12 @@ Standard MVI / unidirectional data flow:
    - `:feature:cooked` — `CookedListScreen`, `CookedListViewModel`, `CookedListUiState`/`CookedListItem` (in `main/`).
    - Screen layout: header "Cooked" Playfair 26sp + back arrow; empty state: 32dp `LocalFireDepartment` icon + "Recipes you finish in cooking mode will gather here."; non-empty: caption "{total} dishes cooked across {N} recipes" (bodySmall, TextTertiary), then `LazyColumn` of rows — 92×70dp thumbnail, category overline (Saffron uppercase), Playfair Medium 16sp title, meta row (flame icon + "Once"/"N times" | check-circle icon + "last {d MMM}"), bookmark toggle.
    - Profile "Cooked" stat card taps → `Screen.CookedList` (`"cooked_list"` route); tapping a cooked row navigates to RecipeDetail.
+
+11. Welcome onboarding — 3-slide first-launch screen, translated pixel-for-pixel from the Claude Design `templates/welcome-onboarding/WelcomeOnboarding.dc.html` template:
+   - `:feature:welcome` — `WelcomeScreen` + `WelcomeViewModel` (local `currentSlide` state only, no repository data). Full-bleed slide photo (`Image` + `ContentScale.Crop`) with a short top scrim (status-bar legibility) and a tall bottom scrim (headline legibility) — the only permitted gradients in the app. Top row: "Saffron" wordmark (Playfair) + "Skip" (hidden on the last slide). Bottom content: uppercase Saffron40 overline → 32sp Playfair headline → Inter Light 15sp body, cross-faded in via `AnimatedContent` (fade + 10dp rise, matching the design's `saffronRise` keyframe). Progress dots (22×6dp pill when active, 6dp circle otherwise, `animateDpAsState` on width). Tapping the top ~460dp of the image also advances (disabled on the last slide, matching the design's tap-to-advance region). Button row: "Continue" on slides 0–1, "Get started" on slide 2.
+   - Slide photos are bundled as local `drawable-nodpi` JPGs (downloaded once from the exact Unsplash URLs baked into the design template) — no network dependency at runtime.
+   - `MainActivity`/`SaffronApp` sets `MaterialTheme` status-bar icon contrast to light (`WindowCompat.getInsetsController(...).isAppearanceLightStatusBars = false`) while this screen is shown, since the wordmark/Skip sit directly over a photo.
+   - First-launch gate — `OnboardingRepository` (`:core:database`, SharedPreferences-backed) exposes `hasCompletedOnboarding()` / `setOnboardingCompleted()`. `SaffronApp` reads it via `koinInject<OnboardingRepository>()` to pick the real `NavHost` `startDestination` (`Screen.Welcome` vs `Screen.Home`). "Get started" calls `WelcomeViewModel.completeOnboarding()` then navigates to Home with `popUpTo(Screen.Welcome) { inclusive = true }` — Welcome never reappears once completed, and it carries no bottom nav bar (excluded from `tabRoutes`).
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.

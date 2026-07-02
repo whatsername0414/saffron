@@ -76,13 +76,9 @@ import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.Step
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import com.saffron.cook.feature.cooking.R
 import org.koin.androidx.compose.koinViewModel
 
@@ -147,21 +143,22 @@ internal fun CookingModeContent(
     onAddMinute: () -> Unit,
     onTimerDone: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     when {
         state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-            CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
+            CircularProgressIndicator(color = colors.accent, strokeWidth = 2.dp)
         }
         state.isError -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = stringResource(R.string.error_load_failed),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                 )
                 Spacer(Modifier.height(12.dp))
                 Button(
                     onClick = onRetry,
-                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
                 ) {
                     Text(stringResource(R.string.error_retry), color = Color.White)
@@ -172,7 +169,7 @@ internal fun CookingModeContent(
             Text(
                 text = stringResource(R.string.recipe_not_found),
                 style = MaterialTheme.typography.bodyLarge,
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
         }
         else -> {
@@ -192,7 +189,7 @@ internal fun CookingModeContent(
                 ModalBottomSheet(
                     onDismissRequest = onBack,
                     sheetState = sheetState,
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ) {
                     CompletionSheetContent(
                         recipeName = state.recipe.title,
@@ -207,7 +204,7 @@ internal fun CookingModeContent(
                 ModalBottomSheet(
                     onDismissRequest = onDismissTimerDialog,
                     sheetState = timerSheetState,
-                    containerColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.surface,
                 ) {
                     TimerSheetContent(
                         totalSeconds = state.timerTotalSeconds ?: 0,
@@ -237,6 +234,7 @@ private fun CompletionSheetContent(
     onAddNote: () -> Unit,
     onMaybeLater: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -252,7 +250,7 @@ private fun CompletionSheetContent(
                 Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = stringResource(R.string.cd_exit),
-                    tint = Truffle,
+                    tint = colors.textPrimary,
                 )
             }
         }
@@ -267,13 +265,13 @@ private fun CompletionSheetContent(
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)
-                    .background(Cream),
+                    .background(colors.surfaceCream),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Outlined.CheckCircle,
                     contentDescription = null,
-                    tint = Saffron,
+                    tint = colors.accent,
                     modifier = Modifier.size(30.dp),
                 )
             }
@@ -283,7 +281,7 @@ private fun CompletionSheetContent(
             Text(
                 text = recipeName.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
+                color = colors.accent,
             )
 
             Spacer(Modifier.height(8.dp))
@@ -297,7 +295,7 @@ private fun CompletionSheetContent(
                     lineHeight = 35.4.sp,
                     letterSpacing = (-0.3).sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
             )
 
             Spacer(Modifier.height(12.dp))
@@ -305,13 +303,13 @@ private fun CompletionSheetContent(
             Text(
                 text = stringResource(R.string.cooking_done_tagline),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
         }
 
         Spacer(Modifier.height(28.dp))
 
-        HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+        HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
 
         Column(
             modifier = Modifier
@@ -323,7 +321,7 @@ private fun CompletionSheetContent(
                 onClick = onAddNote,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
                 contentPadding = PaddingValues(vertical = 16.dp),
             ) {
@@ -347,7 +345,7 @@ private fun CompletionSheetContent(
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Transparent,
-                    contentColor = Truffle,
+                    contentColor = colors.textPrimary,
                 ),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
@@ -376,8 +374,9 @@ private fun TimerSheetContent(
     onAddMinute: () -> Unit,
     onDone: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     val progress = if (totalSeconds > 0) remainingSeconds.toFloat() / totalSeconds.toFloat() else 0f
-    val arcColor = if (isFinished) Saffron160 else Saffron
+    val arcColor = if (isFinished) colors.onCream else colors.accent
 
     Column(
         modifier = Modifier
@@ -400,13 +399,13 @@ private fun TimerSheetContent(
                     stringResource(R.string.cooking_timer_title)
                 },
                 style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
+                color = colors.accent,
             )
             IconButton(onClick = onClose) {
                 Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = stringResource(R.string.cd_close_timer),
-                    tint = Truffle,
+                    tint = colors.textPrimary,
                 )
             }
         }
@@ -416,7 +415,7 @@ private fun TimerSheetContent(
             Text(
                 text = stringResource(R.string.cooking_timer_from_step, stepTitle),
                 style = MaterialTheme.typography.labelSmall,
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
             Spacer(Modifier.height(10.dp))
         } else {
@@ -434,7 +433,7 @@ private fun TimerSheetContent(
                 strokeWidth = 10.dp,
                 strokeCap = StrokeCap.Round,
                 color = arcColor,
-                trackColor = Cream,
+                trackColor = colors.surfaceCream,
             )
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -450,7 +449,7 @@ private fun TimerSheetContent(
                         lineHeight = 52.sp,
                     ),
                     textAlign = TextAlign.Center,
-                    color = Truffle,
+                    color = colors.textPrimary,
                 )
                 Text(
                     text = when {
@@ -459,14 +458,14 @@ private fun TimerSheetContent(
                         else -> stringResource(R.string.cooking_timer_paused_label)
                     },
                     style = MaterialTheme.typography.labelSmall,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                 )
             }
         }
 
         Spacer(Modifier.height(24.dp))
 
-        HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+        HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
 
         // Button row: [↺] [Pause/Resume or Done] [+]
         Row(
@@ -480,7 +479,7 @@ private fun TimerSheetContent(
                 Icon(
                     imageVector = Icons.Outlined.Refresh,
                     contentDescription = stringResource(R.string.cooking_timer_reset),
-                    tint = Truffle,
+                    tint = colors.textPrimary,
                 )
             }
 
@@ -489,7 +488,7 @@ private fun TimerSheetContent(
                     onClick = onDone,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
                 ) {
                     Icon(
@@ -510,7 +509,7 @@ private fun TimerSheetContent(
                     onClick = onPause,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
                 ) {
                     Text(
@@ -524,7 +523,7 @@ private fun TimerSheetContent(
                     onClick = onStart,
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                    colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                     elevation = ButtonDefaults.buttonElevation(0.dp),
                 ) {
                     Text(
@@ -539,7 +538,7 @@ private fun TimerSheetContent(
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = stringResource(R.string.cooking_timer_add_minute),
-                    tint = Truffle,
+                    tint = colors.textPrimary,
                 )
             }
         }
@@ -560,10 +559,11 @@ private fun CookingLayout(
     onPrevious: () -> Unit,
     onShowTimer: (Int, String) -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         Row(
             modifier = Modifier
@@ -576,13 +576,13 @@ private fun CookingLayout(
                 Icon(
                     imageVector = Icons.Outlined.Close,
                     contentDescription = stringResource(R.string.cd_exit),
-                    tint = Truffle,
+                    tint = colors.textPrimary,
                 )
             }
             Text(
                 text = stringResource(R.string.cooking_step_progress, state.currentStepIndex + 1, state.totalSteps),
                 style = MaterialTheme.typography.labelLarge,
-                color = Cinnamon,
+                color = colors.textSecondary,
             )
             Spacer(Modifier.size(48.dp))
         }
@@ -602,7 +602,7 @@ private fun CookingLayout(
                     Text(
                         text = stringResource(R.string.cooking_no_steps),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Cinnamon,
+                        color = colors.textSecondary,
                     )
                 }
             } else {
@@ -630,7 +630,7 @@ private fun CookingLayout(
             }
         }
 
-        HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+        HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
         Footer(
             isFirstStep = state.isFirstStep,
             isLastStep = state.isLastStep,
@@ -677,11 +677,12 @@ private fun StepPill(
     isCompleted: Boolean,
     onClick: () -> Unit,
 ) {
-    val bg = if (isActive) Saffron else Cream
+    val colors = MaterialTheme.saffronColors
+    val bg = if (isActive) colors.accent else colors.surfaceCream
     val textColor = when {
         isActive -> Color.White
-        isCompleted -> Saffron160
-        else -> Cinnamon
+        isCompleted -> colors.onCream
+        else -> colors.textSecondary
     }
 
     Box(
@@ -711,9 +712,10 @@ private fun StepContent(
     onShowTimer: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     val timedSpans = remember(step.instruction) { parseTimedSpans(step.instruction) }
 
-    val annotated = remember(step.instruction, timedSpans) {
+    val annotated = remember(step.instruction, timedSpans, colors) {
         buildAnnotatedString {
             var cursor = 0
             timedSpans.forEach { span ->
@@ -724,7 +726,7 @@ private fun StepContent(
                 )
                 withStyle(
                     SpanStyle(
-                        color = Saffron160,
+                        color = colors.onCream,
                         fontWeight = FontWeight.Medium,
                         textDecoration = TextDecoration.Underline,
                     ),
@@ -747,7 +749,7 @@ private fun StepContent(
         Text(
             text = recipeName.uppercase(),
             style = MaterialTheme.typography.labelMedium,
-            color = Saffron,
+            color = colors.accent,
         )
         Spacer(Modifier.height(10.dp))
         Text(
@@ -759,7 +761,7 @@ private fun StepContent(
                 lineHeight = 35.4.sp,
                 letterSpacing = (-0.3).sp,
             ),
-            color = Truffle,
+            color = colors.textPrimary,
         )
         Spacer(Modifier.height(16.dp))
         Text(
@@ -768,7 +770,7 @@ private fun StepContent(
                 fontSize = 17.sp,
                 lineHeight = 29.75.sp,
             ),
-            color = Truffle,
+            color = colors.textPrimary,
         )
         if (timedSpans.isNotEmpty()) {
             Spacer(Modifier.height(16.dp))
@@ -792,8 +794,8 @@ private fun StepContent(
                 checked = isDone,
                 onCheckedChange = null,
                 colors = CheckboxDefaults.colors(
-                    checkedColor = Saffron,
-                    uncheckedColor = Cinnamon,
+                    checkedColor = colors.accent,
+                    uncheckedColor = colors.textSecondary,
                     checkmarkColor = Color.White,
                 ),
             )
@@ -801,7 +803,7 @@ private fun StepContent(
             Text(
                 text = stringResource(R.string.cooking_mark_done),
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isDone) Saffron else Truffle,
+                color = if (isDone) colors.accent else colors.textPrimary,
             )
         }
     }
@@ -811,11 +813,12 @@ private fun StepContent(
 
 @Composable
 private fun TimerChip(seconds: Int, onClick: () -> Unit) {
+    val colors = MaterialTheme.saffronColors
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(percent = 50),
-        color = Cream,
-        border = BorderStroke(0.5.dp, Color(0xFFD3CFC8)),
+        color = colors.surfaceCream,
+        border = BorderStroke(0.5.dp, colors.borderPrimary),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
@@ -825,13 +828,13 @@ private fun TimerChip(seconds: Int, onClick: () -> Unit) {
             Icon(
                 imageVector = Icons.Outlined.Timer,
                 contentDescription = null,
-                tint = Saffron160,
+                tint = colors.onCream,
                 modifier = Modifier.size(15.dp),
             )
             Text(
                 text = stringResource(R.string.cooking_timer_set, formatSeconds(seconds)),
                 style = MaterialTheme.typography.labelLarge.copy(fontSize = 14.sp),
-                color = Saffron160,
+                color = colors.onCream,
             )
         }
     }
@@ -848,6 +851,7 @@ private fun Footer(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -861,11 +865,11 @@ private fun Footer(
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent,
-                contentColor = Truffle,
+                contentColor = colors.textPrimary,
                 disabledContainerColor = Color.Transparent,
-                disabledContentColor = Color(0xFFD3CFC8),
+                disabledContentColor = colors.borderPrimary,
             ),
-            border = BorderStroke(0.5.dp, if (isFirstStep) Color(0xFFE4DFD5) else Color(0xFFD3CFC8)),
+            border = BorderStroke(0.5.dp, if (isFirstStep) colors.borderTertiary else colors.borderPrimary),
             elevation = ButtonDefaults.buttonElevation(0.dp),
         ) {
             Icon(Icons.AutoMirrored.Outlined.ArrowBack, null, Modifier.size(18.dp))
@@ -881,7 +885,7 @@ private fun Footer(
                 onClick = onFinish,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Icon(
@@ -902,7 +906,7 @@ private fun Footer(
                 onClick = onNext,
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Text(

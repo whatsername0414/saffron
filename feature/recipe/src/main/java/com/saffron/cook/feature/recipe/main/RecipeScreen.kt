@@ -57,14 +57,10 @@ import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Ingredient
 import com.saffron.cook.core.domain.model.Recipe
 import com.saffron.cook.core.domain.model.Step
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import com.saffron.cook.feature.recipe.R
 import kotlin.math.roundToInt
 import org.koin.androidx.compose.koinViewModel
@@ -77,17 +73,18 @@ fun RecipeDetailScreen(
     viewModel: RecipeViewModel = koinViewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val colors = MaterialTheme.saffronColors
 
     when {
         state.isLoading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-            CircularProgressIndicator(color = Saffron, strokeWidth = 2.dp)
+            CircularProgressIndicator(color = colors.accent, strokeWidth = 2.dp)
         }
         state.isError -> Box(Modifier.fillMaxSize(), Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = stringResource(R.string.error_load_failed),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                 )
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = viewModel::retry) {
@@ -96,7 +93,7 @@ fun RecipeDetailScreen(
             }
         }
         state.recipe == null -> Box(Modifier.fillMaxSize(), Alignment.Center) {
-            Text(stringResource(R.string.recipe_not_found), style = MaterialTheme.typography.bodyLarge, color = Cinnamon)
+            Text(stringResource(R.string.recipe_not_found), style = MaterialTheme.typography.bodyLarge, color = colors.textSecondary)
         }
         else -> DetailContent(
             recipe = state.recipe!!,
@@ -116,13 +113,14 @@ private fun DetailContent(
     onToggleSave: () -> Unit,
     onStartCooking: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     val cookTimeCaption = stringResource(R.string.meta_cook_time)
     val servingsCaption = stringResource(R.string.meta_servings)
     val difficultyCaption = stringResource(R.string.meta_difficulty)
     val cookTimeStr = recipe.cookTimeMinutes?.let { stringResource(R.string.meta_duration_min, it) }
     val servingsStr = recipe.servings?.let { stringResource(R.string.meta_serves, it) }
 
-    Box(Modifier.fillMaxSize().background(Color.White)) {
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         LazyColumn(contentPadding = PaddingValues(bottom = 96.dp)) {
             // Hero image
             item {
@@ -130,7 +128,7 @@ private fun DetailContent(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(4f / 3f)
-                        .background(Cream),
+                        .background(colors.surfaceCream),
                 ) {
                     AsyncImage(
                         model = recipe.imageUrl,
@@ -146,12 +144,12 @@ private fun DetailContent(
                             .padding(12.dp)
                             .size(38.dp)
                             .clip(CircleShape)
-                            .background(Color.White),
+                            .background(Color(0xEBFFFFFF)),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back),
-                            tint = Truffle,
+                            tint = Color(0xFF1A1208),
                             modifier = Modifier.size(20.dp),
                         )
                     }
@@ -168,7 +166,7 @@ private fun DetailContent(
                         Icon(
                             imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                             contentDescription = if (isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                            tint = if (isSaved) Saffron else Cinnamon,
+                            tint = if (isSaved) colors.accent else colors.textSecondary,
                             modifier = Modifier.size(20.dp),
                         )
                     }
@@ -181,7 +179,7 @@ private fun DetailContent(
                     Text(
                         text = recipe.categoryId.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelMedium,
-                        color = Saffron,
+                        color = colors.accent,
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
@@ -193,7 +191,7 @@ private fun DetailContent(
                             letterSpacing = (-0.3).sp,
                             fontWeight = FontWeight.Normal,
                         ),
-                        color = Truffle,
+                        color = colors.textPrimary,
                     )
                 }
             }
@@ -225,7 +223,7 @@ private fun DetailContent(
                         Text(
                             text = ratingText,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                         )
                     }
                 }
@@ -258,7 +256,7 @@ private fun DetailContent(
                     Text(
                         text = recipe.description,
                         style = MaterialTheme.typography.bodyLarge,
-                        color = Truffle,
+                        color = colors.textPrimary,
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                 }
@@ -274,7 +272,7 @@ private fun DetailContent(
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Medium,
                         ),
-                        color = Truffle,
+                        color = colors.textPrimary,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 12.dp),
                     )
                 }
@@ -298,7 +296,7 @@ private fun DetailContent(
                 .background(
                     Brush.verticalGradient(
                         0f to Color.Transparent,
-                        0.35f to Color.White,
+                        0.35f to MaterialTheme.colorScheme.surface,
                     )
                 )
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
@@ -307,7 +305,7 @@ private fun DetailContent(
                 onClick = onStartCooking,
                 modifier = Modifier.fillMaxWidth().height(48.dp),
                 shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Saffron),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.accent),
                 elevation = ButtonDefaults.buttonElevation(0.dp),
             ) {
                 Text(
@@ -334,18 +332,19 @@ private fun MetaCard(
     caption: String,
     modifier: Modifier = Modifier,
 ) {
+    val colors = MaterialTheme.saffronColors
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
-            .background(Cream)
-            .border(0.5.dp, Color(0xFFE4DFD5), RoundedCornerShape(14.dp))
+            .background(colors.surfaceCream)
+            .border(0.5.dp, colors.borderTertiary, RoundedCornerShape(14.dp))
             .padding(vertical = 12.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Icon(icon, contentDescription = null, tint = Saffron160, modifier = Modifier.size(20.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge, color = Truffle)
-        Text(caption, style = MaterialTheme.typography.bodySmall, color = Cinnamon)
+        Icon(icon, contentDescription = null, tint = colors.onCream, modifier = Modifier.size(20.dp))
+        Text(label, style = MaterialTheme.typography.labelLarge, color = colors.textPrimary)
+        Text(caption, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
     }
 }
 
@@ -403,6 +402,7 @@ private fun RecipeDetailSavedPreview() {
 
 @Composable
 private fun IngredientRow(ingredient: Ingredient, showDivider: Boolean, modifier: Modifier = Modifier) {
+    val colors = MaterialTheme.saffronColors
     Column(modifier = modifier.padding(horizontal = 16.dp)) {
         Row(
             modifier = Modifier.padding(vertical = 11.dp),
@@ -412,17 +412,17 @@ private fun IngredientRow(ingredient: Ingredient, showDivider: Boolean, modifier
                 modifier = Modifier
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(Saffron),
+                    .background(colors.accent),
             )
             Spacer(Modifier.width(12.dp))
             val text = buildString {
                 if (ingredient.amount.isNotBlank()) { append(ingredient.amount); append(" ") }
                 append(ingredient.name)
             }
-            Text(text, style = MaterialTheme.typography.bodyLarge, color = Truffle)
+            Text(text, style = MaterialTheme.typography.bodyLarge, color = colors.textPrimary)
         }
         if (showDivider) {
-            HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+            HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
         }
     }
 }

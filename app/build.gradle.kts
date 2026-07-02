@@ -35,6 +35,7 @@ dependencies {
     implementation(project(":feature:cooking"))
     implementation(project(":feature:note"))
     implementation(project(":feature:profile"))
+    implementation(project(":feature:welcome"))
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
     implementation(libs.coil.compose)

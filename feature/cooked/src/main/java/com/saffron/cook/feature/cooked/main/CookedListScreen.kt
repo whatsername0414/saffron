@@ -34,7 +34,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -45,17 +44,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
-import com.saffron.cook.core.designsystem.theme.Saffron160
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import com.saffron.cook.feature.cooked.R
 import org.koin.androidx.compose.koinViewModel
-
-private val TextTertiary = Color(0xFF8A7A5C)
 
 @Composable
 fun CookedListScreen(
@@ -75,7 +68,8 @@ private fun CookedListContent(
     onOpenRecipe: (String) -> Unit,
     onToggleSave: (String) -> Unit,
 ) {
-    Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
+    val colors = MaterialTheme.saffronColors
+    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
                 modifier = Modifier
@@ -87,7 +81,7 @@ private fun CookedListContent(
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = Truffle,
+                        tint = colors.textPrimary,
                     )
                 }
                 Text(
@@ -98,7 +92,7 @@ private fun CookedListContent(
                         fontSize = 26.sp,
                         letterSpacing = (-0.3).sp,
                     ),
-                    color = Truffle,
+                    color = colors.textPrimary,
                 )
             }
 
@@ -115,13 +109,13 @@ private fun CookedListContent(
                         Icon(
                             imageVector = Icons.Outlined.LocalFireDepartment,
                             contentDescription = null,
-                            tint = TextTertiary,
+                            tint = colors.textTertiary,
                             modifier = Modifier.size(32.dp),
                         )
                         Text(
                             text = stringResource(R.string.cooked_empty),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Cinnamon,
+                            color = colors.textSecondary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.widthIn(max = 240.dp),
                         )
@@ -131,7 +125,7 @@ private fun CookedListContent(
                 Text(
                     text = stringResource(R.string.cooked_summary, state.totalCooked, state.items.size),
                     style = MaterialTheme.typography.bodySmall,
-                    color = TextTertiary,
+                    color = colors.textTertiary,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                 )
                 LazyColumn(
@@ -162,6 +156,7 @@ private fun CookedCard(
     onOpen: () -> Unit,
     onToggleSave: () -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -174,7 +169,7 @@ private fun CookedCard(
                 .width(92.dp)
                 .height(70.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Cream),
+                .background(colors.surfaceCream),
         ) {
             AsyncImage(
                 model = item.recipeImage,
@@ -187,7 +182,7 @@ private fun CookedCard(
             Text(
                 text = item.recipeCategory.uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
+                color = colors.accent,
             )
             Text(
                 text = item.recipeName,
@@ -197,7 +192,7 @@ private fun CookedCard(
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 ),
-                color = Truffle,
+                color = colors.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.padding(vertical = 2.dp),
@@ -207,11 +202,11 @@ private fun CookedCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 MetaChip(
-                    icon = { Icon(Icons.Outlined.LocalFireDepartment, contentDescription = null, tint = Saffron160, modifier = Modifier.size(15.dp)) },
+                    icon = { Icon(Icons.Outlined.LocalFireDepartment, contentDescription = null, tint = colors.onCream, modifier = Modifier.size(15.dp)) },
                     label = item.timesLabel,
                 )
                 MetaChip(
-                    icon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = Saffron160, modifier = Modifier.size(15.dp)) },
+                    icon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null, tint = colors.onCream, modifier = Modifier.size(15.dp)) },
                     label = item.lastCookedLabel,
                 )
             }
@@ -220,7 +215,7 @@ private fun CookedCard(
             Icon(
                 imageVector = if (item.isSaved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder,
                 contentDescription = if (item.isSaved) stringResource(R.string.action_saved) else stringResource(R.string.action_save),
-                tint = if (item.isSaved) Saffron else Cinnamon,
+                tint = if (item.isSaved) colors.accent else colors.textSecondary,
             )
         }
     }
@@ -228,12 +223,13 @@ private fun CookedCard(
 
 @Composable
 private fun MetaChip(icon: @Composable () -> Unit, label: String) {
+    val colors = MaterialTheme.saffronColors
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         icon()
-        Text(text = label, style = MaterialTheme.typography.bodySmall, color = Cinnamon)
+        Text(text = label, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
     }
 }
 

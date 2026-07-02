@@ -1,6 +1,7 @@
 package com.saffron.cook.navigation
 
 sealed class Screen(val route: String) {
+    data object Welcome : Screen("welcome")
     data object Home : Screen("home")
     data object Search : Screen("search")
     data object Favorites : Screen("favorites")

@@ -36,9 +36,11 @@ import com.saffron.cook.feature.note.main.NoteListScreen
 import com.saffron.cook.feature.profile.main.ProfileScreen
 import com.saffron.cook.feature.recipe.main.RecipeDetailScreen
 import com.saffron.cook.feature.search.main.SearchScreen
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Saffron
+import com.saffron.cook.feature.welcome.main.WelcomeScreen
+import com.saffron.cook.core.database.repository.OnboardingRepository
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
+import com.saffron.cook.core.designsystem.theme.saffronColors
+import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -60,6 +62,14 @@ fun SaffronApp() {
 
     val tabRoutes = BottomNavDestination.entries.map { it.screen.route }.toSet()
     val showBottomBar = currentDestination?.route in tabRoutes
+    val colors = MaterialTheme.saffronColors
+
+    val onboardingRepository = koinInject<OnboardingRepository>()
+    val startDestination = if (onboardingRepository.hasCompletedOnboarding()) {
+        Screen.Home.route
+    } else {
+        Screen.Welcome.route
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,7 +105,7 @@ fun SaffronApp() {
                                 Icon(
                                     imageVector = if (selected) destination.selectedIcon else destination.unselectedIcon,
                                     contentDescription = stringResource(destination.labelRes),
-                                    tint = if (selected) Saffron else Cinnamon
+                                    tint = if (selected) colors.accent else colors.textSecondary
                                 )
                             },
                             label = { Text(stringResource(destination.labelRes)) },
@@ -107,9 +117,18 @@ fun SaffronApp() {
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Home.route,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding),
         ) {
+            composable(Screen.Welcome.route) {
+                WelcomeScreen(
+                    onGetStarted = {
+                        navController.navigate(Screen.Home.route) {
+                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                        }
+                    },
+                )
+            }
             composable(Screen.Home.route) {
                 HomeScreen(
                     onNavigateToSearch = { navController.navigate(Screen.Search.route) },

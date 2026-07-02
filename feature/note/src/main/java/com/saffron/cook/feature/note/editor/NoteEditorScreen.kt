@@ -58,14 +58,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.saffron.cook.feature.note.R
 import com.saffron.cook.core.domain.model.NoteLabel
-import com.saffron.cook.core.designsystem.theme.Cinnamon
-import com.saffron.cook.core.designsystem.theme.Cream
 import com.saffron.cook.core.designsystem.theme.InterFamily
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
-import com.saffron.cook.core.designsystem.theme.Saffron
 import com.saffron.cook.core.designsystem.theme.Saffron40
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
-import com.saffron.cook.core.designsystem.theme.Truffle
+import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.androidx.compose.koinViewModel
 
 private const val maxUpload = 4
@@ -130,7 +127,8 @@ private fun NoteEditorContent(
     onAddPhoto: () -> Unit,
     onRemovePhoto: (Int) -> Unit,
 ) {
-    Surface(color = Color.White, modifier = Modifier.fillMaxSize()) {
+    val colors = MaterialTheme.saffronColors
+    Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Header
             Row(
@@ -143,7 +141,7 @@ private fun NoteEditorContent(
                     Icon(
                         imageVector = Icons.Outlined.Close,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = Truffle,
+                        tint = colors.textPrimary,
                     )
                 }
                 Text(
@@ -153,7 +151,7 @@ private fun NoteEditorContent(
                         stringResource(R.string.note_editor_title)
                     },
                     style = MaterialTheme.typography.labelLarge,
-                    color = Cinnamon,
+                    color = colors.textSecondary,
                     modifier = Modifier.weight(1f),
                 )
                 TextButton(
@@ -163,7 +161,7 @@ private fun NoteEditorContent(
                     Text(
                         text = stringResource(R.string.action_save),
                         style = MaterialTheme.typography.labelLarge,
-                        color = if (state.canSave) Saffron else Color(0xFFD3CFC8),
+                        color = if (state.canSave) colors.accent else colors.borderPrimary,
                     )
                 }
             }
@@ -192,9 +190,9 @@ private fun NoteEditorContent(
                         fontWeight = FontWeight.Normal,
                         fontSize = 26.sp,
                         letterSpacing = (-0.3).sp,
-                        color = Truffle,
+                        color = colors.textPrimary,
                     ),
-                    cursorBrush = SolidColor(Saffron),
+                    cursorBrush = SolidColor(colors.accent),
                     modifier = Modifier.fillMaxWidth(),
                     decorationBox = { inner ->
                         Box {
@@ -206,7 +204,7 @@ private fun NoteEditorContent(
                                         fontWeight = FontWeight.Normal,
                                         fontSize = 26.sp,
                                         letterSpacing = (-0.3).sp,
-                                        color = Color(0xFFD3CFC8),
+                                        color = colors.borderPrimary,
                                     ),
                                 )
                             }
@@ -216,7 +214,7 @@ private fun NoteEditorContent(
                 )
 
                 Spacer(Modifier.height(12.dp))
-                HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFE4DFD5))
+                HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
                 Spacer(Modifier.height(18.dp))
 
                 // Rating
@@ -259,17 +257,17 @@ private fun NoteEditorContent(
                         Text(
                             text = stringResource(R.string.note_body_hint),
                             style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFFD3CFC8),
+                            color = colors.borderPrimary,
                         )
                     },
-                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = Truffle),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(color = colors.textPrimary),
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Saffron,
-                        unfocusedBorderColor = Color(0xFFE4DFD5),
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        cursorColor = Saffron,
+                        focusedBorderColor = colors.accent,
+                        unfocusedBorderColor = colors.borderTertiary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        cursorColor = colors.accent,
                     ),
                 )
 
@@ -292,11 +290,12 @@ private fun NoteEditorContent(
 
 @Composable
 private fun RecipeContextCard(name: String, imageUrl: String) {
+    val colors = MaterialTheme.saffronColors
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(Cream)
+            .background(colors.surfaceCream)
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -305,7 +304,7 @@ private fun RecipeContextCard(name: String, imageUrl: String) {
             modifier = Modifier
                 .size(44.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(Color.White),
+                .background(MaterialTheme.colorScheme.surface),
         ) {
             AsyncImage(
                 model = imageUrl,
@@ -318,7 +317,7 @@ private fun RecipeContextCard(name: String, imageUrl: String) {
             Text(
                 text = stringResource(R.string.note_on_label).uppercase(),
                 style = MaterialTheme.typography.labelMedium,
-                color = Saffron,
+                color = colors.accent,
             )
             Text(
                 text = name,
@@ -326,7 +325,7 @@ private fun RecipeContextCard(name: String, imageUrl: String) {
                     fontFamily = PlayfairDisplayFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 15.sp,
-                    color = Truffle,
+                    color = colors.textPrimary,
                 ),
             )
         }
@@ -351,17 +350,18 @@ private fun StarRating(value: Int, onRate: (Int) -> Unit) {
 
 @Composable
 private fun LabelChip(text: String, selected: Boolean, onClick: () -> Unit) {
+    val colors = MaterialTheme.saffronColors
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(percent = 50))
-            .background(if (selected) Saffron else Cream)
+            .background(if (selected) colors.accent else colors.surfaceCream)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),
     ) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            color = if (selected) Color.White else Cinnamon,
+            color = if (selected) Color.White else colors.textSecondary,
         )
     }
 }
@@ -372,6 +372,7 @@ private fun PhotoRow(
     onAddPhoto: () -> Unit,
     onRemovePhoto: (Int) -> Unit,
 ) {
+    val colors = MaterialTheme.saffronColors
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -380,8 +381,8 @@ private fun PhotoRow(
                 modifier = Modifier
                     .size(100.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Cream)
-                    .border(0.5.dp, Color(0xFFE4DFD5), RoundedCornerShape(8.dp)),
+                    .background(colors.surfaceCream)
+                    .border(0.5.dp, colors.borderTertiary, RoundedCornerShape(8.dp)),
             ) {
                 AsyncImage(
                     model = uri,
@@ -415,7 +416,7 @@ private fun PhotoRow(
                     modifier = Modifier
                         .size(100.dp)
                         .clip(RoundedCornerShape(8.dp))
-                        .border(0.5.dp, Color(0xFFD3CFC8), RoundedCornerShape(8.dp))
+                        .border(0.5.dp, colors.borderPrimary, RoundedCornerShape(8.dp))
                         .clickable(onClick = onAddPhoto),
                     contentAlignment = Alignment.Center,
                 ) {
@@ -426,7 +427,7 @@ private fun PhotoRow(
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = null,
-                            tint = Saffron,
+                            tint = colors.accent,
                             modifier = Modifier.size(22.dp),
                         )
                         Text(
@@ -439,7 +440,7 @@ private fun PhotoRow(
                                 fontFamily = InterFamily,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = 12.sp,
-                                color = Cinnamon,
+                                color = colors.textSecondary,
                             ),
                         )
                     }
@@ -451,10 +452,11 @@ private fun PhotoRow(
 
 @Composable
 private fun SectionLabel(text: String) {
+    val colors = MaterialTheme.saffronColors
     Text(
         text = text.uppercase(),
         style = MaterialTheme.typography.labelMedium,
-        color = Color(0xFF8A7A5C),
+        color = colors.textTertiary,
     )
 }
 

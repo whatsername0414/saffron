@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="welcome_wordmark">Saffron</string>
+    <string name="welcome_skip">Skip</string>
+    <string name="welcome_continue">Continue</string>
+    <string name="welcome_get_started">Get started</string>
+
+    <string name="welcome_overline_0">Welcome to Saffron</string>
+    <string name="welcome_headline_0">Recipes worth slowing down for</string>
+    <string name="welcome_body_0">A calm, uncluttered place to find your next thing to cook. The food leads, and the app steps aside.</string>
+
+    <string name="welcome_overline_1">Cook with intention</string>
+    <string name="welcome_headline_1">Understand every step</string>
+    <string name="welcome_body_1">Exact measurements and the technique behind them, so you know why the risotto takes one ladle at a time, not only that it does.</string>
+
+    <string name="welcome_overline_2">Your kitchen, remembered</string>
+    <string name="welcome_headline_2">Keep what you cook</string>
+    <string name="welcome_body_2">Save recipes, log every cook, and note what you would change next time. It is all yours, and it stays.</string>
+</resources>
