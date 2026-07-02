@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
@@ -38,6 +40,8 @@ import com.saffron.cook.feature.recipe.main.RecipeDetailScreen
 import com.saffron.cook.feature.search.main.SearchScreen
 import com.saffron.cook.feature.welcome.main.WelcomeScreen
 import com.saffron.cook.core.database.repository.OnboardingRepository
+import com.saffron.cook.core.database.repository.ThemeMode
+import com.saffron.cook.core.database.repository.ThemeRepository
 import com.saffron.cook.core.designsystem.theme.SaffronTheme
 import com.saffron.cook.core.designsystem.theme.saffronColors
 import org.koin.compose.koinInject
@@ -47,7 +51,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SaffronTheme {
+            val themeRepository = koinInject<ThemeRepository>()
+            val themeMode by themeRepository.themeMode.collectAsState()
+            val darkTheme = when (themeMode) {
+                ThemeMode.Light -> false
+                ThemeMode.Dark -> true
+                ThemeMode.System -> isSystemInDarkTheme()
+            }
+            SaffronTheme(darkTheme = darkTheme) {
                 SaffronApp()
             }
         }

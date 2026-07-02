@@ -6,6 +6,8 @@ import com.saffron.cook.core.auth.AuthRepository
 import com.saffron.cook.core.database.repository.CookedRecipesRepository
 import com.saffron.cook.core.database.repository.RecipeNotesRepository
 import com.saffron.cook.core.database.repository.SavedRecipesRepository
+import com.saffron.cook.core.database.repository.ThemeMode
+import com.saffron.cook.core.database.repository.ThemeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +19,7 @@ class ProfileViewModel(
     private val savedRecipesRepository: SavedRecipesRepository,
     private val notesRepository: RecipeNotesRepository,
     private val cookedRepository: CookedRecipesRepository,
+    private val themeRepository: ThemeRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -45,7 +48,14 @@ class ProfileViewModel(
                 _uiState.update { it.copy(cookedCount = count) }
             }
         }
+        viewModelScope.launch {
+            themeRepository.themeMode.collect { mode ->
+                _uiState.update { it.copy(themeMode = mode) }
+            }
+        }
     }
+
+    fun setThemeMode(mode: ThemeMode) = themeRepository.setThemeMode(mode)
 
     fun handleGoogleIdToken(idToken: String) {
         _uiState.update { it.copy(isSigningIn = true) }

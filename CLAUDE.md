@@ -61,8 +61,9 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
               entity↔Recipe mappers (package com.saffron.cook.core.database)
               repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository,
-                            OnboardingRepository (SharedPreferences-backed, no Room table — first-launch flag)
-              di/ → databaseModule (DB single + 3 DAO singles + 4 repo singles)
+                            OnboardingRepository (SharedPreferences-backed, no Room table — first-launch flag),
+                            ThemeRepository (SharedPreferences-backed, reactive StateFlow<ThemeMode> — no Room table)
+              di/ → databaseModule (DB single + 3 DAO singles + 5 repo singles)
               Exposes Room runtime/ktx as api so :app sees entity types
 
 :core:auth  — Firebase auth (android.library; owns Firebase types) → no internal deps
@@ -181,7 +182,7 @@ Standard MVI / unidirectional data flow:
 8. Firebase Auth — Google Sign-In, no forced gates:
    - `auth/AuthRepository.kt` — interface: `currentUser: Flow<FirebaseUser?>`, `currentUserSnapshot: FirebaseUser?`, `signInWithGoogle(idToken)`, `signOut()`.
    - `auth/FirebaseAuthRepository.kt` — implements via `callbackFlow` on `FirebaseAuth.AuthStateListener`; sign-in uses `GoogleAuthProvider` + `suspendCancellableCoroutine`.
-   - `:feature:profile` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button. **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Account/Dietary preferences/Notifications/Help/Sign out (all uniform `SettingsRow` with ChevronRight). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`. Stat card taps: "Saved" → Favorites tab (standard tab-switch nav); "Notes" → `NotesList`; "Cooked" → no-op.
+   - `:feature:profile` — Two-state layout. **Signed-out**: generic "Your kitchen" / "On this device" with bordered user-icon circle; 3 stat cards (Saved/Cooked/Notes); "Add an account" Cream card with Credential Manager Google Sign-In button. **Signed-in**: real photo/initials + name/email; "Synced just now" row (CheckCircle, Saffron160) below stats; settings rows Theme/Help (signed-out) or Theme/Help/Sign out (signed-in) (all uniform `SettingsRow` with optional trailing value + ChevronRight — see item 12 for the Theme row/picker). `ProfileUiState` holds `savedCount`, `cookedCount`, `notesCount` (live from Room flows), `isSigningIn`. `ProfileViewModel` exposes `handleGoogleIdToken()` and `signOut()`. Stat card taps: "Saved" → Favorites tab (standard tab-switch nav); "Notes" → `NotesList`; "Cooked" → no-op.
    - Bookmarking is ungated: `HomeViewModel` and `SearchViewModel` do not check auth; `onToggleSave` always calls `SavedRecipesRepository.toggle()`.
    - Firebase project: `saffron-cook-2026`. `app/google-services.json` is present. Google Sign-In enabled, debug SHA-1 registered.
    - Firebase deps: `firebase-bom:33.15.0`, `firebase-auth`, `credentials:1.3.0`, `credentials-play-services-auth`, `googleid:1.1.1`, `google-services:4.4.3` plugin.
@@ -209,6 +210,14 @@ Standard MVI / unidirectional data flow:
    - Slide photos are bundled as local `drawable-nodpi` JPGs (downloaded once from the exact Unsplash URLs baked into the design template) — no network dependency at runtime.
    - `MainActivity`/`SaffronApp` sets `MaterialTheme` status-bar icon contrast to light (`WindowCompat.getInsetsController(...).isAppearanceLightStatusBars = false`) while this screen is shown, since the wordmark/Skip sit directly over a photo.
    - First-launch gate — `OnboardingRepository` (`:core:database`, SharedPreferences-backed) exposes `hasCompletedOnboarding()` / `setOnboardingCompleted()`. `SaffronApp` reads it via `koinInject<OnboardingRepository>()` to pick the real `NavHost` `startDestination` (`Screen.Welcome` vs `Screen.Home`). "Get started" calls `WelcomeViewModel.completeOnboarding()` then navigates to Home with `popUpTo(Screen.Welcome) { inclusive = true }` — Welcome never reappears once completed, and it carries no bottom nav bar (excluded from `tabRoutes`).
+
+12. Theme picker — Light/Dark/System selector, translated 1:1 from the Claude Design `ThemePicker` component (`ui_kits/saffron-app/screens.jsx`):
+   - `ThemeMode` enum (`:core:database`, `Light`/`Dark`/`System`, stable `key` field — same convention as `NoteLabel`) + `ThemeRepository`/`ThemeRepositoryImpl` (SharedPreferences-backed, exposes `themeMode: StateFlow<ThemeMode>`, defaults to `System`). Registered in `databaseModule`.
+   - `MainActivity.setContent` resolves the persisted `ThemeMode` to a `darkTheme: Boolean` (`Light`→false, `Dark`→true, `System`→`isSystemInDarkTheme()`) via `koinInject<ThemeRepository>()` + `collectAsState()`, then passes it into `SaffronTheme(darkTheme = ...)` — any change made in the picker recomposes the whole app instantly and survives restarts.
+   - `ProfileUiState.themeMode` + `ProfileViewModel.setThemeMode()` (delegates to `ThemeRepository`). Profile's "Theme" settings row shows the current mode as a trailing value and opens the picker.
+   - `ThemePicker` composable (`:feature:profile`, in `ProfileScreen.kt`) — a Compose `Dialog` (`usePlatformDefaultWidth = false`) with an `rgba(26,18,8,0.45)` scrim (tap to dismiss), centered card (max width 320dp, 16dp radius, `--shadow-overlay`-approximated shadow), header ("Theme" Playfair Medium 20sp + close `IconButton`), and three option rows — active: Saffron border + Cream fill + Medium-weight label + Saffron160 checkmark; inactive: hairline border + Normal-weight label, no icon. Choosing an option calls `onChoose` then dismisses.
+   - `SettingsEntry` gained an optional `value: String?` rendered before the chevron (Inter Regular 12sp, `textSecondary`) — used by the Theme row. While touching `SettingsRow`, the chevron tint was corrected to `textTertiary` (design token; previously `textSecondary`).
+   - The old "Dietary preferences", "Notifications", and "Account" settings rows were removed — none were ever wired to anything.
 
 **Navigation notes:**
 - Bottom nav Home tab uses `navController.popBackStack(Screen.Home.route, inclusive = false)` instead of `navigate()` to avoid re-creating the Home screen when it is already the top destination. All other tabs use the standard `navigate { popUpTo / launchSingleTop / restoreState }` pattern.

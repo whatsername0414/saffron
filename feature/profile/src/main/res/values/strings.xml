@@ -6,12 +6,15 @@
     <string name="profile_sync_label">Sync</string>
     <string name="profile_add_account">Add an account</string>
     <string name="profile_add_account_body">Your saved recipes, cooked count, and notes live on this device. Add an account to back them up and pick up cooking on any device.</string>
-    <string name="profile_setting_account">Account</string>
-    <string name="profile_setting_dietary">Dietary preferences</string>
-    <string name="profile_setting_notifications">Notifications</string>
+    <string name="profile_setting_theme">Theme</string>
     <string name="profile_setting_help">Help</string>
     <string name="profile_sign_out">Sign out</string>
     <string name="profile_stat_saved">Saved</string>
     <string name="cooked_title">Cooked</string>
     <string name="notes_title">Notes</string>
+    <string name="theme_picker_title">Theme</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_mode_system">System</string>
+    <string name="cd_close">Close</string>
 </resources>

@@ -2,10 +2,12 @@ package com.saffron.cook.feature.profile.main
 
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.saffron.cook.core.database.repository.ThemeMode
 import com.saffron.cook.core.testing.FakeAuthRepository
 import com.saffron.cook.core.testing.FakeCookedRecipesRepository
 import com.saffron.cook.core.testing.FakeRecipeNotesRepository
 import com.saffron.cook.core.testing.FakeSavedRecipesRepository
+import com.saffron.cook.core.testing.FakeThemeRepository
 import com.saffron.cook.core.testing.Fixtures
 import com.saffron.cook.core.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -23,7 +25,8 @@ class ProfileViewModelTest {
         saved: FakeSavedRecipesRepository = FakeSavedRecipesRepository(),
         notes: FakeRecipeNotesRepository = FakeRecipeNotesRepository(),
         cooked: FakeCookedRecipesRepository = FakeCookedRecipesRepository(),
-    ) = ProfileViewModel(FakeAuthRepository(), saved, notes, cooked)
+        theme: FakeThemeRepository = FakeThemeRepository(),
+    ) = ProfileViewModel(FakeAuthRepository(), saved, notes, cooked, theme)
 
     @Test
     fun `savedCount reflects seeded saved recipes`() = runTest {
@@ -76,5 +79,23 @@ class ProfileViewModelTest {
         val vm = buildViewModel()
         advanceUntilIdle()
         assertThat(vm.uiState.value.user).isNull()
+    }
+
+    @Test
+    fun `themeMode reflects the repository's initial value`() = runTest {
+        val theme = FakeThemeRepository(ThemeMode.Dark)
+        val vm = buildViewModel(theme = theme)
+        advanceUntilIdle()
+        assertThat(vm.uiState.value.themeMode).isEqualTo(ThemeMode.Dark)
+    }
+
+    @Test
+    fun `setThemeMode updates state via the repository`() = runTest {
+        val theme = FakeThemeRepository()
+        val vm = buildViewModel(theme = theme)
+        advanceUntilIdle()
+        vm.setThemeMode(ThemeMode.Light)
+        advanceUntilIdle()
+        assertThat(vm.uiState.value.themeMode).isEqualTo(ThemeMode.Light)
     }
 }

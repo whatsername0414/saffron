@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,28 +14,35 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Person
-import androidx.compose.material.icons.outlined.Person2
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -45,13 +53,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
 import coil.compose.AsyncImage
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import androidx.compose.material3.MaterialTheme
+import com.saffron.cook.core.database.repository.ThemeMode
 import com.saffron.cook.core.designsystem.theme.InterFamily
 import com.saffron.cook.core.designsystem.theme.PlayfairDisplayFamily
 import com.saffron.cook.core.designsystem.theme.Saffron20
@@ -93,6 +103,8 @@ fun ProfileScreen(
         }
     }
 
+    var showThemePicker by remember { mutableStateOf(false) }
+
     ProfileContent(
         state = state,
         onSignOut = { viewModel.signOut() },
@@ -100,7 +112,16 @@ fun ProfileScreen(
         onOpenCooked = onOpenCooked,
         onOpenNotes = onOpenNotes,
         onAddAccount = ::launchGoogleSignIn,
+        onOpenTheme = { showThemePicker = true },
     )
+
+    if (showThemePicker) {
+        ThemePicker(
+            value = state.themeMode,
+            onChoose = viewModel::setThemeMode,
+            onClose = { showThemePicker = false },
+        )
+    }
 }
 
 @Composable
@@ -111,6 +132,7 @@ private fun ProfileContent(
     onOpenCooked: () -> Unit,
     onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
+    onOpenTheme: () -> Unit,
 ) {
     val colors = MaterialTheme.saffronColors
     Column(
@@ -138,6 +160,7 @@ private fun ProfileContent(
                 onOpenCooked = onOpenCooked,
                 onOpenNotes = onOpenNotes,
                 onAddAccount = onAddAccount,
+                onOpenTheme = onOpenTheme,
             )
         } else {
             SignedInContent(
@@ -146,6 +169,7 @@ private fun ProfileContent(
                 onOpenCooked = onOpenCooked,
                 onOpenNotes = onOpenNotes,
                 onSignOut = onSignOut,
+                onOpenTheme = onOpenTheme,
             )
         }
     }
@@ -158,6 +182,7 @@ private fun SignedOutContent(
     onOpenCooked: () -> Unit,
     onOpenNotes: () -> Unit,
     onAddAccount: () -> Unit,
+    onOpenTheme: () -> Unit,
 ) {
     val colors = MaterialTheme.saffronColors
     // Generic avatar row
@@ -282,8 +307,11 @@ private fun SignedOutContent(
 
     SettingsSection(
         rows = listOf(
-            SettingsEntry(stringResource(R.string.profile_setting_dietary)),
-            SettingsEntry(stringResource(R.string.profile_setting_notifications)),
+            SettingsEntry(
+                label = stringResource(R.string.profile_setting_theme),
+                value = themeModeLabel(state.themeMode),
+                onClick = onOpenTheme,
+            ),
             SettingsEntry(stringResource(R.string.profile_setting_help)),
         ),
     )
@@ -296,6 +324,7 @@ private fun SignedInContent(
     onOpenCooked: () -> Unit,
     onOpenNotes: () -> Unit,
     onSignOut: () -> Unit,
+    onOpenTheme: () -> Unit,
 ) {
     val user = state.user
     val colors = MaterialTheme.saffronColors
@@ -365,9 +394,11 @@ private fun SignedInContent(
 
     SettingsSection(
         rows = listOf(
-            SettingsEntry(stringResource(R.string.profile_setting_account)),
-            SettingsEntry(stringResource(R.string.profile_setting_dietary)),
-            SettingsEntry(stringResource(R.string.profile_setting_notifications)),
+            SettingsEntry(
+                label = stringResource(R.string.profile_setting_theme),
+                value = themeModeLabel(state.themeMode),
+                onClick = onOpenTheme,
+            ),
             SettingsEntry(stringResource(R.string.profile_setting_help)),
             SettingsEntry(stringResource(R.string.profile_sign_out), labelColor = colors.textSecondary, onClick = onSignOut),
         ),
@@ -443,10 +474,18 @@ private fun StatCard(
 
 private data class SettingsEntry(
     val label: String,
+    val value: String? = null,
     val labelColor: Color = Color.Unspecified,
     val icon: ImageVector = Icons.Filled.ChevronRight,
     val onClick: () -> Unit = {},
 )
+
+@Composable
+private fun themeModeLabel(mode: ThemeMode): String = when (mode) {
+    ThemeMode.Light -> stringResource(R.string.theme_mode_light)
+    ThemeMode.Dark -> stringResource(R.string.theme_mode_dark)
+    ThemeMode.System -> stringResource(R.string.theme_mode_system)
+}
 
 @Composable
 private fun SettingsSection(rows: List<SettingsEntry>) {
@@ -481,12 +520,28 @@ private fun SettingsRow(entry: SettingsEntry) {
             ),
             color = if (entry.labelColor == Color.Unspecified) colors.textPrimary else entry.labelColor,
         )
-        Icon(
-            imageVector = entry.icon,
-            contentDescription = null,
-            tint = colors.textSecondary,
-            modifier = Modifier.size(18.dp),
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            if (entry.value != null) {
+                Text(
+                    text = entry.value,
+                    style = TextStyle(
+                        fontFamily = InterFamily,
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 12.sp,
+                    ),
+                    color = colors.textSecondary,
+                )
+            }
+            Icon(
+                imageVector = entry.icon,
+                contentDescription = null,
+                tint = colors.textTertiary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
     }
 }
 
@@ -501,6 +556,7 @@ private fun ProfileSignedOutPreview() {
             onOpenCooked = {},
             onOpenNotes = {},
             onAddAccount = {},
+            onOpenTheme = {},
         )
     }
 }
@@ -516,6 +572,132 @@ private fun ProfileSignedInPreview() {
             onOpenCooked = {},
             onOpenNotes = {},
             onAddAccount = {},
+            onOpenTheme = {},
         )
+    }
+}
+
+@Composable
+private fun ThemePicker(
+    value: ThemeMode,
+    onChoose: (ThemeMode) -> Unit,
+    onClose: () -> Unit,
+) {
+    val colors = MaterialTheme.saffronColors
+    val options = listOf(
+        ThemeMode.Light to stringResource(R.string.theme_mode_light),
+        ThemeMode.Dark to stringResource(R.string.theme_mode_dark),
+        ThemeMode.System to stringResource(R.string.theme_mode_system),
+    )
+
+    Dialog(onDismissRequest = onClose, properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0x731A1208))
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = onClose,
+                )
+                .padding(24.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 320.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {},
+                    )
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        ambientColor = Color(0x291A1208),
+                        spotColor = Color(0x291A1208),
+                    )
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(16.dp))
+                    .padding(top = 14.dp, bottom = 24.dp),
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        modifier = Modifier.padding(start = 24.dp),
+                        text = stringResource(R.string.theme_picker_title),
+                        style = TextStyle(
+                            fontFamily = PlayfairDisplayFamily,
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 20.sp,
+                        ),
+                        color = colors.textPrimary,
+                    )
+                    IconButton(
+                        modifier = Modifier.padding(end = 12.dp),
+                        onClick = onClose
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = stringResource(R.string.cd_close),
+                            tint = colors.textPrimary,
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    options.forEach { (mode, label) ->
+                        val active = value == mode
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (active) colors.surfaceCream else Color.Transparent)
+                                .border(
+                                    BorderStroke(0.5.dp, if (active) colors.accent else colors.borderTertiary),
+                                    RoundedCornerShape(12.dp),
+                                )
+                                .clickable { onChoose(mode); onClose() }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                text = label,
+                                style = TextStyle(
+                                    fontFamily = InterFamily,
+                                    fontWeight = if (active) FontWeight.Medium else FontWeight.Normal,
+                                    fontSize = 16.sp,
+                                ),
+                                color = colors.textPrimary,
+                            )
+                            if (active) {
+                                Icon(
+                                    imageVector = Icons.Filled.Check,
+                                    contentDescription = null,
+                                    tint = colors.onCream,
+                                    modifier = Modifier.size(20.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ThemePickerPreview() {
+    SaffronTheme {
+        ThemePicker(value = ThemeMode.System, onChoose = {}, onClose = {})
     }
 }
