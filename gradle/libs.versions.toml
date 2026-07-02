@@ -30,6 +30,7 @@ truth = "1.4.4"
 robolectric = "4.13"
 androidxTestCore = "1.6.1"
 archCoreTesting = "2.2.0"
+splashscreen = "1.0.1"
 
 [libraries]
 # Gradle plugin markers — used only by :build-logic to apply plugins programmatically.
@@ -79,6 +80,7 @@ robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "
 androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
 androidx-arch-core-testing = { group = "androidx.arch.core", name = "core-testing", version.ref = "archCoreTesting" }
 androidx-room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
