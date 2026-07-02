@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
@@ -74,7 +72,10 @@ fun WelcomeScreen(
     WelcomeContent(
         state = state,
         onNext = viewModel::next,
-        onSkip = viewModel::skip,
+        onSkip = {
+            viewModel.completeOnboarding()
+            onGetStarted()
+        },
         onGoTo = viewModel::goTo,
         onGetStarted = {
             viewModel.completeOnboarding()
@@ -153,7 +154,6 @@ private fun WelcomeContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .statusBarsPadding()
                 .padding(top = 12.dp, start = 24.dp, end = 20.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
@@ -189,7 +189,6 @@ private fun WelcomeContent(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .navigationBarsPadding()
                 .padding(start = 24.dp, end = 24.dp, bottom = 30.dp),
         ) {
             AnimatedContent(

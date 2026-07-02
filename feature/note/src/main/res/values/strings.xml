@@ -5,7 +5,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_update">Update</string>
     <string name="notes_title">Notes</string>
-    <string name="note_list_empty">Notes you take while cooking will gather here.</string>
+    <string name="note_list_empty">Notes you take after cooking will gather here.</string>
     <string name="note_detail_header">Note</string>
     <string name="note_added_date">Added %1$s</string>
     <string name="note_on_label">Note on</string>

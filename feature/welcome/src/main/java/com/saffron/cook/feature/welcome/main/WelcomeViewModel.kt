@@ -22,10 +22,6 @@ class WelcomeViewModel(
         _uiState.update { it.copy(currentSlide = index.coerceIn(0, WelcomeUiState.SLIDE_COUNT - 1)) }
     }
 
-    fun skip() {
-        _uiState.update { it.copy(currentSlide = WelcomeUiState.SLIDE_COUNT - 1) }
-    }
-
     fun completeOnboarding() {
         onboardingRepository.setOnboardingCompleted()
     }
