@@ -122,7 +122,6 @@ private fun DetailContent(
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface)) {
         LazyColumn(contentPadding = PaddingValues(bottom = 96.dp)) {
-            // Hero image
             item {
                 Box(
                     modifier = Modifier
@@ -136,7 +135,6 @@ private fun DetailContent(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize(),
                     )
-                    // Back
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier
@@ -153,7 +151,6 @@ private fun DetailContent(
                             modifier = Modifier.size(20.dp),
                         )
                     }
-                    // Bookmark
                     IconButton(
                         onClick = onToggleSave,
                         modifier = Modifier
@@ -173,7 +170,6 @@ private fun DetailContent(
                 }
             }
 
-            // Title block
             item {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp)) {
                     Text(
@@ -196,7 +192,6 @@ private fun DetailContent(
                 }
             }
 
-            // Rating row (only if data is available)
             val rating = recipe.rating
             if (rating != null) {
                 item {
@@ -229,7 +224,6 @@ private fun DetailContent(
                 }
             }
 
-            // 3-up meta strip (only if at least one value available)
             val metaCards = buildList {
                 cookTimeStr?.let { add(Triple(Icons.Outlined.Schedule, it, cookTimeCaption)) }
                 servingsStr?.let { add(Triple(Icons.Outlined.People, it, servingsCaption)) }
@@ -250,7 +244,6 @@ private fun DetailContent(
                 item { Spacer(Modifier.height(14.dp)) }
             }
 
-            // Description
             if (recipe.description.isNotBlank()) {
                 item {
                     Text(
@@ -262,7 +255,6 @@ private fun DetailContent(
                 }
             }
 
-            // Ingredients
             if (recipe.ingredients.isNotEmpty()) {
                 item {
                     Text(
@@ -288,7 +280,6 @@ private fun DetailContent(
             }
         }
 
-        // Sticky "Start cooking" CTA
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -347,8 +338,6 @@ private fun MetaCard(
         Text(caption, style = MaterialTheme.typography.bodySmall, color = colors.textSecondary)
     }
 }
-
-// ---- Preview ---------------------------------------------------------------
 
 private val previewDetailRecipe = Recipe(
     id = "52772",

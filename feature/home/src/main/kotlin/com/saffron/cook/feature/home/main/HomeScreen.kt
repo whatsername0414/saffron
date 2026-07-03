@@ -154,8 +154,6 @@ private fun HomeContent(
     }
 }
 
-// ---- Header ----------------------------------------------------------------
-
 @Composable
 private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier = Modifier) {
     val colors = MaterialTheme.saffronColors
@@ -183,28 +181,8 @@ private fun HomeHeader(greeting: String, dateLabel: String, modifier: Modifier =
                 color = colors.textPrimary,
             )
         }
-        InitialsAvatar(initial = "M", size = 44)
     }
 }
-
-@Composable
-private fun InitialsAvatar(initial: String, size: Int, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .size(size.dp)
-            .clip(CircleShape)
-            .background(Saffron20),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = initial,
-            style = MaterialTheme.typography.labelLarge,
-            color = Saffron160,
-        )
-    }
-}
-
-// ---- Search bar ------------------------------------------------------------
 
 @Composable
 private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
@@ -234,8 +212,6 @@ private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
         )
     }
 }
-
-// ---- Category chips --------------------------------------------------------
 
 @Suppress("UnstableCollections")
 @Composable
@@ -283,8 +259,6 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit, 
         )
     }
 }
-
-// ---- Featured card ---------------------------------------------------------
 
 @Composable
 private fun FeaturedSection(
@@ -385,8 +359,6 @@ private fun FeaturedSection(
         }
     }
 }
-
-// ---- Previews --------------------------------------------------------------
 
 private val previewRecipe = Recipe(
     id = "52772",

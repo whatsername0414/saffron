@@ -243,8 +243,6 @@ private fun NoteCard(note: NoteListItem, onClick: () -> Unit) {
     }
 }
 
-// ---- Previews ---------------------------------------------------------------
-
 @Preview(showBackground = true, name = "Empty state")
 @Composable
 private fun NoteListEmptyPreview() {

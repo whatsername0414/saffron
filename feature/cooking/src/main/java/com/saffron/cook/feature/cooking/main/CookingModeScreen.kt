@@ -225,8 +225,6 @@ internal fun CookingModeContent(
     }
 }
 
-// ---- Completion sheet -------------------------------------------------------
-
 @Composable
 private fun CompletionSheetContent(
     recipeName: String,
@@ -358,8 +356,6 @@ private fun CompletionSheetContent(
     }
 }
 
-// ---- Timer sheet ------------------------------------------------------------
-
 @Composable
 private fun TimerSheetContent(
     totalSeconds: Int,
@@ -384,7 +380,6 @@ private fun TimerSheetContent(
             .padding(bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Header row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -410,7 +405,6 @@ private fun TimerSheetContent(
             }
         }
 
-        // "From step: …"
         if (stepTitle != null) {
             Text(
                 text = stringResource(R.string.cooking_timer_from_step, stepTitle),
@@ -422,7 +416,6 @@ private fun TimerSheetContent(
             Spacer(Modifier.height(6.dp))
         }
 
-        // Progress ring with time + status caption
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(220.dp),
@@ -467,7 +460,6 @@ private fun TimerSheetContent(
 
         HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
 
-        // Button row: [↺] [Pause/Resume or Done] [+]
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -544,8 +536,6 @@ private fun TimerSheetContent(
         }
     }
 }
-
-// ---- Cooking layout ---------------------------------------------------------
 
 @Composable
 private fun CookingLayout(
@@ -641,8 +631,6 @@ private fun CookingLayout(
     }
 }
 
-// ---- Step indicator ---------------------------------------------------------
-
 @Composable
 private fun StepIndicatorRow(
     totalSteps: Int,
@@ -700,8 +688,6 @@ private fun StepPill(
         )
     }
 }
-
-// ---- Step content -----------------------------------------------------------
 
 @Composable
 private fun StepContent(
@@ -809,8 +795,6 @@ private fun StepContent(
     }
 }
 
-// ---- Timer chip -------------------------------------------------------------
-
 @Composable
 private fun TimerChip(seconds: Int, onClick: () -> Unit) {
     val colors = MaterialTheme.saffronColors
@@ -839,8 +823,6 @@ private fun TimerChip(seconds: Int, onClick: () -> Unit) {
         }
     }
 }
-
-// ---- Footer -----------------------------------------------------------------
 
 @Composable
 private fun Footer(
@@ -926,16 +908,12 @@ private fun Footer(
     }
 }
 
-// ---- Formatting helpers -----------------------------------------------------
-
 private fun formatSeconds(s: Int): String {
     val h = s / 3600
     val m = (s % 3600) / 60
     val sec = s % 60
     return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%d:%02d".format(m, sec)
 }
-
-// ---- Previews ---------------------------------------------------------------
 
 private val previewCookingRecipe = Recipe(
     id = "52772",

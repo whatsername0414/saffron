@@ -58,7 +58,6 @@ val Typography = Typography(
         lineHeight = 29.sp,
         letterSpacing = 0.sp,
     ),
-    // Inter — everything functional
     headlineSmall = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Medium,

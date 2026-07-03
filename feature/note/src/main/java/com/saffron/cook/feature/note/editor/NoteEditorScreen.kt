@@ -130,7 +130,6 @@ private fun NoteEditorContent(
     val colors = MaterialTheme.saffronColors
     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Header
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -172,7 +171,6 @@ private fun NoteEditorContent(
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 16.dp),
             ) {
-                // Recipe context card
                 if (state.recipeName.isNotEmpty()) {
                     RecipeContextCard(
                         name = state.recipeName,
@@ -181,7 +179,6 @@ private fun NoteEditorContent(
                     Spacer(Modifier.height(18.dp))
                 }
 
-                // Title — borderless Playfair input
                 BasicTextField(
                     value = state.title,
                     onValueChange = onTitleChange,
@@ -217,7 +214,6 @@ private fun NoteEditorContent(
                 HorizontalDivider(thickness = 0.5.dp, color = colors.borderTertiary)
                 Spacer(Modifier.height(18.dp))
 
-                // Rating
                 SectionLabel(stringResource(R.string.note_section_rating))
                 Spacer(Modifier.height(8.dp))
                 StarRating(
@@ -227,7 +223,6 @@ private fun NoteEditorContent(
 
                 Spacer(Modifier.height(22.dp))
 
-                // Labels
                 SectionLabel(stringResource(R.string.note_section_labels))
                 Spacer(Modifier.height(10.dp))
                 FlowRow(
@@ -245,7 +240,6 @@ private fun NoteEditorContent(
 
                 Spacer(Modifier.height(22.dp))
 
-                // Notes body
                 SectionLabel(stringResource(R.string.note_section_notes))
                 Spacer(Modifier.height(10.dp))
                 OutlinedTextField(
@@ -273,7 +267,6 @@ private fun NoteEditorContent(
 
                 Spacer(Modifier.height(22.dp))
 
-                // Photos
                 SectionLabel(stringResource(R.string.note_section_photos))
                 Spacer(Modifier.height(10.dp))
                 PhotoRow(
@@ -459,8 +452,6 @@ private fun SectionLabel(text: String) {
         color = colors.textTertiary,
     )
 }
-
-// ---- Previews --------------------------------------------------------------
 
 @Preview(showBackground = true, name = "Empty state")
 @Composable

@@ -121,7 +121,6 @@ class CookingModeViewModel(
 
     fun onShowTimer(seconds: Int, stepTitle: String) {
         val current = _uiState.value
-        // Re-open existing timer for the same step without resetting it
         val alreadyConfigured = current.timerStepTitle == stepTitle &&
             current.timerInitialSeconds == seconds &&
             current.timerTotalSeconds != null
@@ -129,7 +128,6 @@ class CookingModeViewModel(
             _uiState.update { it.copy(showTimerDialog = true) }
             return
         }
-        // New timer — configure and auto-start
         timerJob?.cancel()
         _uiState.update {
             it.copy(

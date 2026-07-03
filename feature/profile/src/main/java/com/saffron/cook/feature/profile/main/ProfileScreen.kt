@@ -185,7 +185,6 @@ private fun SignedOutContent(
     onOpenTheme: () -> Unit,
 ) {
     val colors = MaterialTheme.saffronColors
-    // Generic avatar row
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -234,7 +233,6 @@ private fun SignedOutContent(
 
     StatStrip(state = state, onOpenNotes = onOpenNotes, onOpenFavorites = onOpenFavorites, onOpenCooked = onOpenCooked)
 
-    // Add an account card
     Box(modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 8.dp)) {
         Column(
             modifier = Modifier
@@ -329,7 +327,6 @@ private fun SignedInContent(
     val user = state.user
     val colors = MaterialTheme.saffronColors
 
-    // User avatar row
     Row(
         modifier = Modifier
             .fillMaxWidth()

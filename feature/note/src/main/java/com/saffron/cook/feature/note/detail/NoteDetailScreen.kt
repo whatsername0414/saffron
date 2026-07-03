@@ -355,8 +355,6 @@ private fun NoteDetailContent(
     }
 }
 
-// ---- Previews ---------------------------------------------------------------
-
 @Preview(showBackground = true, name = "Note with all fields")
 @Composable
 private fun NoteDetailPreview() {

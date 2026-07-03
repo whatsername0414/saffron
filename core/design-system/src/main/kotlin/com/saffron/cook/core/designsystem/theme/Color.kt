@@ -4,14 +4,12 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-// ---- Brand primitives ----
 val Saffron  = Color(0xFFC8860A)
 val Truffle  = Color(0xFF1A1208)
 val Cream    = Color(0xFFFEF3DC)
 val Linen    = Color(0xFFF5F0E8)
 val Cinnamon = Color(0xFF5C4A2A)
 
-// ---- Saffron ramp (fills, borders, text-on-cream) ----
 val Saffron10  = Color(0xFFFEF3DC)
 val Saffron20  = Color(0xFFFDE8B4)
 val Saffron40  = Color(0xFFF5C76A)
@@ -20,13 +18,11 @@ val Saffron100 = Color(0xFFC8860A)
 val Saffron120 = Color(0xFFA06808)
 val Saffron160 = Color(0xFF5C3C04)
 
-// ---- Semantic (system feedback only — never decorative) ----
 val SemanticSuccess = Color(0xFF2D7A4F)
 val SemanticWarning = Color(0xFFB85C00)
 val SemanticError   = Color(0xFFC0392B)
 val SemanticInfo    = Color(0xFF185FA5)
 
-// ---- Light color scheme ----
 internal val LightColorScheme = lightColorScheme(
     primary              = Saffron,
     onPrimary            = Color.White,
@@ -59,7 +55,6 @@ internal val LightColorScheme = lightColorScheme(
     scrim                = Color(0xFF000000),
 )
 
-// ---- Dark color scheme ----
 internal val DarkColorScheme = darkColorScheme(
     primary              = Color(0xFFE09A1A),
     onPrimary            = Color(0xFF110D06),

@@ -108,7 +108,6 @@ private fun WelcomeContent(
             modifier = Modifier.fillMaxSize(),
         )
 
-        // Top scrim — short, for status-bar legibility
         Box(
             Modifier
                 .fillMaxSize()
@@ -121,7 +120,6 @@ private fun WelcomeContent(
                 ),
         )
 
-        // Bottom scrim — tall, for headline legibility (the one permitted gradient)
         Box(
             Modifier
                 .fillMaxSize()
@@ -135,7 +133,6 @@ private fun WelcomeContent(
                 ),
         )
 
-        // Tap the image to advance
         if (!state.isLastSlide) {
             Box(
                 Modifier
@@ -150,7 +147,6 @@ private fun WelcomeContent(
             )
         }
 
-        // Top row: wordmark + skip
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -184,7 +180,6 @@ private fun WelcomeContent(
             }
         }
 
-        // Bottom content
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -233,7 +228,6 @@ private fun WelcomeContent(
 
             Spacer(Modifier.height(22.dp))
 
-            // Progress dots
             Row(
                 horizontalArrangement = Arrangement.spacedBy(7.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -262,7 +256,6 @@ private fun WelcomeContent(
 
             Spacer(Modifier.height(22.dp))
 
-            // Actions
             Button(
                 onClick = if (state.isLastSlide) onGetStarted else onNext,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
