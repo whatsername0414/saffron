@@ -156,13 +156,26 @@ graph TD
 
 1. Clone the repo and open it in Android Studio.
 2. Make sure the Gradle daemon runs on JDK 17 or newer (required by AGP 9).
-3. Build and install:
+3. Set up Firebase (required to build — see below).
+4. Build and install:
 
 ```bash
 ./gradlew installDebug     # gradlew.bat on Windows
 ```
 
-Recipes come from [TheMealDB](https://www.themealdb.com/) — free, no API key needed. Google Sign-In is preconfigured for this repository (`google-services.json` is committed with both the release and `.debug` application ids registered), so auth works out of the box on debug builds.
+Recipes come from [TheMealDB](https://www.themealdb.com/) — free, no API key needed.
+
+### Firebase setup
+
+The build expects `app/google-services.json`, which is deliberately not checked in — bring your own free Firebase project:
+
+1. Create a project in the [Firebase console](https://console.firebase.google.com/).
+2. Register two Android apps in it: `com.saffron.cook` and `com.saffron.cook.debug` (debug builds get a `.debug` applicationId suffix).
+3. Enable **Google** as a provider under Authentication → Sign-in method.
+4. Add your debug keystore's SHA-1 fingerprint to both apps so Google Sign-In works on debug builds — get it with `./gradlew signingReport`.
+5. Download the resulting `google-services.json` into `app/`.
+
+Signing in is optional inside the app — browsing, bookmarks, cooking mode, notes, and history all work without an account. The Firebase config is only needed so the build and the optional Google Sign-In flow have a project to talk to.
 
 ### Build commands
 
