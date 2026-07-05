@@ -16,3 +16,6 @@ local.properties
 
 # Firebase config — each developer supplies their own (see README)
 app/google-services.json
+
+# Internal planning docs — not part of the public repo
+docs/
