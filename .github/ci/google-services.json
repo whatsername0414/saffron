@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "123456789012",
+    "project_id": "saffron-ci-dummy",
+    "storage_bucket": "saffron-ci-dummy.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:0000aaaa1111bbbb2222cccc",
+        "android_client_info": {
+          "package_name": "com.saffron.cook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA00000000000000000000000000000000"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:3333dddd4444eeee5555ffff",
+        "android_client_info": {
+          "package_name": "com.saffron.cook.debug"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA00000000000000000000000000000000"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
