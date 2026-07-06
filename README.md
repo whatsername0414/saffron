@@ -65,7 +65,8 @@ Saffron turns TheMealDB's recipe catalog into a calm, guided cooking experience 
 - **Recipe detail** — hero image, ingredient list, ratings, and a meta strip for time, servings, and difficulty.
 - **Guided cooking mode** — one step per screen with progress pills, step-done tracking, and a completion sheet that flows straight into note-taking.
 - **Inline step timers** — the standout feature. Time references inside instructions ("fry for 3–4 mins") are detected by a regex parser, highlighted as tappable links, and mirrored as one-tap timer chips. The timer sheet has a circular countdown, pause/resume, reset, +1 minute, and a vibration alert when time is up. Ranges like "2–3 mins" resolve to the upper bound; minutes, seconds, and hours are all understood.
-- **Bookmarks that follow you** — saves are Room-backed and shared across Home, Search, Detail, and Favorites through a single reactive flow, so every bookmark icon stays in sync and survives restarts.
+- **Bookmarks that follow you** — saves are Room-backed and shared across Home, Search, Detail, and Favorites through a single reactive flow, so every bookmark icon stays in sync and survives restarts. Saving fetches the full recipe, so bookmarked dishes keep their ingredients and steps offline.
+- **Works offline** — a two-tier Room cache: saved recipes are guaranteed in full, and everything you browse is cached opportunistically (capped at 200 rows, oldest evicted). Lose the connection and Home, search, categories, and previously viewed details still work.
 - **Cooking notes** — post-cook journaling with a star rating, label chips, free-form text, and up to four photos via the system Photo Picker. Notes are browsable, editable, and deletable.
 - **Cooked history** — every recipe finished in cooking mode is recorded with a per-recipe cook count and last-cooked date.
 - **Profile and sign-in** — live stats for saved, cooked, and notes; optional Google Sign-In via Credential Manager and Firebase Auth. Nothing is gated behind an account.
@@ -123,6 +124,7 @@ graph TD
 
 - **Unidirectional data flow** — each screen is a `ViewModel` exposing a single immutable `UiState` via `StateFlow`; Compose renders it, events flow back up.
 - **Repository pattern** — `:core:domain` defines interfaces; implementations live in `:core:data` (network) and `:core:database` (Room). Cross-screen state like bookmarks is a shared reactive `Flow` from a single Room-backed repository.
+- **Offline-first recipes** — `OfflineFirstRecipeRepository` decorates the network repository: network-first with a Room cache fallback. Full results (detail, search, featured) are upserted; partial list rows are inserted only if absent so they never overwrite a fully cached recipe.
 - **Koin DI** — every feature owns its DI module; the app module only assembles them.
 - **Convention plugins** — shared AGP, Compose, and JVM configuration lives in the `build-logic` composite build (`saffron.android.application`, `saffron.android.library`, `saffron.android.compose`, `saffron.jvm.library`), so module build files contain only a namespace and dependencies. Built on AGP 9's built-in Kotlin support.
 - **R8 release builds** — shrinking and obfuscation enabled through the AGP 9 optimization DSL.
@@ -199,7 +201,7 @@ Style is enforced with ktlint 1.4.1 plus [compose-rules](https://mrmans0n.github
 | `:app` | Application shell — activity, navigation graph, bottom nav, DI assembly |
 | `:core:domain` | Domain models and repository interfaces (pure Kotlin, zero dependencies) |
 | `:core:data` | TheMealDB Retrofit service, DTO mapping, repository implementation |
-| `:core:database` | Room database (saved, notes, cooked), theme + onboarding preferences |
+| `:core:database` | Room database (saved, notes, cooked, offline cache), theme + onboarding preferences |
 | `:core:auth` | AuthRepository interface + Firebase/Google Sign-In implementation |
 | `:core:design-system` | Theme, color palettes, typography, bundled Playfair Display + Inter fonts |
 | `:core:presentation` | Shared composables that depend on domain types |

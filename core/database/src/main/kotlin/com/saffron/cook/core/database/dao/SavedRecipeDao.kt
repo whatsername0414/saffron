@@ -19,6 +19,9 @@ interface SavedRecipeDao {
     @Query("SELECT COUNT(*) FROM saved_recipes WHERE id = :id")
     suspend fun count(id: String): Int
 
+    @Query("SELECT * FROM saved_recipes WHERE id = :id")
+    suspend fun getById(id: String): SavedRecipeEntity?
+
     @Query("SELECT * FROM saved_recipes")
     fun observeAll(): Flow<List<SavedRecipeEntity>>
 

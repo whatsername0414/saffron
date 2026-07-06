@@ -3,6 +3,7 @@ package com.saffron.cook.di
 import com.saffron.cook.BuildConfig
 import com.saffron.cook.core.data.network.TheMealDbService
 import com.saffron.cook.core.data.repository.MealDbRecipeRepository
+import com.saffron.cook.core.database.repository.OfflineFirstRecipeRepository
 import com.saffron.cook.core.domain.repository.RecipeRepository
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -31,5 +32,11 @@ val networkModule = module {
 }
 
 val coreDataModule = module {
-    single<RecipeRepository> { MealDbRecipeRepository(get()) }
+    single<RecipeRepository> {
+        OfflineFirstRecipeRepository(
+            remote = MealDbRecipeRepository(get()),
+            cacheDao = get(),
+            savedDao = get(),
+        )
+    }
 }

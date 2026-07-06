@@ -57,13 +57,23 @@ On Windows use `gradlew.bat` instead of `./gradlew`.
               Exposes :core:domain as api (its public API returns domain types)
 
 :core:database — Room persistence + the shared repos (android.library + ksp) → :core:domain
-              SaffronDatabase v1 (single fresh schema, no migrations — dev-only, destructive fallback),
+              SaffronDatabase v2 (single fresh schema, no migrations — dev-only, destructive fallback),
               SavedRecipeDao/Entity, RecipeNoteDao/Entity, CookedRecipeDao/Entity,
-              entity↔Recipe mappers (package com.saffron.cook.core.database)
-              repository/ → SavedRecipesRepository, RecipeNotesRepository, CookedRecipesRepository,
+              CachedRecipeDao + CachedRecipeEntity/CachedCategoryEntity (offline cache — cachedAt +
+              isFullDetail columns; partial list rows insert with IGNORE so they never clobber a full
+              row; eviction keeps newest 200 by cachedAt), entity↔Recipe mappers via internal
+              RecipeColumnCodec (U+001E/U+001F separators, shared by saved + cached entities)
+              (package com.saffron.cook.core.database)
+              repository/ → SavedRecipesRepository (toggle fetches the full recipe via RecipeRepository
+                            when saving a partial list row; falls back to the partial recipe offline),
+                            OfflineFirstRecipeRepository (implements RecipeRepository — network-first
+                            with Room fallback; getRecipeById order: full cache → saved → remote →
+                            rethrow; full results upserted, list rows insert-if-absent; the remote
+                            impl is injected by :app, so no dep on :core:data),
+                            RecipeNotesRepository, CookedRecipesRepository,
                             OnboardingRepository (SharedPreferences-backed, no Room table — first-launch flag),
                             ThemeRepository (SharedPreferences-backed, reactive StateFlow<ThemeMode> — no Room table)
-              di/ → databaseModule (DB single + 3 DAO singles + 5 repo singles)
+              di/ → databaseModule (DB single + 4 DAO singles + 5 repo singles)
               Exposes Room runtime/ktx as api so :app sees entity types
 
 :core:auth  — Firebase auth (android.library; owns Firebase types) → no internal deps

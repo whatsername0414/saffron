@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.outlined.Close
-import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -192,21 +191,7 @@ private fun SignedOutContent(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(colors.surfaceCream)
-                .border(BorderStroke(0.5.dp, colors.borderTertiary), CircleShape),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                imageVector = Icons.Outlined.Person,
-                contentDescription = null,
-                tint = colors.onCream,
-                modifier = Modifier.size(28.dp),
-            )
-        }
+        LetterAvatar(letter = "S")
 
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
@@ -345,23 +330,7 @@ private fun SignedInContent(
                     .background(colors.surfaceCream),
             )
         } else {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(Saffron20),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: "S",
-                    style = TextStyle(
-                        fontFamily = PlayfairDisplayFamily,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 26.sp,
-                    ),
-                    color = colors.onCream,
-                )
-            }
+            LetterAvatar(letter = user?.displayName?.firstOrNull()?.uppercaseChar()?.toString() ?: "S")
         }
 
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -466,6 +435,28 @@ private fun StatCard(
                 color = colors.textSecondary,
             )
         }
+    }
+}
+
+@Composable
+private fun LetterAvatar(letter: String) {
+    val colors = MaterialTheme.saffronColors
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(CircleShape)
+            .background(Saffron20),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = letter,
+            style = TextStyle(
+                fontFamily = PlayfairDisplayFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 26.sp,
+            ),
+            color = colors.onCream,
+        )
     }
 }
 

@@ -16,4 +16,5 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.koin.android)
     implementation(libs.kotlinx.coroutines.core)
+    testImplementation(project(":core:testing"))
 }

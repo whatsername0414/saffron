@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 import com.saffron.cook.core.domain.model.Difficulty
 import com.saffron.cook.core.domain.model.Recipe
 
-@Entity(tableName = "saved_recipes")
-data class SavedRecipeEntity(
+@Entity(tableName = "cached_recipes")
+data class CachedRecipeEntity(
     @PrimaryKey val id: String,
     val title: String,
     val imageUrl: String,
@@ -20,9 +20,11 @@ data class SavedRecipeEntity(
     val difficulty: String?,
     val rating: Float?,
     val ratingCount: Int?,
+    val cachedAt: Long,
+    val isFullDetail: Boolean,
 )
 
-fun Recipe.toEntity() = SavedRecipeEntity(
+fun Recipe.toCachedEntity(cachedAt: Long, isFullDetail: Boolean) = CachedRecipeEntity(
     id = id,
     title = title,
     imageUrl = imageUrl,
@@ -36,9 +38,11 @@ fun Recipe.toEntity() = SavedRecipeEntity(
     difficulty = difficulty?.name,
     rating = rating,
     ratingCount = ratingCount,
+    cachedAt = cachedAt,
+    isFullDetail = isFullDetail,
 )
 
-fun SavedRecipeEntity.toRecipe() = Recipe(
+fun CachedRecipeEntity.toRecipe() = Recipe(
     id = id,
     title = title,
     imageUrl = imageUrl,

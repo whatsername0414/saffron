@@ -20,13 +20,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.saffron.cook.navigation.BottomNavDestination
 import com.saffron.cook.navigation.Screen
 import com.saffron.cook.feature.cooked.main.CookedListScreen
@@ -73,15 +73,16 @@ fun SaffronApp() {
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentDestination = currentBackStack?.destination
 
-    val tabRoutes = BottomNavDestination.entries.map { it.screen.route }.toSet()
-    val showBottomBar = currentDestination?.route in tabRoutes
+    val showBottomBar = BottomNavDestination.entries.any {
+        currentDestination?.hasRoute(it.screen::class) == true
+    }
     val colors = MaterialTheme.saffronColors
 
     val onboardingRepository = koinInject<OnboardingRepository>()
-    val startDestination = if (onboardingRepository.hasCompletedOnboarding()) {
-        Screen.Home.route
+    val startDestination: Screen = if (onboardingRepository.hasCompletedOnboarding()) {
+        Screen.Home
     } else {
-        Screen.Welcome.route
+        Screen.Welcome
     }
 
     Scaffold(
@@ -94,19 +95,19 @@ fun SaffronApp() {
                 ) {
                     BottomNavDestination.entries.forEach { destination ->
                         val selected = currentDestination?.hierarchy
-                            ?.any { it.route == destination.screen.route } == true
+                            ?.any { it.hasRoute(destination.screen::class) } == true
                         NavigationBarItem(
                             selected = selected,
                             onClick = {
-                                if (destination.screen.route == Screen.Home.route) {
+                                if (destination.screen is Screen.Home) {
                                     navController.popBackStack(
-                                        route = Screen.Home.route,
+                                        route = Screen.Home,
                                         inclusive = false,
                                         saveState = true,
                                     )
                                 } else {
-                                    navController.navigate(destination.screen.route) {
-                                        popUpTo(Screen.Home.route) {
+                                    navController.navigate(destination.screen) {
+                                        popUpTo<Screen.Home> {
                                             saveState = true
                                         }
                                         launchSingleTop = true
@@ -133,108 +134,94 @@ fun SaffronApp() {
             startDestination = startDestination,
             modifier = Modifier.padding(innerPadding),
         ) {
-            composable(Screen.Welcome.route) {
+            composable<Screen.Welcome> {
                 WelcomeScreen(
                     onGetStarted = {
-                        navController.navigate(Screen.Home.route) {
-                            popUpTo(Screen.Welcome.route) { inclusive = true }
+                        navController.navigate(Screen.Home) {
+                            popUpTo<Screen.Welcome> { inclusive = true }
                         }
                     },
                 )
             }
-            composable(Screen.Home.route) {
+            composable<Screen.Home> {
                 HomeScreen(
-                    onNavigateToSearch = { navController.navigate(Screen.Search.route) },
-                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                    onNavigateToSearch = { navController.navigate(Screen.Search) },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail(id)) },
                 )
             }
-            composable(Screen.Search.route) {
+            composable<Screen.Search> {
                 SearchScreen(
-                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail(id)) },
                 )
             }
-            composable(Screen.Favorites.route) {
+            composable<Screen.Favorites> {
                 FavoritesScreen(
-                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail(id)) },
                 )
             }
-            composable(Screen.Profile.route) {
+            composable<Screen.Profile> {
                 ProfileScreen(
                     serverClientId = stringResource(R.string.default_web_client_id),
-                    onOpenNotes = { navController.navigate(Screen.NotesList.route) },
+                    onOpenNotes = { navController.navigate(Screen.NotesList) },
                     onOpenFavorites = {
-                        navController.navigate(Screen.Favorites.route) {
-                            popUpTo(Screen.Home.route) { saveState = true }
+                        navController.navigate(Screen.Favorites) {
+                            popUpTo<Screen.Home> { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
                     },
-                    onOpenCooked = { navController.navigate(Screen.CookedList.route) },
+                    onOpenCooked = { navController.navigate(Screen.CookedList) },
                 )
             }
-            composable(Screen.CookedList.route) {
+            composable<Screen.CookedList> {
                 CookedListScreen(
                     onBack = { navController.popBackStack() },
-                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail.createRoute(id)) },
+                    onOpenRecipe = { id -> navController.navigate(Screen.RecipeDetail(id)) },
                 )
             }
-            composable(
-                route = Screen.RecipeDetail.route,
-                arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
-            ) { backStackEntry ->
-                val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
+            composable<Screen.RecipeDetail> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.RecipeDetail>()
                 RecipeDetailScreen(
-                    recipeId = recipeId,
+                    recipeId = route.recipeId,
                     onBack = { navController.popBackStack() },
-                    onStartCooking = { id -> navController.navigate(Screen.CookingMode.createRoute(id)) },
+                    onStartCooking = { id -> navController.navigate(Screen.CookingMode(id)) },
                 )
             }
-            composable(
-                route = Screen.CookingMode.route,
-                arguments = listOf(navArgument("recipeId") { type = NavType.StringType }),
-            ) {
+            composable<Screen.CookingMode> {
                 CookingModeScreen(
                     onBack = { navController.popBackStack() },
                     onAddNote = { recipeId ->
-                        navController.navigate(Screen.NoteEditor.createRoute(recipeId))
+                        navController.navigate(Screen.NoteEditor(recipeId))
                     },
                 )
             }
-            composable(Screen.NotesList.route) {
+            composable<Screen.NotesList> {
                 NoteListScreen(
                     onBack = { navController.popBackStack() },
-                    onOpenNote = { noteId -> navController.navigate(Screen.NoteDetail.createRoute(noteId)) },
+                    onOpenNote = { noteId -> navController.navigate(Screen.NoteDetail(noteId)) },
                 )
             }
-            composable(
-                route = Screen.NoteDetail.route,
-                arguments = listOf(navArgument("noteId") { type = NavType.LongType }),
-            ) { backStackEntry ->
-                val noteId = backStackEntry.arguments?.getLong("noteId") ?: return@composable
+            composable<Screen.NoteDetail> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.NoteDetail>()
                 NoteDetailScreen(
                     onBack = { navController.popBackStack() },
                     onEdit = { recipeId ->
-                        navController.navigate(Screen.NoteEditor.createEditRoute(recipeId, noteId))
+                        navController.navigate(Screen.NoteEditor(recipeId, route.noteId))
                     },
                     onDeleted = { navController.popBackStack() },
                 )
             }
-            composable(
-                route = Screen.NoteEditor.route,
-                arguments = listOf(
-                    navArgument("recipeId") { type = NavType.StringType },
-                    navArgument("noteId") { type = NavType.LongType; defaultValue = 0L },
-                ),
-            ) { backStackEntry ->
-                val isEditMode = (backStackEntry.arguments?.getLong("noteId") ?: 0L) != 0L
+            composable<Screen.NoteEditor> { backStackEntry ->
+                val route = backStackEntry.toRoute<Screen.NoteEditor>()
+                val isEditMode = route.noteId != 0L
                 NoteEditorScreen(
                     onCancel = { navController.popBackStack() },
                     onSaved = {
                         if (isEditMode) {
                             navController.popBackStack()
                         } else {
-                            navController.navigate(Screen.Home.route) {
-                                popUpTo(Screen.Home.route) { inclusive = false }
+                            navController.navigate(Screen.Home) {
+                                popUpTo<Screen.Home> { inclusive = false }
                             }
                         }
                     },
