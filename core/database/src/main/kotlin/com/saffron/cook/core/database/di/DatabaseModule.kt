@@ -24,7 +24,8 @@ val databaseModule = module {
     single { get<SaffronDatabase>().savedRecipeDao() }
     single { get<SaffronDatabase>().recipeNoteDao() }
     single { get<SaffronDatabase>().cookedRecipeDao() }
-    single<SavedRecipesRepository> { SavedRecipesRepositoryImpl(get()) }
+    single { get<SaffronDatabase>().cachedRecipeDao() }
+    single<SavedRecipesRepository> { SavedRecipesRepositoryImpl(get(), get()) }
     single<RecipeNotesRepository> { RecipeNotesRepositoryImpl(get()) }
     single<CookedRecipesRepository> { CookedRecipesRepositoryImpl(get()) }
     single<OnboardingRepository> { OnboardingRepositoryImpl(androidContext()) }
