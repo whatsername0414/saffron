@@ -102,15 +102,17 @@ fun CategoryDto.toCategory(): Category =
     )
 
 private val paragraphSplit = Regex("""\r?\n\s*\r?\n""")
+private val stepHeaderOnly = Regex("""^step\s*\d+\s*[:.\-–—]?\s*$""", RegexOption.IGNORE_CASE)
+private val stepPrefix = Regex("""^step\s*\d+\s*[:.\-–—]\s*""", RegexOption.IGNORE_CASE)
 
-private fun String.parseSteps(): List<Step> {
+internal fun String.parseSteps(): List<Step> {
     val paragraphs =
         paragraphSplit
             .split(this)
             .map { it.trim() }
             .filter { it.isNotBlank() }
 
-    val lines =
+    val blocks =
         if (paragraphs.size > 1) {
             paragraphs
         } else {
@@ -119,7 +121,17 @@ private fun String.parseSteps(): List<Step> {
                 .filter { it.isNotBlank() }
         }
 
-    return lines.mapIndexed { index, text ->
+    val cleaned =
+        blocks
+            .map { block ->
+                block
+                    .split("\r\n", "\n", "\r")
+                    .map { it.trim() }
+                    .filterNot { it.isBlank() || stepHeaderOnly.matches(it) }
+                    .joinToString(" ") { it.replace(stepPrefix, "").trim() }
+            }.filter { it.isNotBlank() }
+
+    return cleaned.mapIndexed { index, text ->
         Step(title = "Step ${index + 1}", instruction = text)
     }
 }
