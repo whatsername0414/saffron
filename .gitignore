@@ -17,5 +17,11 @@ local.properties
 # Firebase config — each developer supplies their own (see README)
 app/google-services.json
 
+# Release signing — never commit the keystore or its credentials
+app/keystore/
+app/keystore.properties
+*.jks
+*.keystore
+
 # Internal planning docs — not part of the public repo
 docs/

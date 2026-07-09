@@ -8,7 +8,12 @@ An editorial cooking companion for Android. Browse, cook, and remember — the f
 ![Room](https://img.shields.io/badge/Room-2.7.1-48B983?style=flat-square)
 ![Koin](https://img.shields.io/badge/Koin-4.0.0-F88909?style=flat-square)
 ![Min SDK](https://img.shields.io/badge/minSdk-24-3DDC84?style=flat-square&logo=android&logoColor=white)
-[![CI](https://github.com/whatsername0414/saffron/actions/workflows/ci.yml/badge.svg)](https://github.com/whatsername0414/saffron/actions/workflows/ci.yml)
+[![CI](https://github.com/maceljonray/saffron/actions/workflows/ci.yml/badge.svg)](https://github.com/maceljonray/saffron/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/maceljonray/saffron?style=flat-square&color=C8860A&label=release)](https://github.com/maceljonray/saffron/releases/latest)
+
+## Download
+
+Grab a signed release build from the [Releases page](https://github.com/maceljonray/saffron/releases/latest) — no build required. This is a portfolio/demo app, not published on the Play Store, so you'll need to sideload the APK (enable "install from unknown sources" if prompted). Requires Android 7.0 (API 24) or higher.
 
 ## Screenshots
 
